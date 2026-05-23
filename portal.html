@@ -11,17 +11,26 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
 .hidden{display:none!important}
-
-/* LOGIN */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1923,#1847CC);padding:24px}
+#login-screen{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0F1923 0%,#1847CC 100%)}
+.login-nav{padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+.login-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.login-nav-logo-mark{width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.login-nav-logo-name{font-size:15px;font-weight:700;color:var(--white)}
+.login-nav-logo-name span{color:#7BA8FF}
+.login-nav-links{display:flex;gap:20px}
+.login-nav-links a{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s}
+.login-nav-links a:hover{color:var(--white)}
+.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
 .login-box{background:var(--white);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
 .login-logo-mark{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
 .login-logo-mark svg{width:20px;height:20px}
 .login-logo-name{font-size:17px;font-weight:800;color:var(--ink)}
 .login-logo-name span{color:var(--blue)}
-.login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:6px;text-align:center}
-.login-box p{font-size:14px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
+.login-sub{font-size:13.5px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-info{background:var(--blue-light);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--blue);line-height:1.6}
+.login-info strong{display:block;font-weight:700;margin-bottom:4px}
 .fg{margin-bottom:16px}
 .fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
@@ -30,9 +39,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .btn-login:hover{background:#1240C0}
 .btn-login:disabled{opacity:.6;cursor:not-allowed}
 .login-error{background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
-.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
-
-/* PORTAL */
+.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+.login-footer{padding:20px 32px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.login-footer a{font-size:12px;color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s}
+.login-footer a:hover{color:rgba(255,255,255,.7)}
 #portal{min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:var(--bg)}
 .sidebar{background:var(--ink);display:flex;flex-direction:column}
 .sb-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
@@ -49,35 +59,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .nav-item.active{color:var(--white);background:rgba(26,71,204,.25)}
 .nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.nav-badge{margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
 .sb-bottom{padding:16px 20px;border-top:1px solid rgba(255,255,255,.07)}
 .btn-logout{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:0}
 .btn-logout:hover{color:rgba(255,255,255,.8)}
-
 .main{display:flex;flex-direction:column}
 .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
 .topbar-title{font-size:16px;font-weight:700;color:var(--ink)}
-.btn-pagar{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:background .2s}
-.btn-pagar:hover{background:#1240C0}
-
+.btn-ver{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.btn-ver:hover{background:#1240C0}
 .content{padding:24px;overflow-y:auto;flex:1}
 .page{display:none}.page.active{display:block}
-
-/* CARDS */
 .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .kpi{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
 .kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 .kpi-val{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
-.kpi-val.danger{color:var(--coral)}
-.kpi-val.success{color:var(--green)}
+.kpi-val.danger{color:var(--coral)}.kpi-val.success{color:var(--green)}
 .kpi-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;margin-top:7px;font-weight:600}
 .kpi-pill.danger{background:var(--coral-light);color:var(--coral)}
 .kpi-pill.success{background:var(--green-light);color:var(--green)}
 .kpi-pill.warn{background:var(--yellow-light);color:var(--yellow)}
-
 .card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
 .card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
-
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{font-size:11px;color:var(--muted);font-weight:600;padding:9px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
 .tbl td{padding:11px 12px;font-size:13.5px;border-bottom:1px solid var(--border)}
@@ -86,8 +88,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600}
 .badge.paid{background:var(--green-light);color:var(--green)}
 .badge.pending{background:var(--yellow-light);color:var(--yellow)}
-.badge.overdue{background:var(--coral-light);color:var(--coral)}
-
 .ec-header{background:linear-gradient(135deg,var(--blue),#0E35A8);border-radius:12px;padding:24px;color:#fff;margin-bottom:16px}
 .ec-total{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 4px}
 .ec-sub{font-size:13px;opacity:.7}
@@ -95,32 +95,58 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .ec-chip{background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center}
 .ec-chip-val{font-size:16px;font-weight:700}
 .ec-chip-lbl{font-size:10px;opacity:.7;margin-top:2px}
-
 .loading{text-align:center;padding:48px;color:var(--muted);font-size:15px}
-.empty{text-align:center;padding:48px;color:var(--muted)}
-.empty-ico{font-size:40px;margin-bottom:12px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-      <span class="login-logo-name">Echo <span>Administración</span></span>
+  <div class="login-nav">
+    <a href="/" class="login-nav-logo">
+      <div class="login-nav-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="login-nav-logo-name">Echo <span>Administración</span></span>
+    </a>
+    <div class="login-nav-links">
+      <a href="/">Inicio</a>
+      <a href="/privacidad">Aviso de privacidad</a>
+      <a href="/terminos">Términos y condiciones</a>
     </div>
-    <h2>Portal de Residentes</h2>
-    <p>Manzana 80 · Aldea Tulum</p>
-    <div class="fg"><label>Número de departamento</label><input type="text" id="input-depto" placeholder="Ej: 101, 202, 304..."></div>
-    <div class="fg"><label>Primer apellido</label><input type="text" id="input-nombre" placeholder="Ej: GARCIA, MARTINEZ, LOPEZ..."></div>
-    <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
-    <div class="login-error" id="login-error">No encontramos tu departamento. Verifica los datos.</div>
-    <p class="login-hint">¿Problemas para acceder? <a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
+  </div>
+  <div class="login-body">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-logo-mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        <span class="login-logo-name">Echo <span>Administración</span></span>
+      </div>
+      <h2>Portal de Residentes</h2>
+      <p class="login-sub">Manzana 80 · Aldea Tulum</p>
+      
+      <div class="fg">
+        <label>Clave de acceso</label>
+        <input type="text" id="input-user" placeholder="Ej: 301D2, 204A, 201L...">
+      </div>
+      <div class="fg">
+        <label>Contraseña</label>
+        <input type="password" id="input-pass" placeholder="Tulum + tu clave">
+      </div>
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
+      <div class="login-error" id="login-error">Clave o contraseña incorrecta.</div>
+      <p class="login-hint">
+        ¿No sabes tu clave? Contacta a:<br>
+        <a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a>
+      </p>
+    </div>
+  </div>
+  <div class="login-footer">
+    <a href="/privacidad">Aviso de privacidad</a>
+    <a href="/terminos">Términos y condiciones</a>
+    <a href="mailto:echoadministrationmx@gmail.com">Contacto</a>
+    <a href="/">← Inicio</a>
   </div>
 </div>
 
-<!-- PORTAL -->
 <div id="portal" class="hidden">
   <div class="sidebar">
     <div class="sb-logo">
@@ -149,34 +175,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <button class="btn-logout" onclick="doLogout()">← Cerrar sesión</button>
     </div>
   </div>
-
   <div class="main">
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">Resumen</span>
-      <button class="btn-pagar" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta</button>
+      <button class="btn-ver" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta</button>
     </div>
     <div class="content">
 
-      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div id="dashboard-loading" class="loading">⏳ Cargando tu información...</div>
         <div id="dashboard-content" class="hidden">
           <div class="kpi-grid">
-            <div class="kpi">
-              <div class="kpi-label">Saldo pendiente</div>
-              <div class="kpi-val danger" id="kpi-deuda">$0</div>
-              <div class="kpi-pill danger" id="kpi-deuda-pill">Calculando...</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Pagos registrados</div>
-              <div class="kpi-val success" id="kpi-pagados">0</div>
-              <div class="kpi-pill success">En 2026</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Meses pendientes</div>
-              <div class="kpi-val" id="kpi-pendientes">0</div>
-              <div class="kpi-pill warn" id="kpi-pendientes-pill">2026</div>
-            </div>
+            <div class="kpi"><div class="kpi-label">Saldo pendiente</div><div class="kpi-val danger" id="kpi-deuda">$0</div><div class="kpi-pill danger" id="kpi-deuda-pill">—</div></div>
+            <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En 2026</div></div>
+            <div class="kpi"><div class="kpi-label">Meses pendientes</div><div class="kpi-val" id="kpi-pendientes">0</div><div class="kpi-pill warn" id="kpi-pendientes-pill">2026</div></div>
           </div>
           <div class="card">
             <div class="card-title">Últimos movimientos</div>
@@ -188,7 +200,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
-      <!-- ESTADO DE CUENTA -->
       <div class="page" id="page-cuenta">
         <div id="cuenta-loading" class="loading">⏳ Cargando estado de cuenta...</div>
         <div id="cuenta-content" class="hidden">
@@ -212,27 +223,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
-      <!-- DOCUMENTOS -->
       <div class="page" id="page-docs">
         <div class="card">
           <div class="card-title">Documentos del condominio</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
-              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div>
-              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">Actualizado 2026</div></div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
-              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div>
-              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
-              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div>
-              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto anual 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
-              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div>
-              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Enero – Marzo 2026</div></div>
-            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Disponible próximamente')"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Disponible próximamente')"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Disponible próximamente')"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto anual 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Disponible próximamente')"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Ene – Mar 2026</div></div></div>
           </div>
         </div>
       </div>
@@ -243,7 +241,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
 <script>
 const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_GscgjvA4RQkFZfwANPpueg_rKfWJ_NmXcJRA';
+const SUPABASE_KEY = 'sb_publishable_GscgjvA4RQkFZfwANPpueg_rKfWJ_nU';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -251,57 +249,50 @@ let residente = null;
 let pagosData = [];
 
 async function doLogin() {
-  const depto = document.getElementById('input-depto').value.trim();
-  const nombre = document.getElementById('input-nombre').value.trim().toUpperCase();
+  const userId = document.getElementById('input-user').value.trim();
+  const pass = document.getElementById('input-pass').value.trim();
   const btn = document.getElementById('btn-login');
   const err = document.getElementById('login-error');
 
-  if (!depto || !nombre) { err.style.display='block'; err.textContent='Por favor llena ambos campos.'; return; }
+  if (!userId || !pass) {
+    err.style.display='block';
+    err.textContent='Por favor llena ambos campos.';
+    return;
+  }
 
-  btn.disabled = true;
-  btn.textContent = 'Buscando...';
-  err.style.display = 'none';
+  btn.disabled=true; btn.textContent='Verificando...';
+  err.style.display='none';
 
   try {
     const { data, error } = await db
       .from('residentes')
       .select('*')
-      .eq('departamento', depto)
-      .ilike('nombre_completo', `%${nombre.split(' ')[0]}%`)
+      .eq('user_id', userId)
+      .eq('password', pass)
       .limit(1);
 
     if (error || !data || data.length === 0) {
-      // Try just by department
-      const { data: data2 } = await db
-        .from('residentes')
-        .select('*')
-        .eq('departamento', depto)
-        .limit(1);
-
-      if (!data2 || data2.length === 0) {
-        err.style.display = 'block';
-        err.textContent = 'Departamento no encontrado. Verifica el número.';
-        btn.disabled = false; btn.textContent = 'Entrar al portal →';
-        return;
-      }
-      residente = data2[0];
-    } else {
-      residente = data[0];
+      err.style.display='block';
+      err.textContent='Clave o contraseña incorrecta. ¿Necesitas ayuda? echoadministrationmx@gmail.com';
+      btn.disabled=false; btn.textContent='Entrar al portal →';
+      return;
     }
 
+    residente = data[0];
     document.getElementById('sb-nombre').textContent = residente.nombre_completo;
     document.getElementById('sb-depto').textContent = `Depto ${residente.departamento} · Manzana 80`;
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('portal').classList.remove('hidden');
-    loadDashboard();
+    loadData();
+
   } catch(e) {
-    err.style.display = 'block';
-    err.textContent = 'Error de conexión. Intenta de nuevo.';
-    btn.disabled = false; btn.textContent = 'Entrar al portal →';
+    err.style.display='block';
+    err.textContent='Error de conexión. Intenta de nuevo.';
+    btn.disabled=false; btn.textContent='Entrar al portal →';
   }
 }
 
-async function loadDashboard() {
+async function loadData() {
   try {
     const { data, error } = await db
       .from('pagos')
@@ -314,81 +305,71 @@ async function loadDashboard() {
 
     const pagados = pagosData.filter(p => p.estado === 'pagado');
     const pendientes = pagosData.filter(p => p.estado === 'pendiente');
-    const deuda = pendientes.length * 500;
+    const deuda = pendientes.reduce((s,p) => s+(p.monto||500), 0);
 
-    // KPIs
     document.getElementById('kpi-deuda').textContent = `$${deuda.toLocaleString()}`;
-    document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? `${pendientes.length} meses` : 'Al corriente ✓';
+    document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? `${pendientes.length} meses pendientes` : '✓ Al corriente';
     document.getElementById('kpi-pagados').textContent = pagados.length;
     document.getElementById('kpi-pendientes').textContent = pendientes.length;
-    document.getElementById('kpi-pendientes-pill').textContent = pendientes.length > 0 ? 'Por pagar' : 'Al día ✓';
+    document.getElementById('kpi-pendientes-pill').textContent = pendientes.length > 0 ? 'Por pagar' : '✓ Al día';
 
-    // Tabla movimientos (últimos 6)
-    const ultimos = [...pagosData].slice(-6).reverse();
-    const tbody = document.getElementById('tabla-movimientos');
-    tbody.innerHTML = ultimos.map(p => `
+    const ultimos = [...pagosData].reverse().slice(0,6);
+    document.getElementById('tabla-movimientos').innerHTML = ultimos.map(p=>`
       <tr>
         <td>${p.concepto}</td>
-        <td>${formatFecha(p.fecha_vencimiento)}</td>
+        <td>${fmt(p.fecha_vencimiento)}</td>
         <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
         <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
 
-    // Estado de cuenta
     document.getElementById('ec-total').textContent = `$${deuda.toLocaleString()}`;
     document.getElementById('ec-sub').textContent = `${residente.nombre_completo} · Depto ${residente.departamento} · Manzana 80`;
     document.getElementById('ec-pagados').textContent = pagados.length;
     document.getElementById('ec-pendientes').textContent = pendientes.length;
-
-    const tbody2 = document.getElementById('tabla-cuenta');
-    tbody2.innerHTML = pagosData.map(p => `
+    document.getElementById('tabla-cuenta').innerHTML = pagosData.map(p=>`
       <tr>
         <td>${p.concepto}</td>
-        <td>${formatFecha(p.fecha_vencimiento)}</td>
+        <td>${fmt(p.fecha_vencimiento)}</td>
         <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
         <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
 
-    document.getElementById('dashboard-loading').classList.add('hidden');
-    document.getElementById('dashboard-content').classList.remove('hidden');
-    document.getElementById('cuenta-loading').classList.add('hidden');
-    document.getElementById('cuenta-content').classList.remove('hidden');
+    ['dashboard-loading','cuenta-loading'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    ['dashboard-content','cuenta-content'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
 
   } catch(e) {
-    document.getElementById('dashboard-loading').textContent = '❌ Error cargando datos. Intenta de nuevo.';
+    document.getElementById('dashboard-loading').textContent='❌ Error cargando datos.';
   }
 }
 
-function formatFecha(f) {
-  if (!f) return '—';
-  const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const parts = f.split('-');
-  return `${meses[parseInt(parts[1])]} ${parts[0]}`;
+function fmt(f) {
+  if(!f) return '—';
+  const m=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const p=f.split('-');
+  return `${m[parseInt(p[1])]} ${p[0]}`;
 }
 
-function go(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+function go(id,el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  if (el) el.classList.add('active');
-  const titles = {dashboard:'Resumen',cuenta:'Estado de cuenta',docs:'Documentos'};
-  document.getElementById('topbar-title').textContent = titles[id] || id;
+  if(el) el.classList.add('active');
+  const t={dashboard:'Resumen',cuenta:'Estado de cuenta',docs:'Documentos'};
+  document.getElementById('topbar-title').textContent=t[id]||id;
 }
 
 function doLogout() {
-  residente = null; pagosData = [];
+  residente=null; pagosData=[];
   document.getElementById('portal').classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('input-depto').value = '';
-  document.getElementById('input-nombre').value = '';
-  document.getElementById('btn-login').disabled = false;
-  document.getElementById('btn-login').textContent = 'Entrar al portal →';
+  document.getElementById('input-user').value='';
+  document.getElementById('input-pass').value='';
+  document.getElementById('btn-login').disabled=false;
+  document.getElementById('btn-login').textContent='Entrar al portal →';
+  document.getElementById('login-error').style.display='none';
 }
 
-// Enter key login
-document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 </script>
 </body>
 </html>
