@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Residentes — Echo Administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
+.hidden{display:none!important}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1923,#1847CC);padding:24px}
+.login-box{background:var(--white);border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+.login-logo-mark{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.login-logo-mark svg{width:20px;height:20px}
+.login-logo-name{font-size:17px;font-weight:800;color:var(--ink)}
+.login-logo-name span{color:var(--blue)}
+.login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:6px;text-align:center}
+.login-box p{font-size:14px;color:var(--muted);text-align:center;margin-bottom:28px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+.fg input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(24,71,204,.08)}
+.btn-login{width:100%;background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;margin-top:4px;transition:background .2s}
+.btn-login:hover{background:#1240C0}
+.btn-login:disabled{opacity:.6;cursor:not-allowed}
+.login-error{background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
+.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+
+/* PORTAL */
+#portal{min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:var(--bg)}
+.sidebar{background:var(--ink);display:flex;flex-direction:column}
+.sb-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
+.sb-logo-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.sb-logo-mark svg{width:16px;height:16px}
+.sb-logo-name{font-size:14px;font-weight:700;color:var(--white)}
+.sb-logo-name span{color:#7BA8FF}
+.sb-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-user-name{font-size:14px;font-weight:600;color:var(--white)}
+.sb-user-dept{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
+.nav{flex:1;padding:8px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13.5px;color:rgba(255,255,255,.55);cursor:pointer;transition:background .1s;position:relative;border:none;background:transparent;width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
+.nav-item.active{color:var(--white);background:rgba(26,71,204,.25)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
+.sb-bottom{padding:16px 20px;border-top:1px solid rgba(255,255,255,.07)}
+.btn-logout{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:0}
+.btn-logout:hover{color:rgba(255,255,255,.8)}
+
+.main{display:flex;flex-direction:column}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:16px;font-weight:700;color:var(--ink)}
+.btn-pagar{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:background .2s}
+.btn-pagar:hover{background:#1240C0}
+
+.content{padding:24px;overflow-y:auto;flex:1}
+.page{display:none}.page.active{display:block}
+
+/* CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.kpi-val.danger{color:var(--coral)}
+.kpi-val.success{color:var(--green)}
+.kpi-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;margin-top:7px;font-weight:600}
+.kpi-pill.danger{background:var(--coral-light);color:var(--coral)}
+.kpi-pill.success{background:var(--green-light);color:var(--green)}
+.kpi-pill.warn{background:var(--yellow-light);color:var(--yellow)}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
+
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;color:var(--muted);font-weight:600;padding:9px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
+.tbl td{padding:11px 12px;font-size:13.5px;border-bottom:1px solid var(--border)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600}
+.badge.paid{background:var(--green-light);color:var(--green)}
+.badge.pending{background:var(--yellow-light);color:var(--yellow)}
+.badge.overdue{background:var(--coral-light);color:var(--coral)}
+
+.ec-header{background:linear-gradient(135deg,var(--blue),#0E35A8);border-radius:12px;padding:24px;color:#fff;margin-bottom:16px}
+.ec-total{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 4px}
+.ec-sub{font-size:13px;opacity:.7}
+.ec-chips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.ec-chip{background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center}
+.ec-chip-val{font-size:16px;font-weight:700}
+.ec-chip-lbl{font-size:10px;opacity:.7;margin-top:2px}
+
+.loading{text-align:center;padding:48px;color:var(--muted);font-size:15px}
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-ico{font-size:40px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <span class="login-logo-name">Echo <span>Administración</span></span>
+    </div>
+    <h2>Portal de Residentes</h2>
+    <p>Manzana 80 · Aldea Tulum</p>
+    <div class="fg"><label>Número de departamento</label><input type="text" id="input-depto" placeholder="Ej: 101, 202, 304..."></div>
+    <div class="fg"><label>Primer apellido</label><input type="text" id="input-nombre" placeholder="Ej: GARCIA, MARTINEZ, LOPEZ..."></div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
+    <div class="login-error" id="login-error">No encontramos tu departamento. Verifica los datos.</div>
+    <p class="login-hint">¿Problemas para acceder? <a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portal" class="hidden">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark"><svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <span class="sb-logo-name">Echo <span>Admin</span></span>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-nombre">—</div>
+      <div class="sb-user-dept" id="sb-depto">—</div>
+    </div>
+    <div class="nav">
+      <button class="nav-item active" onclick="go('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Resumen
+      </button>
+      <button class="nav-item" onclick="go('cuenta',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Estado de cuenta
+      </button>
+      <button class="nav-item" onclick="go('docs',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Documentos
+      </button>
+    </div>
+    <div class="sb-bottom">
+      <button class="btn-logout" onclick="doLogout()">← Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Resumen</span>
+      <button class="btn-pagar" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta</button>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div id="dashboard-loading" class="loading">⏳ Cargando tu información...</div>
+        <div id="dashboard-content" class="hidden">
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-label">Saldo pendiente</div>
+              <div class="kpi-val danger" id="kpi-deuda">$0</div>
+              <div class="kpi-pill danger" id="kpi-deuda-pill">Calculando...</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Pagos registrados</div>
+              <div class="kpi-val success" id="kpi-pagados">0</div>
+              <div class="kpi-pill success">En 2026</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Meses pendientes</div>
+              <div class="kpi-val" id="kpi-pendientes">0</div>
+              <div class="kpi-pill warn" id="kpi-pendientes-pill">2026</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Últimos movimientos</div>
+            <table class="tbl">
+              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-movimientos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO DE CUENTA -->
+      <div class="page" id="page-cuenta">
+        <div id="cuenta-loading" class="loading">⏳ Cargando estado de cuenta...</div>
+        <div id="cuenta-content" class="hidden">
+          <div class="ec-header">
+            <div style="font-size:13px;opacity:.7">Saldo total pendiente</div>
+            <div class="ec-total" id="ec-total">$0</div>
+            <div class="ec-sub" id="ec-sub">Manzana 80 · 2026</div>
+            <div class="ec-chips">
+              <div class="ec-chip"><div class="ec-chip-val" id="ec-pagados">0</div><div class="ec-chip-lbl">Meses pagados</div></div>
+              <div class="ec-chip"><div class="ec-chip-val" id="ec-pendientes">0</div><div class="ec-chip-lbl">Pendientes</div></div>
+              <div class="ec-chip"><div class="ec-chip-val">$500</div><div class="ec-chip-lbl">Cuota mensual</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Historial completo 2026</div>
+            <table class="tbl">
+              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-cuenta"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTOS -->
+      <div class="page" id="page-docs">
+        <div class="card">
+          <div class="card-title">Documentos del condominio</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
+              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">Actualizado 2026</div></div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
+              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
+              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto anual 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="alert('Documento disponible próximamente')">
+              <div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Enero – Marzo 2026</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_GscgjvA4RQkFZfwANPpueg_rKfWJ_NmXcJRA';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let residente = null;
+let pagosData = [];
+
+async function doLogin() {
+  const depto = document.getElementById('input-depto').value.trim();
+  const nombre = document.getElementById('input-nombre').value.trim().toUpperCase();
+  const btn = document.getElementById('btn-login');
+  const err = document.getElementById('login-error');
+
+  if (!depto || !nombre) { err.style.display='block'; err.textContent='Por favor llena ambos campos.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Buscando...';
+  err.style.display = 'none';
+
+  try {
+    const { data, error } = await db
+      .from('residentes')
+      .select('*')
+      .eq('departamento', depto)
+      .ilike('nombre_completo', `%${nombre.split(' ')[0]}%`)
+      .limit(1);
+
+    if (error || !data || data.length === 0) {
+      // Try just by department
+      const { data: data2 } = await db
+        .from('residentes')
+        .select('*')
+        .eq('departamento', depto)
+        .limit(1);
+
+      if (!data2 || data2.length === 0) {
+        err.style.display = 'block';
+        err.textContent = 'Departamento no encontrado. Verifica el número.';
+        btn.disabled = false; btn.textContent = 'Entrar al portal →';
+        return;
+      }
+      residente = data2[0];
+    } else {
+      residente = data[0];
+    }
+
+    document.getElementById('sb-nombre').textContent = residente.nombre_completo;
+    document.getElementById('sb-depto').textContent = `Depto ${residente.departamento} · Manzana 80`;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('portal').classList.remove('hidden');
+    loadDashboard();
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'Error de conexión. Intenta de nuevo.';
+    btn.disabled = false; btn.textContent = 'Entrar al portal →';
+  }
+}
+
+async function loadDashboard() {
+  try {
+    const { data, error } = await db
+      .from('pagos')
+      .select('*')
+      .eq('id_residente', residente.id_residente)
+      .order('fecha_vencimiento', { ascending: true });
+
+    if (error) throw error;
+    pagosData = data || [];
+
+    const pagados = pagosData.filter(p => p.estado === 'pagado');
+    const pendientes = pagosData.filter(p => p.estado === 'pendiente');
+    const deuda = pendientes.length * 500;
+
+    // KPIs
+    document.getElementById('kpi-deuda').textContent = `$${deuda.toLocaleString()}`;
+    document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? `${pendientes.length} meses` : 'Al corriente ✓';
+    document.getElementById('kpi-pagados').textContent = pagados.length;
+    document.getElementById('kpi-pendientes').textContent = pendientes.length;
+    document.getElementById('kpi-pendientes-pill').textContent = pendientes.length > 0 ? 'Por pagar' : 'Al día ✓';
+
+    // Tabla movimientos (últimos 6)
+    const ultimos = [...pagosData].slice(-6).reverse();
+    const tbody = document.getElementById('tabla-movimientos');
+    tbody.innerHTML = ultimos.map(p => `
+      <tr>
+        <td>${p.concepto}</td>
+        <td>${formatFecha(p.fecha_vencimiento)}</td>
+        <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
+        <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
+      </tr>
+    `).join('');
+
+    // Estado de cuenta
+    document.getElementById('ec-total').textContent = `$${deuda.toLocaleString()}`;
+    document.getElementById('ec-sub').textContent = `${residente.nombre_completo} · Depto ${residente.departamento} · Manzana 80`;
+    document.getElementById('ec-pagados').textContent = pagados.length;
+    document.getElementById('ec-pendientes').textContent = pendientes.length;
+
+    const tbody2 = document.getElementById('tabla-cuenta');
+    tbody2.innerHTML = pagosData.map(p => `
+      <tr>
+        <td>${p.concepto}</td>
+        <td>${formatFecha(p.fecha_vencimiento)}</td>
+        <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
+        <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
+      </tr>
+    `).join('');
+
+    document.getElementById('dashboard-loading').classList.add('hidden');
+    document.getElementById('dashboard-content').classList.remove('hidden');
+    document.getElementById('cuenta-loading').classList.add('hidden');
+    document.getElementById('cuenta-content').classList.remove('hidden');
+
+  } catch(e) {
+    document.getElementById('dashboard-loading').textContent = '❌ Error cargando datos. Intenta de nuevo.';
+  }
+}
+
+function formatFecha(f) {
+  if (!f) return '—';
+  const meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const parts = f.split('-');
+  return `${meses[parseInt(parts[1])]} ${parts[0]}`;
+}
+
+function go(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {dashboard:'Resumen',cuenta:'Estado de cuenta',docs:'Documentos'};
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+function doLogout() {
+  residente = null; pagosData = [];
+  document.getElementById('portal').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('input-depto').value = '';
+  document.getElementById('input-nombre').value = '';
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login').textContent = 'Entrar al portal →';
+}
+
+// Enter key login
+document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
