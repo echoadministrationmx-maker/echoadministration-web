@@ -241,9 +241,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
 <script>
 const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_GscgjvA4RQkFZfwANPpueg_rKfWJ_nU';
+const SUPABASE_KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false },
+  global: {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    }
+  }
+});
 
 let residente = null;
 let pagosData = [];
@@ -264,12 +272,20 @@ async function doLogin() {
   err.style.display='none';
 
   try {
-    const { data, error } = await db
-      .from('residentes')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('password', pass)
-      .limit(1);
+    // Try direct fetch first
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/residentes?user_id=eq.${encodeURIComponent(userId)}&password=eq.${encodeURIComponent(pass)}&limit=1`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    const data = await response.json();
+    const error = !response.ok;
 
     if (error || !data || data.length === 0) {
       err.style.display='block';
@@ -294,14 +310,17 @@ async function doLogin() {
 
 async function loadData() {
   try {
-    const { data, error } = await db
-      .from('pagos')
-      .select('*')
-      .eq('id_residente', residente.id_residente)
-      .order('fecha_vencimiento', { ascending: true });
-
-    if (error) throw error;
-    pagosData = data || [];
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/pagos?id_residente=eq.${residente.id_residente}&order=fecha_vencimiento.asc`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    pagosData = await resp.json() || [];
 
     const pagados = pagosData.filter(p => p.estado === 'pagado');
     const pendientes = pagosData.filter(p => p.estado === 'pendiente');
