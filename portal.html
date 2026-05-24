@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal de Residentes — Echo Administración</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 :root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -166,6 +166,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Estado de cuenta
       </button>
+      <button class="nav-item" onclick="go('pago',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Pagar ahora
+      </button>
       <button class="nav-item" onclick="go('docs',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Documentos
@@ -178,7 +182,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="main">
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">Resumen</span>
-      <button class="btn-ver" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta</button>
+      <button class="btn-ver" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta →</button>
     </div>
     <div class="content">
 
@@ -187,7 +191,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div id="dashboard-content" class="hidden">
           <div class="kpi-grid">
             <div class="kpi"><div class="kpi-label">Saldo pendiente</div><div class="kpi-val danger" id="kpi-deuda">$0</div><div class="kpi-pill danger" id="kpi-deuda-pill">—</div></div>
-            <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En 2026</div></div>
+            <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En el periodo</div></div>
             <div class="kpi"><div class="kpi-label">Meses pendientes</div><div class="kpi-val" id="kpi-pendientes">0</div><div class="kpi-pill warn" id="kpi-pendientes-pill">2026</div></div>
           </div>
           <div class="card">
@@ -206,7 +210,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           <div class="ec-header">
             <div style="font-size:13px;opacity:.7">Saldo total pendiente</div>
             <div class="ec-total" id="ec-total">$0</div>
-            <div class="ec-sub" id="ec-sub">Manzana 80 · 2026</div>
+            <div class="ec-sub" id="ec-sub">Manzana 80</div>
             <div class="ec-chips">
               <div class="ec-chip"><div class="ec-chip-val" id="ec-pagados">0</div><div class="ec-chip-lbl">Meses pagados</div></div>
               <div class="ec-chip"><div class="ec-chip-val" id="ec-pendientes">0</div><div class="ec-chip-lbl">Pendientes</div></div>
@@ -214,12 +218,46 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             </div>
           </div>
           <div class="card">
-            <div class="card-title">Historial completo 2026</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+              <div class="card-title" style="margin-bottom:0">Historial de pagos</div>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <select id="filtro-anio" onchange="filtrarPorAnio()" style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:8px;padding:7px 12px;font-size:13px;font-family:inherit;color:#374151;outline:none;cursor:pointer">
+                  <option value="todos">Todos los años</option>
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                </select>
+                <button onclick="go('pago',document.querySelectorAll('.nav-item')[3])" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💳 Pagar ahora</button>
+              </div>
+            </div>
             <table class="tbl">
               <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
               <tbody id="tabla-cuenta"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-pago">
+        <div class="card" style="max-width:420px;margin:0 auto">
+          <div class="card-title" style="margin-bottom:4px">💳 Realizar pago</div>
+          <p style="font-size:13px;color:#6B7280;margin-bottom:20px" id="pago-sub">Manzana 80</p>
+          <div style="background:#F9FAFB;border-radius:10px;padding:16px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E5E7EB;font-size:13.5px"><span style="color:#6B7280">Saldo pendiente total</span><span style="font-weight:700;color:#DC2626" id="pago-total">$0</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px"><span style="font-weight:700;color:#0F1923">Total a pagar</span><span style="font-weight:800;color:#059669;font-size:20px" id="pago-total2">$0</span></div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6B7280;margin-bottom:10px">Método de pago</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="pay-method active" onclick="selMetodo(this)" style="border:1.5px solid #1847CC;background:#EBF0FD;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:#1847CC;font-weight:600">💳 Tarjeta</div>
+              <div class="pay-method" onclick="selMetodo(this)" style="border:1.5px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:#6B7280">🏦 SPEI/Transfer</div>
+              <div class="pay-method" onclick="selMetodo(this)" style="border:1.5px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:#6B7280">🏪 OXXO</div>
+              <div class="pay-method" onclick="selMetodo(this)" style="border:1.5px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:#6B7280">📱 Mercado Pago</div>
+            </div>
+          </div>
+          <button onclick="doPago()" style="width:100%;background:#059669;color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px">🔒 Pagar de forma segura</button>
+          <p style="font-size:11px;color:#9CA3AF;text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
         </div>
       </div>
 
@@ -332,7 +370,12 @@ async function loadData() {
     document.getElementById('kpi-pendientes').textContent = pendientes.length;
     document.getElementById('kpi-pendientes-pill').textContent = pendientes.length > 0 ? 'Por pagar' : '✓ Al día';
 
-    const ultimos = [...pagosData].reverse().slice(0,6);
+    // Sort all data descending (newest first)
+    pagosData.sort((a,b) => new Date(b.fecha_vencimiento) - new Date(a.fecha_vencimiento));
+    const ultimos = pagosData.slice(0,6);
+    document.getElementById('pago-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento;
+    document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
+    document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
     document.getElementById('tabla-movimientos').innerHTML = ultimos.map(p=>`
       <tr>
         <td>${p.concepto}</td>
@@ -373,7 +416,7 @@ function go(id,el) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  const t={dashboard:'Resumen',cuenta:'Estado de cuenta',docs:'Documentos'};
+  const t={dashboard:'Resumen',cuenta:'Estado de cuenta',pago:'Pagar ahora',docs:'Documentos'};
   document.getElementById('topbar-title').textContent=t[id]||id;
 }
 
@@ -389,6 +432,33 @@ function doLogout() {
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function filtrarPorAnio() {
+  const anio = document.getElementById('filtro-anio').value;
+  const filtrado = anio === 'todos' ? pagosData : pagosData.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(anio));
+  document.getElementById('tabla-cuenta').innerHTML = filtrado.map(p=>`
+    <tr>
+      <td>${p.concepto}</td>
+      <td>${fmt(p.fecha_vencimiento)}</td>
+      <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
+      <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
+    </tr>`).join('');
+}
+
+function selMetodo(el) {
+  document.querySelectorAll('.pay-method').forEach(m => {
+    m.style.borderColor='#E5E7EB';
+    m.style.background='transparent';
+    m.style.color='#6B7280';
+  });
+  el.style.borderColor='#1847CC';
+  el.style.background='#EBF0FD';
+  el.style.color='#1847CC';
+}
+
+function doPago() {
+  alert('🚀 Próximamente: Pago en línea con Mercado Pago\n\nPor ahora contacta a:\nechoadministrationmx@gmail.com\nWhatsApp: +52 998 123 4567');
+}
 </script>
 </body>
 </html>
