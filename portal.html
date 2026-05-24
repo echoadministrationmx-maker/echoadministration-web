@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal de Residentes — Echo Administración</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+
 <style>
 :root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -280,8 +280,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <script>
 const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
+// fetch directo sin librería
+const _unused = {
   auth: { persistSession: false },
   global: {
     headers: {
