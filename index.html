@@ -8,14 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#1847CC;--blue-mid:#2558E8;--blue-light:#EBF0FD;
-  --green:#059669;--green-light:#ECFDF5;
-  --ink:#0C1320;--body:#374151;--muted:#6B7280;
-  --border:#E5E7EB;--bg:#F9FAFB;--white:#fff;
-  --coral:#DC2626;--coral-light:#FEF2F2;
-  --yellow:#D97706;--yellow-light:#FFFBEB;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
-  --shadow-lg:0 4px 6px rgba(0,0,0,.05),0 10px 40px rgba(0,0,0,.1);
+ --blue:#1847CC;--blue-mid:#2558E8;--blue-light:#EBF0FD;
+ --green:#059669;--green-light:#ECFDF5;
+ --ink:#0C1320;--body:#374151;--muted:#6B7280;
+ --border:#E5E7EB;--bg:#F9FAFB;--white:#fff;
+ --coral:#DC2626;--coral-light:#FEF2F2;
+ --yellow:#D97706;--yellow-light:#FFFBEB;
+ --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+ --shadow-lg:0 4px 6px rgba(0,0,0,.05),0 10px 40px rgba(0,0,0,.1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -312,17 +312,17 @@ footer{background:var(--ink);padding:56px 0 28px}
 .fbot-links{display:flex;gap:18px}
 
 @media(max-width:920px){
-  nav .nav-links{display:none}
-  .hero-grid,.numbers-wrap,.legal-grid,.fiscal-wrap,.contact-wrap,.two-in-one,.pricing-grid,.testi-grid,.projects-grid{grid-template-columns:1fr}
-  .svc-grid,.svc-item.featured{grid-template-columns:1fr;grid-column:span 1}
-  .steps-grid{grid-template-columns:repeat(2,1fr);gap:24px}
-  .steps-grid::before{display:none}
-  .portal-cta{grid-template-columns:1fr;padding:36px 24px}
-  .fi{grid-template-columns:1fr 1fr}
-  .fr2{grid-template-columns:1fr}
-  .container{padding:0 18px}
-  nav{padding:0 18px}
-  .cta-band{padding:64px 0}
+ nav .nav-links{display:none}
+ .hero-grid,.numbers-wrap,.legal-grid,.fiscal-wrap,.contact-wrap,.two-in-one,.pricing-grid,.testi-grid,.projects-grid{grid-template-columns:1fr}
+ .svc-grid,.svc-item.featured{grid-template-columns:1fr;grid-column:span 1}
+ .steps-grid{grid-template-columns:repeat(2,1fr);gap:24px}
+ .steps-grid::before{display:none}
+ .portal-cta{grid-template-columns:1fr;padding:36px 24px}
+ .fi{grid-template-columns:1fr 1fr}
+ .fr2{grid-template-columns:1fr}
+ .container{padding:0 18px}
+ nav{padding:0 18px}
+ .cta-band{padding:64px 0}
 }
 </style>
 </head>
@@ -330,669 +330,641 @@ footer{background:var(--ink);padding:56px 0 28px}
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">
-    <div class="nav-logo-icon">
-      <svg viewBox="0 0 18 18" fill="none"><path d="M2 9C2 5.13 5.13 2 9 2C12.87 2 16 5.13 16 9C16 12.87 12.87 16 9 16" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M9 6V12M6 9H12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-    <span class="nav-logo-name">Echo <span>Administración</span></span>
+ <div class="nav-logo">
+  <div class="nav-logo-icon">
+   <svg viewBox="0 0 18 18" fill="none"><path d="M2 9C2 5.13 5.13 2 9 2C12.87 2 16 5.13 16 9C16 12.87 12.87 16 9 16" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M9 6V12M6 9H12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
   </div>
-  <div class="nav-links">
-    <a href="#servicios">Servicios</a>
-    <a href="#renta-vacacional" style="color:var(--green);font-weight:600">Airbnb ✦</a>
-    <a href="#convenios" style="color:var(--blue);font-weight:600">Convenios</a>
-    <a href="#como-funciona">Cómo funciona</a>
-    <a href="#proyectos">Proyectos</a>
-    <a href="#precios">Precios</a>
-    <a href="#contacto">Contacto</a>
-  </div>
-  <div class="nav-right">
-    <a href="/portal" class="nav-portal">Portal residentes →</a>
-    <a href="#contacto" class="btn btn-primary" style="padding:8px 18px;font-size:13.5px">Solicitar demo</a>
-  </div>
+  <span class="nav-logo-name">Echo <span>Administración</span></span>
+ </div>
+ <div class="nav-links">
+  <a href="#servicios">Servicios</a>
+  <a href="#renta-vacacional" style="color:var(--green);font-weight:600">Airbnb ✦</a>
+  <a href="/convenios" style="color:var(--blue);font-weight:600">Convenios</a>
+  <a href="#como-funciona">Cómo funciona</a>
+  <a href="#proyectos">Proyectos</a>
+  <a href="#precios">Precios</a>
+  <a href="#contacto">Contacto</a>
+ </div>
+ <div class="nav-right">
+  <a href="/portal" class="nav-portal">Portal residentes →</a>
+  <a href="#contacto" class="btn btn-primary" style="padding:8px 18px;font-size:13.5px">Solicitar demo</a>
+ </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="container">
-    <div class="hero-grid">
-      <div>
-        <div class="hero-eyebrow"><span class="hero-dot"></span> Disponible en toda la República Mexicana</div>
-        <h1>La administración que <span class="hl">sí resuelve</span> el déficit.</h1>
-        <p class="hero-sub">La única empresa en México que combina equipo profesional en campo con plataforma propia. Cobranza activa, portal de residentes y pagos en línea — todo en un solo contrato.</p>
-        <div class="hero-actions">
-          <a href="#contacto" class="btn btn-primary">Solicitar propuesta gratis →</a>
-          <a href="#como-funciona" class="btn btn-outline">Ver cómo funciona</a>
-        </div>
-        <div class="hero-social">
-          <div class="hs-avatars">
-            <div class="hs-avatar">XL</div>
-            <div class="hs-avatar">SM</div>
-            <div class="hs-avatar">GT</div>
-            <div class="hs-avatar">IZ</div>
-            <div class="hs-avatar">+7</div>
-          </div>
-          <span class="hs-text"><strong>11 condominios</strong> en Tulum ya nos confían su administración</span>
-        </div>
-      </div>
-      <div class="hero-visual reveal">
-        <div class="dashboard-card">
-          <div class="dc-topbar">
-            <div class="dc-dots"><span></span><span></span><span></span></div>
-            <div class="dc-title">Echo Administración — Panel de control</div>
-          </div>
-          <div class="dc-body">
-            <div class="dc-kpis">
-              <div class="dc-kpi"><div class="dc-kpi-val g">$0</div><div class="dc-kpi-lbl">Déficit actual</div></div>
-              <div class="dc-kpi"><div class="dc-kpi-val b">78%</div><div class="dc-kpi-lbl">Cobranza</div></div>
-              <div class="dc-kpi"><div class="dc-kpi-val r">24</div><div class="dc-kpi-lbl">Incidencias</div></div>
-            </div>
-            <div class="dc-bar-wrap">
-              <div class="dc-bar-label"><span>Recuperación de cartera vencida</span><span style="color:var(--green);font-weight:600">78%</span></div>
-              <div class="dc-bar"><div class="dc-bar-fill" id="hero-bar" style="width:78%"></div></div>
-            </div>
-            <div class="dc-list">
-              <div class="dc-row"><div class="dc-row-ico green">🌿</div><div class="dc-row-name">Samsara · Depto 312</div><div class="dc-row-val g">Pagado ✓</div></div>
-              <div class="dc-row"><div class="dc-row-ico blue">🏙️</div><div class="dc-row-name">Giada Tower · Depto 1502</div><div class="dc-row-val g">Pagado ✓</div></div>
-              <div class="dc-row"><div class="dc-row-ico yellow">⚠️</div><div class="dc-row-name">Xalet · Depto 204</div><div class="dc-row-val r">Pendiente</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="float-badge fb1"><div class="fb-dot g"></div>Pago recibido · +$500</div>
-        <div class="float-badge fb2"><div class="fb-dot b"></div>11 proyectos activos</div>
-      </div>
+ <div class="container">
+  <div class="hero-grid">
+   <div>
+    <div class="hero-eyebrow"><span class="hero-dot"></span> Disponible en toda la República Mexicana</div>
+    <h1>La administración que <span class="hl">sí resuelve</span> el déficit.</h1>
+    <p class="hero-sub">La única empresa en México que combina equipo profesional en campo con plataforma propia. Cobranza activa, portal de residentes y pagos en línea — todo en un solo contrato.</p>
+    <div class="hero-actions">
+     <a href="#contacto" class="btn btn-primary">Solicitar propuesta gratis →</a>
+     <a href="#como-funciona" class="btn btn-outline">Ver cómo funciona</a>
     </div>
+    <div class="hero-social">
+     <div class="hs-avatars">
+      <div class="hs-avatar">XL</div>
+      <div class="hs-avatar">SM</div>
+      <div class="hs-avatar">GT</div>
+      <div class="hs-avatar">IZ</div>
+      <div class="hs-avatar">+7</div>
+     </div>
+     <span class="hs-text"><strong>11 condominios</strong> en Tulum ya nos confían su administración</span>
+    </div>
+   </div>
+   <div class="hero-visual reveal">
+    <div class="dashboard-card">
+     <div class="dc-topbar">
+      <div class="dc-dots"><span></span><span></span><span></span></div>
+      <div class="dc-title">Echo Administración — Panel de control</div>
+     </div>
+     <div class="dc-body">
+      <div class="dc-kpis">
+       <div class="dc-kpi"><div class="dc-kpi-val g">$0</div><div class="dc-kpi-lbl">Déficit actual</div></div>
+       <div class="dc-kpi"><div class="dc-kpi-val b">78%</div><div class="dc-kpi-lbl">Cobranza</div></div>
+       <div class="dc-kpi"><div class="dc-kpi-val r">24</div><div class="dc-kpi-lbl">Incidencias</div></div>
+      </div>
+      <div class="dc-bar-wrap">
+       <div class="dc-bar-label"><span>Recuperación de cartera vencida</span><span style="color:var(--green);font-weight:600">78%</span></div>
+       <div class="dc-bar"><div class="dc-bar-fill" id="hero-bar" style="width:78%"></div></div>
+      </div>
+      <div class="dc-list">
+       <div class="dc-row"><div class="dc-row-ico green">🌿</div><div class="dc-row-name">Samsara · Depto 312</div><div class="dc-row-val g">Pagado ✓</div></div>
+       <div class="dc-row"><div class="dc-row-ico blue">🏙️</div><div class="dc-row-name">Giada Tower · Depto 1502</div><div class="dc-row-val g">Pagado ✓</div></div>
+       <div class="dc-row"><div class="dc-row-ico yellow">⚠️</div><div class="dc-row-name">Xalet · Depto 204</div><div class="dc-row-val r">Pendiente</div></div>
+      </div>
+     </div>
+    </div>
+    <div class="float-badge fb1"><div class="fb-dot g"></div>Pago recibido · +$500</div>
+    <div class="float-badge fb2"><div class="fb-dot b"></div>11 proyectos activos</div>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- LOGOS BAND -->
 <div class="logos-band">
-  <div class="container">
-    <div class="logos-inner">
-      <span class="logos-label">Proyectos en Tulum</span>
-      <div style="overflow:hidden;display:flex;flex:1">
-        <div class="logos-track">
-          <span class="logo-item">Xalet</span><span class="logo-item">Samsara</span><span class="logo-item">María</span><span class="logo-item">Meneses</span><span class="logo-item">Aflora</span><span class="logo-item">Miraluna</span><span class="logo-item">Giada Tower</span><span class="logo-item">Itza</span><span class="logo-item">Botánica</span><span class="logo-item">Essencia</span><span class="logo-item">Art House</span><span class="logo-item">Amira District</span>
-        </div>
-        <div class="logos-track logos-track2" aria-hidden="true">
-          <span class="logo-item">Xalet</span><span class="logo-item">Samsara</span><span class="logo-item">María</span><span class="logo-item">Meneses</span><span class="logo-item">Aflora</span><span class="logo-item">Miraluna</span><span class="logo-item">Giada Tower</span><span class="logo-item">Itza</span><span class="logo-item">Botánica</span><span class="logo-item">Essencia</span><span class="logo-item">Art House</span><span class="logo-item">Amira District</span>
-        </div>
-      </div>
+ <div class="container">
+  <div class="logos-inner">
+   <span class="logos-label">Proyectos en Tulum</span>
+   <div style="overflow:hidden;display:flex;flex:1">
+    <div class="logos-track">
+     <span class="logo-item">Xalet</span><span class="logo-item">Samsara</span><span class="logo-item">María</span><span class="logo-item">Meneses</span><span class="logo-item">Aflora</span><span class="logo-item">Miraluna</span><span class="logo-item">Giada Tower</span><span class="logo-item">Itza</span><span class="logo-item">Botánica</span><span class="logo-item">Essencia</span><span class="logo-item">Art House</span><span class="logo-item">Amira District</span>
     </div>
+    <div class="logos-track logos-track2" aria-hidden="true">
+     <span class="logo-item">Xalet</span><span class="logo-item">Samsara</span><span class="logo-item">María</span><span class="logo-item">Meneses</span><span class="logo-item">Aflora</span><span class="logo-item">Miraluna</span><span class="logo-item">Giada Tower</span><span class="logo-item">Itza</span><span class="logo-item">Botánica</span><span class="logo-item">Essencia</span><span class="logo-item">Art House</span><span class="logo-item">Amira District</span>
+    </div>
+   </div>
   </div>
+ </div>
 </div>
 
 <!-- PROBLEMA -->
 <section class="section section-alt">
-  <div class="container">
-    <div class="badge badge-blue">El problema que resolvemos</div>
-    <h2>¿Por qué el 98% de los condominios<br>operan sin administración formal?</h2>
-    <p class="lead">Porque las opciones existentes son o muy caras, o solo software, o personal sin respaldo legal. Nosotros somos las tres cosas juntas.</p>
-    <div class="problem-grid reveal">
-      <div class="prob-card p1">
-        <div class="prob-num r">60%</div>
-        <h3>Morosidad promedio</h3>
-        <p>Sin un sistema activo de cobranza, la mitad de los condóminos no pagan. El déficit crece cada mes sin control.</p>
-      </div>
-      <div class="prob-card p2">
-        <div class="prob-num y">$67k</div>
-        <h3>Déficit mensual típico</h3>
-        <p>Un condominio de 320 unidades con 60% de morosidad pierde $67,000 al mes con la administración tradicional.</p>
-      </div>
-      <div class="prob-card p3">
-        <div class="prob-num b">0</div>
-        <h3>Herramientas legales usadas</h3>
-        <p>La mayoría de administraciones no usan el Art. 39, la Constancia de No Adeudo ni el embargo precautorio disponibles en la ley.</p>
-      </div>
-    </div>
+ <div class="container">
+  <div class="badge badge-blue">El problema que resolvemos</div>
+  <h2>¿Por qué el 98% de los condominios<br>operan sin administración formal?</h2>
+  <p class="lead">Porque las opciones existentes son o muy caras, o solo software, o personal sin respaldo legal. Nosotros somos las tres cosas juntas.</p>
+  <div class="problem-grid reveal">
+   <div class="prob-card p1">
+    <div class="prob-num r">60%</div>
+    <h3>Morosidad promedio</h3>
+    <p>Sin un sistema activo de cobranza, la mitad de los condóminos no pagan. El déficit crece cada mes sin control.</p>
+   </div>
+   <div class="prob-card p2">
+    <div class="prob-num y">$67k</div>
+    <h3>Déficit mensual típico</h3>
+    <p>Un condominio de 320 unidades con 60% de morosidad pierde $67,000 al mes con la administración tradicional.</p>
+   </div>
+   <div class="prob-card p3">
+    <div class="prob-num b">0</div>
+    <h3>Herramientas legales usadas</h3>
+    <p>La mayoría de administraciones no usan el Art. 39, la Constancia de No Adeudo ni el embargo precautorio disponibles en la ley.</p>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- DOS EN UNO -->
 <section class="section">
-  <div class="container">
-    <div class="badge badge-green">Nuestra propuesta única</div>
-    <h2>Somos empresa <em style="font-style:normal;color:var(--blue)">y</em> plataforma.<br>Nadie más ofrece las dos.</h2>
-    <p class="lead">CondoVive y otros son solo software. Otras empresas no tienen tecnología. Nosotros somos los únicos con las dos.</p>
-    <div style="position:relative" class="reveal">
-      <div class="two-in-one">
-        <div class="tio-card empresa">
-          <div class="tio-tag">Empresa en campo</div>
-          <h3>Equipo profesional que opera tu condominio</h3>
-          <p>Guardias, mantenimiento, jardinería, limpieza y administradores físicamente en tu condominio.</p>
-          <ul class="tio-list">
-            <li>2 guardias en turnos de 12hrs (REPSE)</li>
-            <li>Técnico de mantenimiento + jardinería</li>
-            <li>Limpieza de áreas comunes</li>
-            <li>2 administradores dedicados</li>
-            <li>Cobranza extrajudicial presencial</li>
-          </ul>
-        </div>
-        <div class="tio-card plataforma">
-          <div class="tio-tag">Plataforma digital propia</div>
-          <h3>Portal de residentes con todo integrado</h3>
-          <p>App web donde cada residente ve su estado de cuenta, paga en línea, reporta incidencias y descarga documentos.</p>
-          <ul class="tio-list">
-            <li>Portal de residentes por condominio</li>
-            <li>Pagos con Mercado Pago (OXXO, tarjeta, SPEI)</li>
-            <li>Bot de WhatsApp con recordatorios</li>
-            <li>Reportes financieros en tiempo real</li>
-            <li>Gestión de multas e incidencias</li>
-          </ul>
-        </div>
-      </div>
-      <div class="vs-badge">+</div>
+ <div class="container">
+  <div class="badge badge-green">Nuestra propuesta única</div>
+  <h2>Somos empresa <em style="font-style:normal;color:var(--blue)">y</em> plataforma.<br>Nadie más ofrece las dos.</h2>
+  <p class="lead">CondoVive y otros son solo software. Otras empresas no tienen tecnología. Nosotros somos los únicos con las dos.</p>
+  <div style="position:relative" class="reveal">
+   <div class="two-in-one">
+    <div class="tio-card empresa">
+     <div class="tio-tag">Empresa en campo</div>
+     <h3>Equipo profesional que opera tu condominio</h3>
+     <p>Guardias, mantenimiento, jardinería, limpieza y administradores físicamente en tu condominio.</p>
+     <ul class="tio-list">
+      <li>2 guardias en turnos de 12hrs</li>
+      <li>Técnico de mantenimiento + jardinería</li>
+      <li>Limpieza de áreas comunes</li>
+      <li>2 administradores dedicados</li>
+      <li>Cobranza extrajudicial presencial</li>
+     </ul>
     </div>
+    <div class="tio-card plataforma">
+     <div class="tio-tag">Plataforma digital propia</div>
+     <h3>Portal de residentes con todo integrado</h3>
+     <p>App web donde cada residente ve su estado de cuenta, paga en línea, reporta incidencias y descarga documentos.</p>
+     <ul class="tio-list">
+      <li>Portal de residentes por condominio</li>
+      <li>Pagos con Mercado Pago (OXXO, tarjeta, SPEI)</li>
+      <li>Bot de WhatsApp con recordatorios</li>
+      <li>Reportes financieros en tiempo real</li>
+      <li>Gestión de multas e incidencias</li>
+     </ul>
+    </div>
+   </div>
+   <div class="vs-badge">+</div>
   </div>
+ </div>
 </section>
 
 <!-- SERVICIOS -->
 <section class="section section-alt" id="servicios">
-  <div class="container">
-    <div class="badge badge-blue">Servicios</div>
-    <h2>Todo en un solo contrato,<br>sin sorpresas.</h2>
-    <p class="lead">Sin subcontratar partes. Sin intermediarios. Un solo número para todo.</p>
-    <div class="svc-grid reveal">
-      <div class="svc-item featured">
-        <div>
-          <div class="svc-tag">★ Diferenciador clave</div>
-          <h3>Sistema de Cobranza Activa en 3 Etapas</h3>
-          <p>La única administración con un plan estructurado para recuperar cartera vencida con respaldo legal de la Ley Condominial de cada estado.</p>
-        </div>
-        <div class="stages">
-          <div class="stage"><span class="stag">ETAPA A</span><span class="stage-txt"><strong style="color:#fff">Preventiva:</strong> Recordatorios WhatsApp y email 5 días antes del vencimiento.</span></div>
-          <div class="stage"><span class="stag">ETAPA B</span><span class="stage-txt"><strong style="color:#fff">Administrativa:</strong> Convenios, restricción de amenidades, lista de morosos.</span></div>
-          <div class="stage"><span class="stag">ETAPA C</span><span class="stage-txt"><strong style="color:#fff">Extrajudicial:</strong> Requerimientos notariales. Constancia de No Adeudo. Juicio civil.</span></div>
-        </div>
-      </div>
-      <div class="svc-item"><div class="svc-ico">🏢</div><div class="svc-tag">Administración</div><h3>Administración y Contabilidad</h3><p>Reportes financieros mensuales, declaraciones SAT, CFDI y conciliaciones bancarias.</p></div>
-      <div class="svc-item"><div class="svc-ico">🛡️</div><div class="svc-tag">Seguridad</div><h3>Vigilancia 24/7</h3><p>Guardias en turnos de 12hrs. Personal REPSE. Cero responsabilidad patronal para el condominio.</p></div>
-      <div class="svc-item"><div class="svc-ico">🌿</div><div class="svc-tag">Mantenimiento</div><h3>Áreas Comunes</h3><p>Técnico de mantenimiento, jardinería y limpieza de pasillos, alberca e instalaciones.</p></div>
-      <div class="svc-item"><div class="svc-ico">📱</div><div class="svc-tag">Tecnología</div><h3>Portal de Residentes</h3><p>Estado de cuenta, pagos en línea, multas, documentos e incidencias en un solo lugar.</p></div>
-      <div class="svc-item"><div class="svc-ico">📋</div><div class="svc-tag">Asambleas</div><h3>Asambleas y Reglamento</h3><p>Convocatoria, actas legales, asesoría al Comité de Vigilancia y reglamento interno.</p></div>
+ <div class="container">
+  <div class="badge badge-blue">Servicios</div>
+  <h2>Todo en un solo contrato,<br>sin sorpresas.</h2>
+  <p class="lead">Sin subcontratar partes. Sin intermediarios. Un solo número para todo.</p>
+  <div class="svc-grid reveal">
+   <div class="svc-item featured">
+    <div>
+     <div class="svc-tag">★ Diferenciador clave</div>
+     <h3>Sistema de Cobranza Activa en 3 Etapas</h3>
+     <p>La única administración con un plan estructurado para recuperar cartera vencida con respaldo legal de la Ley Condominial de cada estado.</p>
     </div>
+    <div class="stages">
+     <div class="stage"><span class="stag">ETAPA A</span><span class="stage-txt"><strong style="color:#fff">Preventiva:</strong> Recordatorios WhatsApp y email 5 días antes del vencimiento.</span></div>
+     <div class="stage"><span class="stag">ETAPA B</span><span class="stage-txt"><strong style="color:#fff">Administrativa:</strong> Convenios, restricción de amenidades, lista de morosos.</span></div>
+     <div class="stage"><span class="stag">ETAPA C</span><span class="stage-txt"><strong style="color:#fff">Extrajudicial:</strong> Requerimientos notariales. Constancia de No Adeudo. Juicio civil.</span></div>
+    </div>
+   </div>
+   <div class="svc-item"><div class="svc-ico">🏢</div><div class="svc-tag">Administración</div><h3>Administración y Contabilidad</h3><p>Reportes financieros mensuales, declaraciones SAT, CFDI y conciliaciones bancarias.</p></div>
+   <div class="svc-item"><div class="svc-ico">🛡️</div><div class="svc-tag">Seguridad</div><h3>Vigilancia 24/7</h3><p>Guardias en turnos de 12hrs. Sin responsabilidad patronal para el condominio.</p></div>
+   <div class="svc-item"><div class="svc-ico">🌿</div><div class="svc-tag">Mantenimiento</div><h3>Áreas Comunes</h3><p>Técnico de mantenimiento, jardinería y limpieza de pasillos, alberca e instalaciones.</p></div>
+   <div class="svc-item"><div class="svc-ico">📱</div><div class="svc-tag">Tecnología</div><h3>Portal de Residentes</h3><p>Estado de cuenta, pagos en línea, multas, documentos e incidencias en un solo lugar.</p></div>
+   <div class="svc-item"><div class="svc-ico">📋</div><div class="svc-tag">Asambleas</div><h3>Asambleas y Reglamento</h3><p>Convocatoria, actas legales, asesoría al Comité de Vigilancia y reglamento interno.</p></div>
   </div>
+ </div>
 </section>
 
 <!-- CÓMO FUNCIONA -->
 <section class="section" id="como-funciona">
-  <div class="container">
-    <div class="badge badge-blue">Cómo funciona</div>
-    <h2>Del primer contacto a la<br>operación saneada en 30 días</h2>
-    <p class="lead">Un proceso simple, sin burocracia. Nos encargamos de todo el onboarding.</p>
-    <div class="steps-grid reveal">
-      <div class="step">
-        <div class="step-circle" style="position:relative">🤝<div class="step-num">1</div></div>
-        <h3>Diagnóstico gratis</h3>
-        <p>Analizamos tu condominio, morosidad actual y presupuesto. Te damos una propuesta en 24 horas.</p>
-      </div>
-      <div class="step">
-        <div class="step-circle" style="position:relative">📋<div class="step-num">2</div></div>
-        <h3>Firma del contrato</h3>
-        <p>Contrato claro con todos los servicios incluidos. Sin letra pequeña ni costos ocultos.</p>
-      </div>
-      <div class="step">
-        <div class="step-circle" style="position:relative">⚙️<div class="step-num">3</div></div>
-        <h3>Configuración del portal</h3>
-        <p>Activamos el portal de residentes con todos los departamentos y cargamos el historial de pagos.</p>
-      </div>
-      <div class="step">
-        <div class="step-circle" style="position:relative">🚀<div class="step-num">4</div></div>
-        <h3>Operación activa</h3>
-        <p>En 30 días ves los primeros resultados de cobranza. Reporte mensual al Comité de Vigilancia.</p>
-      </div>
-    </div>
+ <div class="container">
+  <div class="badge badge-blue">Cómo funciona</div>
+  <h2>Del primer contacto a la<br>operación saneada en 30 días</h2>
+  <p class="lead">Un proceso simple, sin burocracia. Nos encargamos de todo el onboarding.</p>
+  <div class="steps-grid reveal">
+   <div class="step">
+    <div class="step-circle" style="position:relative">🤝<div class="step-num">1</div></div>
+    <h3>Diagnóstico gratis</h3>
+    <p>Analizamos tu condominio, morosidad actual y presupuesto. Te damos una propuesta en 24 horas.</p>
+   </div>
+   <div class="step">
+    <div class="step-circle" style="position:relative">📋<div class="step-num">2</div></div>
+    <h3>Firma del contrato</h3>
+    <p>Contrato claro con todos los servicios incluidos. Sin letra pequeña ni costos ocultos.</p>
+   </div>
+   <div class="step">
+    <div class="step-circle" style="position:relative">⚙️<div class="step-num">3</div></div>
+    <h3>Configuración del portal</h3>
+    <p>Activamos el portal de residentes con todos los departamentos y cargamos el historial de pagos.</p>
+   </div>
+   <div class="step">
+    <div class="step-circle" style="position:relative">🚀<div class="step-num">4</div></div>
+    <h3>Operación activa</h3>
+    <p>En 30 días ves los primeros resultados de cobranza. Reporte mensual al Comité de Vigilancia.</p>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- NÚMEROS -->
 <section class="section section-alt">
-  <div class="container">
-    <div class="badge badge-blue">Resultados reales</div>
-    <h2>De déficit a operación<br><span style="color:var(--green)">saneada en 60 días.</span></h2>
-    <p class="lead">Ejemplo real: 320 unidades, 60% de morosidad. Antes y después con Echo Administración.</p>
-    <div class="numbers-wrap reveal">
-      <div class="num-card bad">
-        <h3>⚠️ Situación actual</h3>
-        <div class="nbig r">–$67,000</div>
-        <div class="ndesc">Déficit mensual con administración anterior</div>
-        <div class="nrow"><span class="l">Ingreso teórico (320 × $500)</span><span class="v">$160,000</span></div>
-        <div class="nrow"><span class="l">Morosidad 60% (192 unidades)</span><span class="v r">–$96,000</span></div>
-        <div class="nrow"><span class="l">Ingreso real disponible</span><span class="v">$64,000</span></div>
-        <div class="nrow"><span class="l">Gasto administración anterior</span><span class="v">$131,000</span></div>
-        <div class="nrow"><span class="l" style="color:var(--coral);font-weight:600">Déficit mensual</span><span class="v lr">–$67,000</span></div>
-      </div>
-      <div class="num-card good">
-        <h3>✅ Con Echo Administración</h3>
-        <div class="nbig g">$0</div>
-        <div class="ndesc">Déficit eliminado con cobranza activa</div>
-        <div class="nrow"><span class="l">Administración + Contabilidad</span><span class="v">$36,000</span></div>
-        <div class="nrow"><span class="l">Vigilancia 24hrs (REPSE)</span><span class="v">$16,000</span></div>
-        <div class="nrow"><span class="l">Mantenimiento + Limpieza</span><span class="v">$22,900</span></div>
-        <div class="nrow"><span class="l">Cobranza activa (320 unidades)</span><span class="v g">$32,000</span></div>
-        <div class="nrow"><span class="l" style="color:var(--green);font-weight:600">Total mensual</span><span class="v lg">$106,900</span></div>
-      </div>
-    </div>
+ <div class="container">
+  <div class="badge badge-blue">Resultados reales</div>
+  <h2>De déficit a operación<br><span style="color:var(--green)">saneada en 60 días.</span></h2>
+  <p class="lead">Ejemplo real: 320 unidades, 60% de morosidad. Antes y después con Echo Administración.</p>
+  <div class="numbers-wrap reveal">
+   <div class="num-card bad">
+    <h3>⚠️ Situación actual</h3>
+    <div class="nbig r">–$67,000</div>
+    <div class="ndesc">Déficit mensual con administración anterior</div>
+    <div class="nrow"><span class="l">Ingreso teórico (320 × $500)</span><span class="v">$160,000</span></div>
+    <div class="nrow"><span class="l">Morosidad 60% (192 unidades)</span><span class="v r">–$96,000</span></div>
+    <div class="nrow"><span class="l">Ingreso real disponible</span><span class="v">$64,000</span></div>
+    <div class="nrow"><span class="l">Gasto administración anterior</span><span class="v">$131,000</span></div>
+    <div class="nrow"><span class="l" style="color:var(--coral);font-weight:600">Déficit mensual</span><span class="v lr">–$67,000</span></div>
+   </div>
+   <div class="num-card good">
+    <h3>✅ Con Echo Administración</h3>
+    <div class="nbig g">$0</div>
+    <div class="ndesc">Déficit eliminado con cobranza activa</div>
+    <div class="nrow"><span class="l">Administración + Contabilidad</span><span class="v">$36,000</span></div>
+    <div class="nrow"><span class="l">Vigilancia 24hrs </span><span class="v">$16,000</span></div>
+    <div class="nrow"><span class="l">Mantenimiento + Limpieza</span><span class="v">$22,900</span></div>
+    <div class="nrow"><span class="l">Cobranza activa (320 unidades)</span><span class="v g">$32,000</span></div>
+    <div class="nrow"><span class="l" style="color:var(--green);font-weight:600">Total mensual</span><span class="v lg">$106,900</span></div>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- LEGAL -->
 <section class="section" id="legal">
-  <div class="container">
-    <div class="badge badge-blue">Marco jurídico</div>
-    <h2>4 herramientas legales que<br>la competencia no usa.</h2>
-    <p class="lead">Conocemos y aplicamos la Ley de Propiedad en Condominio de cada estado para recuperar lo que se debe.</p>
-    <div class="legal-grid reveal">
-      <div class="lcard"><div class="lnum">01</div><div class="ltag">Art. 39 · Ley Estatal QRoo</div><h3>⚖️ Título Ejecutivo</h3><p>El Acta de Asamblea tiene fuerza ejecutiva. Podemos iniciar juicio civil y solicitar embargo precautorio sobre bienes o la unidad.</p></div>
-      <div class="lcard"><div class="lnum">02</div><div class="ltag">Restricción de Servicios</div><h3>🚫 Bloqueo de Amenidades</h3><p>Suspensión inmediata de alberca, gimnasio y áreas comunes para morosos. Presión efectiva sin costo adicional.</p></div>
-      <div class="lcard"><div class="lnum">03</div><div class="ltag">Derecho Condominial</div><h3>🗳️ Pérdida de Voz y Voto</h3><p>El condómino moroso pierde su derecho a participar y votar en Asambleas mientras mantenga adeudos pendientes.</p></div>
-      <div class="lcard"><div class="lnum">04</div><div class="ltag">Notarios Públicos</div><h3>📋 Constancia de No Adeudo</h3><p>El propietario moroso <strong>no puede vender, donar ni hipotecar</strong> su departamento hasta liquidar el 100% de sus adeudos.</p></div>
-    </div>
+ <div class="container">
+  <div class="badge badge-blue">Marco jurídico</div>
+  <h2>4 herramientas legales que<br>la competencia no usa.</h2>
+  <p class="lead">Conocemos y aplicamos la Ley de Propiedad en Condominio de cada estado para recuperar lo que se debe.</p>
+  <div class="legal-grid reveal">
+   <div class="lcard"><div class="lnum">01</div><div class="ltag">Art. 39 · Ley Estatal QRoo</div><h3>⚖️ Título Ejecutivo</h3><p>El Acta de Asamblea tiene fuerza ejecutiva. Podemos iniciar juicio civil y solicitar embargo precautorio sobre bienes o la unidad.</p></div>
+   <div class="lcard"><div class="lnum">02</div><div class="ltag">Restricción de Servicios</div><h3>🚫 Bloqueo de Amenidades</h3><p>Suspensión inmediata de alberca, gimnasio y áreas comunes para morosos. Presión efectiva sin costo adicional.</p></div>
+   <div class="lcard"><div class="lnum">03</div><div class="ltag">Derecho Condominial</div><h3>🗳️ Pérdida de Voz y Voto</h3><p>El condómino moroso pierde su derecho a participar y votar en Asambleas mientras mantenga adeudos pendientes.</p></div>
+   <div class="lcard"><div class="lnum">04</div><div class="ltag">Notarios Públicos</div><h3>📋 Constancia de No Adeudo</h3><p>El propietario moroso <strong>no puede vender, donar ni hipotecar</strong> su departamento hasta liquidar el 100% de sus adeudos.</p></div>
   </div>
+ </div>
 </section>
 
 <!-- PROYECTOS -->
 <section class="section section-alt" id="proyectos">
-  <div class="container">
-    <div class="badge badge-green">Dónde operamos</div>
-    <h2>11 condominios en Tulum<br>ya confían en nosotros.</h2>
-    <p class="lead">Presencia activa en los principales desarrollos de la Riviera Maya, con expansión a toda la República.</p>
-    <div class="projects-grid reveal">
-      <div class="proj-card"><div class="proj-ico">🏡</div><div><div class="proj-name">Xalet</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🌿</div><div><div class="proj-name">Samsara</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🌸</div><div><div class="proj-name">María</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🏠</div><div><div class="proj-name">Meneses</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🌺</div><div><div class="proj-name">Aflora</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🌙</div><div><div class="proj-name">Miraluna</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🏙️</div><div><div class="proj-name">Giada Tower</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🏛️</div><div><div class="proj-name">Itza</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🌿</div><div><div class="proj-name">Botánica</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">✨</div><div><div class="proj-name">Essencia</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card"><div class="proj-ico">🎨</div><div><div class="proj-name">Art House</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
-      <div class="proj-card" style="border-style:dashed;background:transparent;justify-content:center;color:var(--muted)"><div style="text-align:center;font-size:13px">+ Tu condominio<br><a href="#contacto" style="color:var(--blue);font-weight:600">Contáctanos →</a></div></div>
+ <div class="container">
+  <div class="badge badge-green">Dónde operamos</div>
+  <h2>11 condominios en Tulum<br>ya confían en nosotros.</h2>
+  <p class="lead">Presencia activa en Tulum, Tampico, Ciudad de México y Mazatlán — expandiendo a toda la República.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px">📍 Tulum, Q.Roo</span>
+      <span style="background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px">📍 Tampico, Tamps.</span>
+      <span style="background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px">📍 Ciudad de México</span>
+      <span style="background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px">📍 Mazatlán, Sin.</span>
     </div>
+  <div class="projects-grid reveal">
+   <div class="proj-card"><div class="proj-ico">🏡</div><div><div class="proj-name">Xalet</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🌿</div><div><div class="proj-name">Samsara</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🌸</div><div><div class="proj-name">María</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🏠</div><div><div class="proj-name">Meneses</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🌺</div><div><div class="proj-name">Aflora</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🌙</div><div><div class="proj-name">Miraluna</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🏙️</div><div><div class="proj-name">Giada Tower</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🏛️</div><div><div class="proj-name">Itza</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🌿</div><div><div class="proj-name">Botánica</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">✨</div><div><div class="proj-name">Essencia</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card"><div class="proj-ico">🎨</div><div><div class="proj-name">Art House</div><div class="proj-loc">Tulum, Q.Roo</div></div></div>
+   <div class="proj-card" style="border-style:dashed;background:transparent;justify-content:center;color:var(--muted)"><div style="text-align:center;font-size:13px">+ Tu condominio<br><a href="#contacto" style="color:var(--blue);font-weight:600">Contáctanos →</a></div></div>
   </div>
+ </div>
 </section>
 
 <!-- PORTAL CTA -->
 <div class="container" id="portal">
-  <div class="portal-cta reveal">
-    <div>
-      <div class="badge" style="background:rgba(123,168,255,.15);color:#7BA8FF;margin-bottom:14px">Portal de residentes</div>
-      <h2>Tu condominio, <em>digitalizado</em><br>desde hoy.</h2>
-      <p>Cada residente tiene acceso a su estado de cuenta, puede pagar en línea con Mercado Pago, reportar incidencias y descargar documentos. Todo desde el celular.</p>
-    </div>
-    <div class="portal-cta-right">
-      <a href="/portal" class="btn btn-white">Entrar al portal →</a>
-      <a href="#contacto" class="btn" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)">Solicitar acceso</a>
-    </div>
+ <div class="portal-cta reveal">
+  <div>
+   <div class="badge" style="background:rgba(123,168,255,.15);color:#7BA8FF;margin-bottom:14px">Portal de residentes</div>
+   <h2>Tu condominio, <em>digitalizado</em><br>desde hoy.</h2>
+   <p>Cada residente tiene acceso a su estado de cuenta, puede pagar en línea con Mercado Pago, reportar incidencias y descargar documentos. Todo desde el celular.</p>
   </div>
+  <div class="portal-cta-right">
+   <a href="/portal" class="btn btn-white">Entrar al portal →</a>
+   <a href="#contacto" class="btn" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)">Solicitar acceso</a>
+  </div>
+ </div>
 </div>
 
 <!-- RENTA VACACIONAL -->
 <section class="section" id="renta-vacacional">
-  <div class="container">
-    <div class="badge badge-green">Servicio add-on · Solo para clientes Echo</div>
-    <h2>¿Tu depto en Airbnb?<br><span style="color:var(--blue)">Nosotros lo gestionamos todo.</span></h2>
-    <p class="lead">Si eres propietario e inversionista, convierte tu departamento en una fuente de ingresos sin que tengas que hacer nada. Gestión completa de renta vacacional + alianzas exclusivas para tus huéspedes.</p>
+ <div class="container">
+  <div class="badge badge-green">Servicio add-on · Solo para clientes Echo</div>
+  <h2>¿Tu depto en Airbnb?<br><span style="color:var(--blue)">Nosotros lo gestionamos todo.</span></h2>
+  <p class="lead">Si eres propietario e inversionista, convierte tu departamento en una fuente de ingresos sin que tengas que hacer nada. Gestión completa de renta vacacional + alianzas exclusivas para tus huéspedes.</p>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:52px" class="reveal">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:52px" class="reveal">
 
-      <!-- GESTIÓN COMPLETA -->
-      <div style="background:var(--ink);border-radius:18px;padding:40px;color:var(--white)">
-        <div style="width:48px;height:48px;background:rgba(255,255,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px">🏠</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px">Gestión vacacional</div>
-        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;color:var(--white);margin-bottom:10px">Gestión completa de tu Airbnb o Booking</h3>
-        <p style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:24px">Nos encargamos de todo para que tú solo recibas el dinero. Desde las fotos hasta el check-out.</p>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
-            <span style="font-size:16px">📸</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--white)">Fotografía profesional</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5)">Fotos que maximizan las reservas</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
-            <span style="font-size:16px">📱</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--white)">Publicación y gestión en Airbnb, Booking y VRBO</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5)">Precios dinámicos según temporada</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
-            <span style="font-size:16px">🗝️</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--white)">Check-in y check-out de huéspedes</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5)">Atención 24/7 a huéspedes</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
-            <span style="font-size:16px">🧹</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--white)">Limpieza y preparación entre reservas</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5)">Toallas, amenidades y arreglo del depto</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
-            <span style="font-size:16px">💰</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--white)">Reporte mensual de ingresos</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5)">Transferencia directa a tu cuenta</div>
-            </div>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-top:20px;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:13px;color:rgba(255,255,255,.6)">Comisión por gestión</span>
-          <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;color:var(--white)">15–20% de ingresos</span>
-        </div>
-      </div>
-
-      <!-- ALIANZAS -->
-      <div style="background:var(--blue);border-radius:18px;padding:40px;color:var(--white)">
-        <div style="width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px">🤝</div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:10px">Alianzas locales · Próximamente</div>
-        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;color:var(--white);margin-bottom:10px">Beneficios exclusivos para tus huéspedes</h3>
-        <p style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:24px">Tus huéspedes llegan a Tulum y reciben una guía de beneficios exclusivos con negocios locales aliados de Echo.</p>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-          <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;margin-bottom:6px">🍽️</div>
-            <div style="font-size:12px;font-weight:600;color:var(--white)">Restaurantes</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Descuentos exclusivos</div>
-          </div>
-          <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;margin-bottom:6px">🤿</div>
-            <div style="font-size:12px;font-weight:600;color:var(--white)">Tours y cenotes</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Paquetes preferentes</div>
-          </div>
-          <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;margin-bottom:6px">🚗</div>
-            <div style="font-size:12px;font-weight:600;color:var(--white)">Transporte</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Traslados aeropuerto</div>
-          </div>
-          <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
-            <div style="font-size:28px;margin-bottom:6px">🛍️</div>
-            <div style="font-size:12px;font-weight:600;color:var(--white)">Tiendas y spas</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Experiencia premium</div>
-          </div>
-        </div>
-
-        <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:14px">
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:6px">¿Tienes un negocio en Tulum?</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.6">Estamos formando nuestra red de aliados. Si quieres aparecer en nuestra guía de huéspedes, <a href="#contacto" style="color:var(--white);font-weight:600;text-decoration:underline">contáctanos</a>.</div>
-        </div>
-
-        <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:13px;color:rgba(255,255,255,.6)">Costo para el propietario</span>
-          <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;color:var(--white)">Incluido</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA RENTA -->
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:32px;margin-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px" class="reveal">
+   <!-- GESTIÓN COMPLETA -->
+   <div style="background:var(--ink);border-radius:18px;padding:40px;color:var(--white)">
+    <div style="width:48px;height:48px;background:rgba(255,255,255,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px">🏠</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px">Gestión vacacional</div>
+    <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;color:var(--white);margin-bottom:10px">Gestión completa de tu Airbnb o Booking</h3>
+    <p style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:24px">Nos encargamos de todo para que tú solo recibas el dinero. Desde las fotos hasta el check-out.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
+      <span style="font-size:16px">📸</span>
       <div>
-        <div style="font-size:16px;font-weight:700;color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;margin-bottom:4px">¿Tu depto puede generar ingresos mientras no lo usas?</div>
-        <div style="font-size:14px;color:var(--muted)">Disponible solo para propietarios con contrato de administración Echo. Sin exclusividad.</div>
+       <div style="font-size:13px;font-weight:600;color:var(--white)">Fotografía profesional</div>
+       <div style="font-size:12px;color:rgba(255,255,255,.5)">Fotos que maximizan las reservas</div>
       </div>
-      <a href="#contacto" class="btn btn-primary">Quiero rentar mi depto →</a>
+     </div>
+     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
+      <span style="font-size:16px">📱</span>
+      <div>
+       <div style="font-size:13px;font-weight:600;color:var(--white)">Publicación y gestión en Airbnb, Booking y VRBO</div>
+       <div style="font-size:12px;color:rgba(255,255,255,.5)">Precios dinámicos según temporada</div>
+      </div>
+     </div>
+     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
+      <span style="font-size:16px">🗝️</span>
+      <div>
+       <div style="font-size:13px;font-weight:600;color:var(--white)">Check-in y check-out de huéspedes</div>
+       <div style="font-size:12px;color:rgba(255,255,255,.5)">Atención 24/7 a huéspedes</div>
+      </div>
+     </div>
+     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
+      <span style="font-size:16px">🧹</span>
+      <div>
+       <div style="font-size:13px;font-weight:600;color:var(--white)">Limpieza y preparación entre reservas</div>
+       <div style="font-size:12px;color:rgba(255,255,255,.5)">Toallas, amenidades y arreglo del depto</div>
+      </div>
+     </div>
+     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px">
+      <span style="font-size:16px">💰</span>
+      <div>
+       <div style="font-size:13px;font-weight:600;color:var(--white)">Reporte mensual de ingresos</div>
+       <div style="font-size:12px;color:rgba(255,255,255,.5)">Transferencia directa a tu cuenta</div>
+      </div>
+     </div>
+    </div>
+    <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+     <span style="font-size:13px;color:rgba(255,255,255,.6)">Comisión por gestión</span>
+     <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;color:var(--white)">15–20% de ingresos</span>
+    </div>
+   </div>
+
+   <!-- ALIANZAS -->
+   <div style="background:var(--blue);border-radius:18px;padding:40px;color:var(--white)">
+    <div style="width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px">🤝</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:10px">Alianzas locales · Próximamente</div>
+    <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;color:var(--white);margin-bottom:10px">Beneficios exclusivos para tus huéspedes</h3>
+    <p style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:24px">Tus huéspedes llegan a Tulum y reciben una guía de beneficios exclusivos con negocios locales aliados de Echo.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+     <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:6px">🍽️</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Restaurantes</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Descuentos exclusivos</div>
+     </div>
+     <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:6px">🤿</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Tours y cenotes</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Paquetes preferentes</div>
+     </div>
+     <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:6px">🚗</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Transporte</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Traslados aeropuerto</div>
+     </div>
+     <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:6px">🛍️</div>
+      <div style="font-size:12px;font-weight:600;color:var(--white)">Tiendas y spas</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Experiencia premium</div>
+     </div>
     </div>
 
+    <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:14px">
+     <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:6px">¿Tienes un negocio en Tulum?</div>
+     <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.6">Estamos formando nuestra red de aliados. Si quieres aparecer en nuestra guía de huéspedes, <a href="#contacto" style="color:var(--white);font-weight:600;text-decoration:underline">contáctanos</a>.</div>
+    </div>
+
+    <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+     <span style="font-size:13px;color:rgba(255,255,255,.6)">Costo para el propietario</span>
+     <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;color:var(--white)">Incluido</span>
+    </div>
+   </div>
   </div>
+
+  <!-- CTA RENTA -->
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:32px;margin-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px" class="reveal">
+   <div>
+    <div style="font-size:16px;font-weight:700;color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;margin-bottom:4px">¿Tu depto puede generar ingresos mientras no lo usas?</div>
+    <div style="font-size:14px;color:var(--muted)">Disponible solo para propietarios con contrato de administración Echo. Sin exclusividad.</div>
+   </div>
+   <a href="#contacto" class="btn btn-primary">Quiero rentar mi depto →</a>
+  </div>
+
+ </div>
 </section>
 
 <!-- PRECIOS -->
 <section class="section section-alt" id="precios">
-  <div class="container">
-    <div class="badge badge-blue">Precios transparentes</div>
-    <h2>Sin costos ocultos.<br>Sin sorpresas al final del mes.</h2>
-    <p class="lead">Cuota mensual fija + comisión solo si recuperamos cartera vencida. Nuestros incentivos son los tuyos.</p>
-    <div class="pricing-grid reveal">
-      <div class="price-card">
-        <div class="price-name">Básico</div>
-        <div class="price-amount"><sup>$</sup>75,000</div>
-        <div class="price-period">+ IVA / mes · hasta 100 unidades</div>
-        <div class="price-divider"></div>
-        <ul class="price-features">
-          <li>Administración y contabilidad</li>
-          <li>Portal de residentes</li>
-          <li>Cobranza preventiva (etapa A)</li>
-          <li class="no">Declaraciones SAT mensuales</li>
-          <li class="no">Vigilancia 24hrs</li>
-          <li class="no">Mantenimiento incluido</li>
-        </ul>
-        <a href="#contacto" class="btn btn-outline" style="width:100%;justify-content:center">Solicitar info</a>
-      </div>
-      <div class="price-card featured">
-        <div class="price-name">Integral</div>
-        <div class="price-amount"><sup>$</sup>106,900</div>
-        <div class="price-period">MXN / mes · hasta 320 unidades</div>
-        <div class="price-divider"></div>
-        <ul class="price-features">
-          <li>Administración y contabilidad</li>
-          <li>Declaraciones SAT mensuales</li>
-          <li>Portal de residentes completo</li>
-          <li>Cobranza activa 3 etapas</li>
-          <li>Vigilancia 24hrs (2 guardias REPSE)</li>
-          <li>Mantenimiento + limpieza</li>
-        </ul>
-        <a href="#contacto" class="btn btn-primary" style="width:100%;justify-content:center">Solicitar propuesta →</a>
-      </div>
-      <div class="price-card">
-        <div class="price-name">Empresa</div>
-        <div class="price-amount" style="font-size:28px">A la<br>medida</div>
-        <div class="price-period">+300 unidades o multi-condominio</div>
-        <div class="price-divider"></div>
-        <ul class="price-features">
-          <li>Todo lo del plan Integral</li>
-          <li>Dashboard multi-condominio</li>
-          <li>Bot de WhatsApp Business</li>
-          <li>Integraciones personalizadas</li>
-          <li>Gerente de cuenta dedicado</li>
-          <li>Soporte 24/7</li>
-        </ul>
-        <a href="#contacto" class="btn btn-outline" style="width:100%;justify-content:center">Hablar con ventas</a>
-      </div>
-    </div>
+ <div class="container">
+  <div class="badge badge-blue">Precios transparentes</div>
+  <h2>Sin costos ocultos.<br>Sin sorpresas al final del mes.</h2>
+  <p class="lead">Cuota mensual fija + comisión solo si recuperamos cartera vencida. Nuestros incentivos son los tuyos.</p>
+  <div class="pricing-grid reveal">
+   <div class="price-card">
+    <div class="price-name">Básico</div>
+    <div class="price-amount"><sup>$</sup>70,000</div>
+    <div class="price-period">+ IVA / mes · hasta 100 unidades</div>
+    <div class="price-divider"></div>
+    <ul class="price-features">
+     <li>Administración y contabilidad</li>
+     <li>Portal de residentes</li>
+     <li>Cobranza preventiva (etapa A)</li>
+     <li class="no">Declaraciones SAT mensuales</li>
+     <li class="no">Vigilancia 24hrs</li>
+     <li class="no">Mantenimiento incluido</li>
+    </ul>
+    <a href="#contacto" class="btn btn-outline" style="width:100%;justify-content:center">Solicitar info</a>
+   </div>
+   <div class="price-card featured">
+    <div class="price-name">Integral</div>
+    <div class="price-amount"><sup>$</sup>106,900</div>
+    <div class="price-period">MXN / mes · hasta 320 unidades</div>
+    <div class="price-divider"></div>
+    <ul class="price-features">
+     <li>Administración y contabilidad</li>
+     <li>Declaraciones SAT mensuales</li>
+     <li>Portal de residentes completo</li>
+     <li>Cobranza activa 3 etapas</li>
+     <li>Vigilancia 24hrs (2 guardias )</li>
+     <li>Mantenimiento + limpieza</li>
+    </ul>
+    <a href="#contacto" class="btn btn-primary" style="width:100%;justify-content:center">Solicitar propuesta →</a>
+   </div>
+   <div class="price-card">
+    <div class="price-name">Empresa</div>
+    <div class="price-amount" style="font-size:28px">A la<br>medida</div>
+    <div class="price-period">+300 unidades o multi-condominio</div>
+    <div class="price-divider"></div>
+    <ul class="price-features">
+     <li>Todo lo del plan Integral</li>
+     <li>Dashboard multi-condominio</li>
+     <li>Bot de WhatsApp Business</li>
+     <li>Integraciones personalizadas</li>
+     <li>Gerente de cuenta dedicado</li>
+     <li>Soporte 24/7</li>
+    </ul>
+    <a href="#contacto" class="btn btn-outline" style="width:100%;justify-content:center">Hablar con ventas</a>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- TESTIMONIOS -->
 <section class="section">
-  <div class="container">
-    <div class="badge badge-green">Lo que dicen nuestros condominios</div>
-    <h2>Condominios que eliminaron<br>su déficit con nosotros.</h2>
-    <div class="testi-grid reveal">
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"En 45 días bajamos la morosidad del 60% al 22%. El portal de residentes hizo toda la diferencia — ahora los condóminos pagan desde el celular."</p>
-        <div class="testi-author"><div class="testi-avatar">CR</div><div><div class="testi-name">Comité Samsara</div><div class="testi-condo">Samsara · Tulum · 120 unidades</div></div></div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"Por fin una administración que conoce la ley. La Constancia de No Adeudo fue clave para que los morosos más duros liquidaran sus adeudos."</p>
-        <div class="testi-author"><div class="testi-avatar">MR</div><div><div class="testi-name">Comité Giada Tower</div><div class="testi-condo">Giada Tower · Tulum · 80 unidades</div></div></div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"Los reportes mensuales son muy claros. El Comité de Vigilancia puede ver en tiempo real a dónde va cada peso. Eso genera mucha confianza."</p>
-        <div class="testi-author"><div class="testi-avatar">LV</div><div><div class="testi-name">Comité Aflora</div><div class="testi-condo">Aflora · Tulum · 95 unidades</div></div></div>
-      </div>
-    </div>
+ <div class="container">
+  <div class="badge badge-green">Lo que dicen nuestros condominios</div>
+  <h2>Condominios que eliminaron<br>su déficit con nosotros.</h2>
+  <div class="testi-grid reveal">
+   <div class="testi-card">
+    <div class="testi-stars">★★★★★</div>
+    <p class="testi-text">"En 45 días bajamos la morosidad del 60% al 22%. El portal de residentes hizo toda la diferencia — ahora los condóminos pagan desde el celular."</p>
+    <div class="testi-author"><div class="testi-avatar">CR</div><div><div class="testi-name">Comité Samsara</div><div class="testi-condo">Samsara · Tulum · 120 unidades</div></div></div>
+   </div>
+   <div class="testi-card">
+    <div class="testi-stars">★★★★★</div>
+    <p class="testi-text">"Por fin una administración que conoce la ley. La Constancia de No Adeudo fue clave para que los morosos más duros liquidaran sus adeudos."</p>
+    <div class="testi-author"><div class="testi-avatar">MR</div><div><div class="testi-name">Comité Giada Tower</div><div class="testi-condo">Giada Tower · Tulum · 80 unidades</div></div></div>
+   </div>
+   <div class="testi-card">
+    <div class="testi-stars">★★★★★</div>
+    <p class="testi-text">"Los reportes mensuales son muy claros. El Comité de Vigilancia puede ver en tiempo real a dónde va cada peso. Eso genera mucha confianza."</p>
+    <div class="testi-author"><div class="testi-avatar">LV</div><div><div class="testi-name">Comité Aflora</div><div class="testi-condo">Aflora · Tulum · 95 unidades</div></div></div>
+   </div>
   </div>
+ </div>
 </section>
 
 
 
-<!-- CONVENIOS -->
-<section class="section" id="convenios">
+<!-- CONVENIOS TEASER -->
+<section class="section section-alt" id="convenios">
   <div class="container">
     <div class="badge badge-green">Beneficios exclusivos</div>
-    <h2>Convenios para residentes<br><span style="color:var(--blue)">y sus huéspedes.</span></h2>
-    <p class="lead">Como residente Echo tienes acceso a descuentos y beneficios exclusivos con los mejores negocios de Tulum. Muestra tu portal para activarlos.</p>
-
-    <!-- RESTAURANTES Y VIDA NOCTURNA -->
-    <div style="margin-top:52px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <div style="width:36px;height:36px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🍽️</div>
-        <h3 style="font-size:18px;color:var(--ink)">Restaurantes y vida nocturna</h3>
+    <h2>Convenios para residentes<br><span style="color:var(--blue)">en toda la República.</span></h2>
+    <p class="lead">Como residente Echo tienes acceso a descuentos y beneficios exclusivos con los mejores negocios locales. Casa Tortuga, Mia, Bagatelle y más.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px;margin-bottom:40px" class="reveal">
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🍽️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Restaurantes</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Descuentos exclusivos</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" class="reveal">
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(24,71,204,.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
-          <div style="font-size:32px;margin-bottom:12px">🐢</div>
-          <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;font-family:'Bricolage Grotesque',sans-serif">Casa Tortuga</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Restaurante & beach club en el corazón de Tulum. Descuento exclusivo para residentes Echo.</div>
-          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px">✓ Convenio activo</div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(24,71,204,.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
-          <div style="font-size:32px;margin-bottom:12px">🌺</div>
-          <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;font-family:'Bricolage Grotesque',sans-serif">Mia</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Experiencia gastronómica única en Tulum. Beneficios especiales para la comunidad Echo.</div>
-          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px">✓ Convenio activo</div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(24,71,204,.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
-          <div style="font-size:32px;margin-bottom:12px">🥂</div>
-          <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;font-family:'Bricolage Grotesque',sans-serif">Bagatelle</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">El restaurante más exclusivo de Tulum. Reservaciones preferenciales y beneficios VIP para residentes.</div>
-          <div style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px">✓ Convenio activo</div>
-        </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🤿</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Tours y cenotes</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">15% off en tours</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🎉</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Fiestas y eventos</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Acceso preferencial</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">🚗</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Transporte</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Traslados preferenciales</div>
       </div>
     </div>
+    <div style="text-align:center">
+      <a href="/convenios" class="btn btn-primary" style="font-size:15px;padding:14px 32px">Ver todos los convenios por estado →</a>
+    </div>
+  </div>
+</section>
 
-    <!-- FIESTAS Y EVENTOS -->
-    <div style="margin-top:40px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <div style="width:36px;height:36px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🎉</div>
-        <h3 style="font-size:18px;color:var(--ink)">Fiestas y eventos</h3>
-        <div style="font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-light);padding:3px 10px;border-radius:100px;letter-spacing:.06em">SE ACTUALIZA CONSTANTEMENTE</div>
+<!-- ALIADOS -->
+<section class="section section-alt">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:32px">
+      <div class="badge badge-blue">Aliados comerciales</div>
+      <h2 style="font-size:28px">Integrado con las plataformas<br>que ya usas.</h2>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap" class="reveal">
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">🟡</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">OXXO</div>
+        <div style="font-size:11px;color:var(--muted)">Pagos en efectivo</div>
       </div>
-      <div style="background:linear-gradient(135deg,var(--ink),#1a2740);border-radius:16px;padding:32px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px" class="reveal">
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">🌙</div>
-          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Fiestas de luna llena</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px">Acceso preferencial en los mejores venues de Tulum</div>
-          <div style="font-size:11px;font-weight:700;color:#F59E0B;background:rgba(245,158,11,.1);padding:3px 10px;border-radius:100px">Próximo evento</div>
-        </div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">🎵</div>
-          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Festivales y conciertos</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px">Preventa exclusiva y descuentos para la comunidad Echo</div>
-          <div style="font-size:11px;font-weight:700;color:#F59E0B;background:rgba(245,158,11,.1);padding:3px 10px;border-radius:100px">Temporada 2026</div>
-        </div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;text-align:center">
-          <div style="font-size:28px;margin-bottom:10px">🏖️</div>
-          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Beach parties</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px">Acceso y consumo mínimo preferencial en beach clubs aliados</div>
-          <div style="font-size:11px;font-weight:700;color:#F59E0B;background:rgba(245,158,11,.1);padding:3px 10px;border-radius:100px">Ver agenda</div>
-        </div>
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">🟢</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Mercado Pago</div>
+        <div style="font-size:11px;color:var(--muted)">Pagos en línea</div>
+      </div>
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">🏛️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">SAT / CFDI</div>
+        <div style="font-size:11px;color:var(--muted)">Facturación electrónica</div>
+      </div>
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">🛍️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Mercado Libre</div>
+        <div style="font-size:11px;color:var(--muted)">Marketplace aliado</div>
+      </div>
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">💬</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">WhatsApp</div>
+        <div style="font-size:11px;color:var(--muted)">Notificaciones</div>
+      </div>
+      <div style="text-align:center;opacity:.7;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+        <div style="width:80px;height:80px;background:var(--white);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px">🏠</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">Airbnb</div>
+        <div style="font-size:11px;color:var(--muted)">Gestión vacacional</div>
       </div>
     </div>
-
-    <!-- OTROS CONVENIOS -->
-    <div style="margin-top:40px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <div style="width:36px;height:36px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🤝</div>
-        <h3 style="font-size:18px;color:var(--ink)">Más beneficios</h3>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" class="reveal">
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;align-items:center;gap:14px">
-          <div style="font-size:28px;flex-shrink:0">🤿</div>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">Tours y cenotes</div>
-            <div style="font-size:12px;color:var(--muted)">15% descuento en tours seleccionados</div>
-            <div style="font-size:11px;font-weight:600;color:var(--green);margin-top:6px">✓ Activo</div>
-          </div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;align-items:center;gap:14px">
-          <div style="font-size:28px;flex-shrink:0">🚗</div>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">Transporte y traslados</div>
-            <div style="font-size:12px;color:var(--muted)">Tarifa preferente aeropuerto Cancún</div>
-            <div style="font-size:11px;font-weight:600;color:var(--green);margin-top:6px">✓ Activo</div>
-          </div>
-        </div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;align-items:center;gap:14px">
-          <div style="font-size:28px;flex-shrink:0">🏋️</div>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">Gimnasios y yoga</div>
-            <div style="font-size:12px;color:var(--muted)">Membresías con descuento para residentes</div>
-            <div style="font-size:11px;font-weight:600;color:#F59E0B;margin-top:6px">⏳ Próximamente</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA CONVENIOS -->
-    <div style="background:var(--blue-light);border:1px solid rgba(24,71,204,.15);border-radius:16px;padding:28px;margin-top:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px" class="reveal">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;margin-bottom:4px">¿Tienes un negocio en Tulum?</div>
-        <div style="font-size:13px;color:var(--muted)">Únete a nuestra red de aliados y llega a cientos de residentes y huéspedes mensualmente.</div>
-      </div>
-      <a href="#contacto" class="btn btn-primary">Quiero ser aliado →</a>
-    </div>
-
   </div>
 </section>
 
 <!-- CTA BAND -->
 <section class="cta-band">
-  <div class="container">
-    <div class="cta-inner">
-      <div class="badge" style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);margin-bottom:20px;display:inline-flex">¿Listo para empezar?</div>
-      <h2>Elimina el déficit de<br>tu condominio hoy.</h2>
-      <p>Diagnóstico gratuito en 24 horas. Sin compromisos. Te decimos exactamente cuánto puedes recuperar.</p>
-      <div class="cta-btns">
-        <a href="https://wa.me/529981234567" class="btn btn-white">📲 WhatsApp directo</a>
-        <a href="#contacto" class="btn" style="background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.3)">Formulario de contacto</a>
-      </div>
-    </div>
+ <div class="container">
+  <div class="cta-inner">
+   <div class="badge" style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);margin-bottom:20px;display:inline-flex">¿Listo para empezar?</div>
+   <h2>Elimina el déficit de<br>tu condominio hoy.</h2>
+   <p>Diagnóstico gratuito en 24 horas. Sin compromisos. Te decimos exactamente cuánto puedes recuperar.</p>
+   <div class="cta-btns">
+    <a href="https://wa.me/529981234567" class="btn btn-white">📲 WhatsApp directo</a>
+    <a href="#contacto" class="btn" style="background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.3)">Formulario de contacto</a>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- CONTACTO -->
 <section class="section" id="contacto">
-  <div class="container">
-    <div class="badge badge-blue">Contacto</div>
-    <h2>Hablemos sobre<br>tu condominio.</h2>
-    <p class="lead">Sin compromisos. Te preparamos una propuesta con números reales en menos de 24 horas.</p>
-    <div class="contact-wrap reveal">
-      <div>
-        <h3 style="margin-bottom:12px">Canales directos</h3>
-        <p style="font-size:15px;color:var(--muted);margin-bottom:24px;line-height:1.7">Respondemos en menos de 2 horas en días hábiles.</p>
-        <a href="https://wa.me/529981234567" class="ch"><span class="ch-ico">📲</span><div><div class="ch-lbl">WhatsApp</div><div class="ch-val">+52 998 123 4567</div></div></a>
-        <a href="mailto:echoadministrationmx@gmail.com" class="ch"><span class="ch-ico">✉️</span><div><div class="ch-lbl">Correo</div><div class="ch-val">echoadministrationmx@gmail.com</div></div></a>
-        <a href="#" class="ch"><span class="ch-ico">📍</span><div><div class="ch-lbl">Sede principal</div><div class="ch-val">Tulum, Quintana Roo · México</div></div></a>
-      </div>
-      <div class="cf">
-        <div class="fr2">
-          <div class="fr"><label>Nombre</label><input type="text" placeholder="Tu nombre completo"></div>
-          <div class="fr"><label>WhatsApp</label><input type="tel" placeholder="+52 000 000 0000"></div>
-        </div>
-        <div class="fr"><label>Correo electrónico</label><input type="email" placeholder="correo@ejemplo.com"></div>
-        <div class="fr2">
-          <div class="fr"><label>¿Cuántas unidades?</label><select><option value="">Selecciona</option><option>Menos de 50</option><option>50 – 150</option><option>150 – 300</option><option>Más de 300</option></select></div>
-          <div class="fr"><label>Estado</label><select><option value="">Selecciona</option><option>Quintana Roo</option><option>CDMX</option><option>Jalisco</option><option>Nuevo León</option><option>Otro</option></select></div>
-        </div>
-        <div class="fr"><label>¿Cuál es tu principal problema?</label><textarea placeholder="Morosidad alta, déficit mensual, falta de transparencia..."></textarea></div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="alert('¡Gracias! Te contactamos en menos de 24 horas.')">Solicitar diagnóstico gratuito →</button>
-      </div>
+ <div class="container">
+  <div class="badge badge-blue">Contacto</div>
+  <h2>Hablemos sobre<br>tu condominio.</h2>
+  <p class="lead">Sin compromisos. Te preparamos una propuesta con números reales en menos de 24 horas.</p>
+  <div class="contact-wrap reveal">
+   <div>
+    <h3 style="margin-bottom:12px">Canales directos</h3>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:24px;line-height:1.7">Respondemos en menos de 2 horas en días hábiles.</p>
+    <a href="https://wa.me/529981234567" class="ch"><span class="ch-ico">📲</span><div><div class="ch-lbl">WhatsApp</div><div class="ch-val">+52 998 123 4567</div></div></a>
+    <a href="mailto:echoadministrationmx@gmail.com" class="ch"><span class="ch-ico">✉️</span><div><div class="ch-lbl">Correo</div><div class="ch-val">echoadministrationmx@gmail.com</div></div></a>
+    <a href="#" class="ch"><span class="ch-ico">📍</span><div><div class="ch-lbl">Sede principal</div><div class="ch-val">Tulum, Quintana Roo · México</div></div></a>
+   </div>
+   <div class="cf">
+    <div class="fr2">
+     <div class="fr"><label>Nombre</label><input type="text" placeholder="Tu nombre completo"></div>
+     <div class="fr"><label>WhatsApp</label><input type="tel" placeholder="+52 000 000 0000"></div>
     </div>
+    <div class="fr"><label>Correo electrónico</label><input type="email" placeholder="correo@ejemplo.com"></div>
+    <div class="fr2">
+     <div class="fr"><label>¿Cuántas unidades?</label><select><option value="">Selecciona</option><option>Menos de 50</option><option>50 – 150</option><option>150 – 300</option><option>Más de 300</option></select></div>
+     <div class="fr"><label>Estado</label><select><option value="">Selecciona</option><option>Quintana Roo</option><option>CDMX</option><option>Jalisco</option><option>Nuevo León</option><option>Otro</option></select></div>
+    </div>
+    <div class="fr"><label>¿Cuál es tu principal problema?</label><textarea placeholder="Morosidad alta, déficit mensual, falta de transparencia..."></textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="alert('¡Gracias! Te contactamos en menos de 24 horas.')">Solicitar diagnóstico gratuito →</button>
+   </div>
   </div>
+ </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="container">
-    <div class="fi">
-      <div class="fb"><div class="fn">Echo <span>Administración</span></div><p>La única empresa en México que combina equipo en campo con plataforma digital propia para condominios.</p></div>
-      <div class="fc"><h4>Empresa</h4><ul><li><a href="#">Quiénes somos</a></li><li><a href="#como-funciona">Cómo funciona</a></li><li><a href="#proyectos">Proyectos</a></li><li><a href="#precios">Precios</a></li></ul></div>
-      <div class="fc"><h4>Servicios</h4><ul><li><a href="#servicios">Administración</a></li><li><a href="#servicios">Cobranza activa</a></li><li><a href="#servicios">Vigilancia</a></li><li><a href="#portal">Portal residentes</a></li></ul></div>
-      <div class="fc"><h4>Contacto</h4><ul><li><a href="https://wa.me/529981234567">WhatsApp</a></li><li><a href="mailto:echoadministrationmx@gmail.com">Email</a></li><li><a href="#contacto">Formulario</a></li></ul></div>
-    </div>
-    <div class="fbot">
-      <p>© 2026 Echo Administración · Tulum, Quintana Roo · México</p>
-      <div class="fbot-links"><a href="/privacidad">Aviso de privacidad</a><a href="/terminos">Términos y condiciones</a></div>
-    </div>
+ <div class="container">
+  <div class="fi">
+   <div class="fb"><div class="fn">Echo <span>Administración</span></div><p>La única empresa en México que combina equipo en campo con plataforma digital propia para condominios.</p></div>
+   <div class="fc"><h4>Empresa</h4><ul><li><a href="#">Quiénes somos</a></li><li><a href="#como-funciona">Cómo funciona</a></li><li><a href="#proyectos">Proyectos</a></li><li><a href="#precios">Precios</a></li></ul></div>
+   <div class="fc"><h4>Servicios</h4><ul><li><a href="#servicios">Administración</a></li><li><a href="#servicios">Cobranza activa</a></li><li><a href="#servicios">Vigilancia</a></li><li><a href="#portal">Portal residentes</a></li></ul></div>
+   <div class="fc"><h4>Contacto</h4><ul><li><a href="https://wa.me/529981234567">WhatsApp</a></li><li><a href="mailto:echoadministrationmx@gmail.com">Email</a></li><li><a href="#contacto">Formulario</a></li></ul></div>
   </div>
+  <div class="fbot">
+   <p>© 2026 Echo Administración · Tulum, Quintana Roo · México</p>
+   <div class="fbot-links"><a href="/privacidad">Aviso de privacidad</a><a href="/terminos">Términos y condiciones</a></div>
+  </div>
+ </div>
 </footer>
 
 <script>
