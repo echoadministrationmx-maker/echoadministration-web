@@ -1,9 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/portal", "destination": "/portal.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/privacidad", "destination": "/privacidad.html" },
-    { "source": "/terminos", "destination": "/terminos.html" }
+    { "source": "/portal", "destination": "/portal/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/convenios", "destination": "/convenios/index.html" },
+    { "source": "/privacidad", "destination": "/privacidad/index.html" },
+    { "source": "/terminos", "destination": "/terminos/index.html" }
   ]
 }
