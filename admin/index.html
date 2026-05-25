@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Admin — Echo Administración</title>
+<title>Echo Admin — Panel de Administración</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
@@ -14,96 +14,104 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 /* LOGIN */
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1923,#1847CC);padding:24px}
 .login-box{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+.ll{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
 .lm{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
 .lm svg{width:20px;height:20px}
 .ln{font-size:17px;font-weight:800;color:var(--ink)}.ln span{color:var(--blue)}
 .login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
 .login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
-.admin-badge{background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;display:inline-block;margin-bottom:20px;width:100%;text-align:center}
+.admin-badge{background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;padding:5px 14px;border-radius:100px;display:inline-block;margin-bottom:20px;width:100%;text-align:center}
 .fg{margin-bottom:16px}
 .fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
 .fg input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(24,71,204,.08)}
 .btn-login{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
-.btn-login:disabled{opacity:.6;cursor:not-allowed}
 .login-error{background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
 
-/* ADMIN PANEL */
+/* LAYOUT */
 #admin{min-height:100vh;display:grid;grid-template-columns:220px 1fr}
-.sidebar{background:var(--ink);display:flex;flex-direction:column}
+.sidebar{background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
 .sb-logo{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
 .sb-lm{width:26px;height:26px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center}
 .sb-lm svg{width:14px;height:14px}
 .sb-ln{font-size:13px;font-weight:700;color:#fff}.sb-ln span{color:#7BA8FF}
 .sb-proj{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
-.sb-proj-label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.sb-proj-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
 .sb-proj-name{font-size:13px;font-weight:600;color:#fff}
-.nav{flex:1;padding:8px 0}
+.nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;transition:background .1s;position:relative}
 .nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
 .nav-item.active{color:#fff;background:rgba(26,71,204,.25)}
 .nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
-.nav-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25)}
 .sb-bottom{padding:14px 20px;border-top:1px solid rgba(255,255,255,.07)}
 .btn-out{background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;font-family:inherit;padding:0}
 
-.main{display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.main{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10}
 .topbar-title{font-size:15px;font-weight:700;color:var(--ink)}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .tb-badge{background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+
 .content{padding:20px;overflow-y:auto;flex:1}
 .page{display:none}.page.active{display:block}
 
 /* COMPONENTS */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
+.kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.kpi.blue::before{background:var(--blue)}.kpi.green::before{background:var(--green)}.kpi.coral::before{background:var(--coral)}.kpi.yellow::before{background:var(--yellow)}
-.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.kpi-val{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-bottom:4px}
+.kpi.blue::before{background:var(--blue)}.kpi.green::before{background:var(--green)}
+.kpi.coral::before{background:var(--coral)}.kpi.yellow::before{background:var(--yellow)}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-bottom:3px}
 .kpi-val.coral{color:var(--coral)}.kpi-val.green{color:var(--green)}.kpi-val.blue{color:var(--blue)}
 .kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-sub.up{color:var(--green)}.kpi-sub.down{color:var(--coral)}
 
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .grid-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .card-title{font-size:14px;font-weight:700;color:var(--ink)}
-.card-link{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:inherit}
+.card-link{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500}
 
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:10px;color:var(--muted);font-weight:700;padding:8px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em}
-.tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+.tbl th{font-size:10px;color:var(--muted);font-weight:700;padding:8px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--bg)}
-.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600}
+.tbl tr:hover td{background:#fafafa}
+.tbl-scroll{overflow-x:auto}
+
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600;white-space:nowrap}
 .badge.paid{background:var(--green-light);color:var(--green)}
 .badge.pending{background:var(--yellow-light);color:var(--yellow)}
 .badge.overdue{background:var(--coral-light);color:var(--coral)}
+.badge.blue{background:var(--blue-light);color:var(--blue)}
 
-/* MAPA */
-.mapa-wrap{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:16px}
-.depto-cell{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;transition:transform .1s;border:1px solid transparent}
-.depto-cell:hover{transform:scale(1.1);z-index:2;position:relative}
-.depto-cell.pagado{background:var(--green-light);color:var(--green);border-color:rgba(5,150,105,.2)}
-.depto-cell.pendiente{background:var(--coral-light);color:var(--coral);border-color:rgba(220,38,38,.2)}
-.depto-cell.parcial{background:var(--yellow-light);color:var(--yellow);border-color:rgba(217,119,6,.2)}
-.depto-cell.vacio{background:var(--bg);color:var(--muted);border-color:var(--border)}
-.mapa-legend{display:flex;gap:16px;margin-bottom:14px}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-.leg-dot{width:10px;height:10px;border-radius:3px}
-
-/* BARRA PROGRESO */
-.prog-bar{height:8px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:6px}
+.prog-bar{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:5px}
 .prog-fill{height:100%;border-radius:100px;transition:width 1s ease}
 .prog-fill.green{background:var(--green)}.prog-fill.coral{background:var(--coral)}.prog-fill.blue{background:var(--blue)}
 
-.loading{text-align:center;padding:48px;color:var(--muted);font-size:14px}
-.search-box{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;color:var(--body);outline:none;width:220px}
+.search-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search-box{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;color:var(--body);outline:none;min-width:200px}
 .search-box:focus{border-color:var(--blue)}
+.filter-select{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--body);outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--blue)}
+
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.stat-chip{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;flex:1;min-width:100px}
+.stat-chip-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.stat-chip-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+.loading{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+.empty-row td{text-align:center;color:var(--muted);padding:32px!important;font-style:italic}
+
+/* Cartera detail panel */
+.detail-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:8px;width:fit-content;margin-bottom:16px}
+.detail-tab{font-size:13px;font-weight:500;color:var(--muted);padding:6px 16px;border-radius:6px;cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .15s}
+.detail-tab.active{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
@@ -111,16 +119,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">
+    <div class="ll">
       <div class="lm"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-      <span class="ln">Echo <span>Administración</span></span>
+      <span class="ln">Echo <span>Admin</span></span>
     </div>
     <div class="admin-badge">🔐 Panel de Administración</div>
     <h2>Acceso restringido</h2>
     <p class="login-sub">Manzana 80 · Echo Administración</p>
-    <div class="fg"><label>Usuario</label><input type="text" id="a-user" placeholder="admin"></div>
+    <div class="fg"><label>Usuario</label><input type="text" id="a-user" placeholder="echoadmin"></div>
     <div class="fg"><label>Contraseña</label><input type="password" id="a-pass" placeholder="••••••••"></div>
-    <button class="btn-login" id="a-btn" onclick="adminLogin()">Entrar al panel →</button>
+    <button class="btn-login" onclick="adminLogin()">Entrar al panel →</button>
     <div class="login-error" id="a-err">Usuario o contraseña incorrectos.</div>
   </div>
 </div>
@@ -132,21 +140,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div class="sb-lm"><svg viewBox="0 0 20 20" fill="none" width="14" height="14"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
       <span class="sb-ln">Echo <span>Admin</span></span>
     </div>
-    <div class="sb-proj">
-      <div class="sb-proj-label">Condominio activo</div>
-      <div class="sb-proj-name">Manzana 80</div>
-    </div>
+    <div class="sb-proj"><div class="sb-proj-lbl">Condominio activo</div><div class="sb-proj-name">Manzana 80</div></div>
     <div class="nav">
       <div class="nav-section">Dashboard</div>
       <button class="nav-item active" onclick="go('overview',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Resumen general
       </button>
-      <button class="nav-item" onclick="go('mapa',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
-        Mapa de pagos
-      </button>
       <div class="nav-section">Cobranza</div>
+      <button class="nav-item" onclick="go('cartera',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Cartera vencida
+      </button>
       <button class="nav-item" onclick="go('morosos',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Lista de morosos
@@ -156,53 +161,49 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         Pagos recibidos
       </button>
       <div class="nav-section">Operaciones</div>
-      <button class="nav-item" onclick="go('incidencias',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Incidencias
-      </button>
       <button class="nav-item" onclick="go('residentes',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Residentes
       </button>
+      <button class="nav-item" onclick="go('incidencias',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Incidencias
+      </button>
     </div>
-    <div class="sb-bottom">
-      <button class="btn-out" onclick="adminLogout()">← Cerrar sesión</button>
-    </div>
+    <div class="sb-bottom"><button class="btn-out" onclick="adminLogout()">← Cerrar sesión</button></div>
   </div>
 
   <div class="main">
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">Resumen general — Manzana 80</span>
-      <div class="topbar-right">
-        <span class="tb-badge" id="tb-fecha">Cargando...</span>
-      </div>
+      <div class="topbar-right"><span class="tb-badge" id="tb-fecha">Cargando...</span></div>
     </div>
     <div class="content">
 
       <!-- OVERVIEW -->
       <div class="page active" id="page-overview">
-        <div id="ov-loading" class="loading">⏳ Cargando datos del condominio...</div>
+        <div id="ov-loading" class="loading">⏳ Cargando datos...</div>
         <div id="ov-content" class="hidden">
           <div class="kpi-grid">
-            <div class="kpi blue">
+            <div class="kpi blue" onclick="go('residentes',document.querySelectorAll('.nav-item')[4])">
               <div class="kpi-label">Total departamentos</div>
               <div class="kpi-val blue" id="ov-total">320</div>
               <div class="kpi-sub">Manzana 80</div>
             </div>
-            <div class="kpi green">
+            <div class="kpi green" onclick="go('pagos',document.querySelectorAll('.nav-item')[3])">
               <div class="kpi-label">Al corriente</div>
               <div class="kpi-val green" id="ov-alcorriente">—</div>
               <div class="kpi-sub" id="ov-alcorriente-pct">—</div>
             </div>
-            <div class="kpi coral">
+            <div class="kpi coral" onclick="go('morosos',document.querySelectorAll('.nav-item')[2])">
               <div class="kpi-label">Morosos</div>
               <div class="kpi-val coral" id="ov-morosos">—</div>
               <div class="kpi-sub" id="ov-morosos-pct">—</div>
             </div>
-            <div class="kpi yellow">
-              <div class="kpi-label">Cartera vencida</div>
+            <div class="kpi yellow" onclick="go('cartera',document.querySelectorAll('.nav-item')[1])">
+              <div class="kpi-label">Cartera vencida 2026</div>
               <div class="kpi-val coral" id="ov-cartera">—</div>
-              <div class="kpi-sub">Total adeudo 2026</div>
+              <div class="kpi-sub" id="ov-cartera-hist">Histórico: —</div>
             </div>
           </div>
 
@@ -214,15 +215,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div class="card">
               <div class="card-hdr"><span class="card-title">Estado de cobranza</span></div>
               <div style="margin-bottom:14px">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Al corriente</span><span style="font-weight:600;color:var(--green)" id="prog-corriente-txt">—</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Al corriente</span><span style="font-weight:600;color:var(--green)" id="prog-corriente-txt">—</span></div>
                 <div class="prog-bar"><div class="prog-fill green" id="prog-corriente" style="width:0%"></div></div>
               </div>
               <div style="margin-bottom:14px">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Morosos</span><span style="font-weight:600;color:var(--coral)" id="prog-morosos-txt">—</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Morosos</span><span style="font-weight:600;color:var(--coral)" id="prog-morosos-txt">—</span></div>
                 <div class="prog-bar"><div class="prog-fill coral" id="prog-morosos" style="width:0%"></div></div>
               </div>
-              <div style="margin-bottom:0">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Ingresos recuperados</span><span style="font-weight:600;color:var(--blue)" id="prog-ing-txt">—</span></div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Recuperación</span><span style="font-weight:600;color:var(--blue)" id="prog-ing-txt">—</span></div>
                 <div class="prog-bar"><div class="prog-fill blue" id="prog-ing" style="width:0%"></div></div>
               </div>
             </div>
@@ -230,14 +231,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
           <div class="grid-2">
             <div class="card">
-              <div class="card-hdr"><span class="card-title">⚠️ Top morosos</span><button class="card-link" onclick="go('morosos',document.querySelectorAll('.nav-item')[2])">Ver todos →</button></div>
+              <div class="card-hdr">
+                <span class="card-title">⚠️ Top morosos — 2026 + Histórico</span>
+                <button class="card-link" onclick="go('morosos',document.querySelectorAll('.nav-item')[2])">Ver todos →</button>
+              </div>
               <table class="tbl">
-                <thead><tr><th>Residente</th><th>Depto</th><th>Adeudo</th></tr></thead>
+                <thead><tr><th>Residente</th><th>Depto</th><th>Adeudo 2026</th><th>Histórico total</th></tr></thead>
                 <tbody id="top-morosos"></tbody>
               </table>
             </div>
             <div class="card">
-              <div class="card-hdr"><span class="card-title">✅ Últimos pagos</span><button class="card-link" onclick="go('pagos',document.querySelectorAll('.nav-item')[3])">Ver todos →</button></div>
+              <div class="card-hdr">
+                <span class="card-title">✅ Últimos pagos</span>
+                <button class="card-link" onclick="go('pagos',document.querySelectorAll('.nav-item')[3])">Ver todos →</button>
+              </div>
               <table class="tbl">
                 <thead><tr><th>Residente</th><th>Depto</th><th>Mes</th></tr></thead>
                 <tbody id="ultimos-pagos"></tbody>
@@ -247,59 +254,106 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
-      <!-- MAPA -->
-      <div class="page" id="page-mapa">
-        <div class="card">
-          <div class="card-hdr"><span class="card-title">🗺️ Mapa de pagos — Mayo 2026</span>
-            <select id="mapa-mes" onchange="renderMapa()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;outline:none">
-              <option value="2026-05">Mayo 2026</option>
-              <option value="2026-04">Abril 2026</option>
-              <option value="2026-03">Marzo 2026</option>
-              <option value="2026-02">Febrero 2026</option>
-              <option value="2026-01">Enero 2026</option>
-            </select>
+      <!-- CARTERA VENCIDA -->
+      <div class="page" id="page-cartera">
+        <div id="cartera-loading" class="loading">⏳ Cargando cartera...</div>
+        <div id="cartera-content" class="hidden">
+          <div class="stat-row" id="cartera-stats"></div>
+          <div class="detail-tabs">
+            <button class="detail-tab active" onclick="switchCartera('2026',this)">Adeudos 2026</button>
+            <button class="detail-tab" onclick="switchCartera('historico',this)">Histórico completo</button>
           </div>
-          <div class="mapa-legend">
-            <div class="leg-item"><div class="leg-dot" style="background:var(--green-light);border:1px solid rgba(5,150,105,.3)"></div>Al corriente</div>
-            <div class="leg-item"><div class="leg-dot" style="background:var(--coral-light);border:1px solid rgba(220,38,38,.3)"></div>Moroso</div>
-            <div class="leg-item"><div class="leg-dot" style="background:var(--bg);border:1px solid var(--border)"></div>Sin datos</div>
+          <div class="card">
+            <div class="card-hdr">
+              <span class="card-title" id="cartera-titulo">Cartera vencida 2026</span>
+              <input type="text" class="search-box" placeholder="🔍 Buscar residente o depto..." oninput="filtrarCartera(this.value)">
+            </div>
+            <div class="tbl-scroll">
+              <table class="tbl">
+                <thead><tr><th>Depto</th><th>Residente</th><th>Meses pendientes</th><th>Total adeudo</th><th>Último pago</th><th>Estado</th></tr></thead>
+                <tbody id="tabla-cartera"></tbody>
+              </table>
+            </div>
           </div>
-          <div class="mapa-wrap" id="mapa-grid"></div>
         </div>
       </div>
 
       <!-- MOROSOS -->
       <div class="page" id="page-morosos">
+        <div class="search-row">
+          <input type="text" class="search-box" placeholder="🔍 Buscar por nombre o depto..." oninput="filtrarMorosos(this.value)" id="morosos-search">
+          <select class="filter-select" onchange="filtrarMorosos(document.getElementById('morosos-search').value)" id="morosos-edificio">
+            <option value="todos">Todos los edificios</option>
+          </select>
+          <select class="filter-select" onchange="filtrarMorosos(document.getElementById('morosos-search').value)" id="morosos-orden">
+            <option value="deuda">Mayor deuda primero</option>
+            <option value="meses">Más meses pendientes</option>
+            <option value="nombre">Por nombre A-Z</option>
+          </select>
+        </div>
         <div class="card">
           <div class="card-hdr">
             <span class="card-title">⚠️ Lista de morosos</span>
-            <input type="text" class="search-box" placeholder="🔍 Buscar por nombre o depto..." oninput="filtrarMorosos(this.value)">
+            <span id="morosos-count" style="font-size:12px;color:var(--muted)">Cargando...</span>
           </div>
-          <table class="tbl">
-            <thead><tr><th>Depto</th><th>Residente</th><th>Meses adeudo</th><th>Total</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-morosos"></tbody>
-          </table>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Meses 2026</th><th>Adeudo 2026</th><th>Histórico total</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-morosos"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- PAGOS -->
       <div class="page" id="page-pagos">
+        <div class="search-row">
+          <select class="filter-select" onchange="filtrarPagosMes()" id="pagos-mes">
+            <option value="todos">Todos los meses</option>
+            <option value="2026-05">Mayo 2026</option>
+            <option value="2026-04">Abril 2026</option>
+            <option value="2026-03">Marzo 2026</option>
+            <option value="2026-02">Febrero 2026</option>
+            <option value="2026-01">Enero 2026</option>
+            <option value="2025">Todo 2025</option>
+            <option value="2024">Todo 2024</option>
+            <option value="2023">Todo 2023</option>
+          </select>
+          <input type="text" class="search-box" placeholder="🔍 Buscar residente..." oninput="filtrarPagosMes()" id="pagos-search">
+        </div>
         <div class="card">
           <div class="card-hdr">
-            <span class="card-title">✅ Pagos recibidos 2026</span>
-            <select id="pagos-mes" onchange="filtrarPagosMes()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;outline:none">
-              <option value="todos">Todos los meses</option>
-              <option value="2026-05">Mayo 2026</option>
-              <option value="2026-04">Abril 2026</option>
-              <option value="2026-03">Marzo 2026</option>
-              <option value="2026-02">Febrero 2026</option>
-              <option value="2026-01">Enero 2026</option>
-            </select>
+            <span class="card-title">✅ Pagos recibidos</span>
+            <span id="pagos-count" style="font-size:12px;color:var(--muted)"></span>
           </div>
-          <table class="tbl">
-            <thead><tr><th>Depto</th><th>Residente</th><th>Concepto</th><th>Monto</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-pagos-admin"></tbody>
-          </table>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Depto</th><th>Residente</th><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-pagos-admin"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENTES -->
+      <div class="page" id="page-residentes">
+        <div class="search-row">
+          <input type="text" class="search-box" placeholder="🔍 Buscar residente..." oninput="filtrarResidentes(this.value)" id="res-search">
+          <select class="filter-select" onchange="filtrarResidentes(document.getElementById('res-search').value)" id="res-edificio">
+            <option value="todos">Todos los edificios</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">👥 Residentes — Manzana 80</span>
+            <span id="res-count" style="font-size:12px;color:var(--muted)"></span>
+          </div>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>#</th><th>Depto</th><th>Edificio</th><th>Nombre completo</th><th>Estado de cuenta</th></tr></thead>
+              <tbody id="tabla-residentes-admin"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -307,23 +361,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div class="page" id="page-incidencias">
         <div class="card">
           <div class="card-hdr"><span class="card-title">📋 Incidencias reportadas</span></div>
-          <div style="background:var(--yellow-light);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--yellow)">
-            ⏳ Módulo de incidencias en desarrollo. Próximamente verás aquí todos los reportes de los 320 residentes en tiempo real.
+          <div style="background:var(--yellow-light);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:16px;font-size:13px;color:var(--yellow)">
+            ⏳ Módulo en desarrollo. Próximamente verás todos los reportes de residentes en tiempo real.
           </div>
-        </div>
-      </div>
-
-      <!-- RESIDENTES -->
-      <div class="page" id="page-residentes">
-        <div class="card">
-          <div class="card-hdr">
-            <span class="card-title">👥 Residentes — Manzana 80</span>
-            <input type="text" class="search-box" placeholder="🔍 Buscar residente..." oninput="filtrarResidentes(this.value)">
-          </div>
-          <table class="tbl">
-            <thead><tr><th>ID</th><th>Depto</th><th>Nombre</th><th>Lote</th><th>Acceso</th></tr></thead>
-            <tbody id="tabla-residentes-admin"></tbody>
-          </table>
         </div>
       </div>
 
@@ -334,30 +374,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <script>
 const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
 const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
-const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
-
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json' };
 const ADMIN_USER = 'echoadmin';
 const ADMIN_PASS = 'Echo2026#';
 
-let allResidentes = [];
-let allPagos = [];
-let allMorosos = [];
+let allResidentes = [], allPagos = [], allMorosos = [], carteraVista = '2026';
+let deudaMap = {};
 
 function adminLogin() {
   const u = document.getElementById('a-user').value.trim();
   const p = document.getElementById('a-pass').value.trim();
-  const err = document.getElementById('a-err');
-  const btn = document.getElementById('a-btn');
-
   if (u === ADMIN_USER && p === ADMIN_PASS) {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('admin').classList.remove('hidden');
-    const now = new Date();
-    document.getElementById('tb-fecha').textContent = now.toLocaleDateString('es-MX', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('tb-fecha').textContent = new Date().toLocaleDateString('es-MX', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
     cargarDatos();
   } else {
-    err.style.display = 'block';
-    btn.disabled = false;
+    document.getElementById('a-err').style.display = 'block';
   }
 }
 
@@ -365,176 +398,264 @@ async function cargarDatos() {
   try {
     const rRes = await fetch(`${URL}/residentes?order=departamento.asc&limit=1000`, { headers: H });
     allResidentes = await rRes.json() || [];
-    const rPag = await fetch(`${URL}/pagos?order=fecha_vencimiento.desc&limit=10000`, { headers: H });
+    const rPag = await fetch(`${URL}/pagos?order=fecha_vencimiento.desc&limit=20000`, { headers: H });
     allPagos = await rPag.json() || [];
     calcularMetricas();
+    poblarFiltros();
   } catch(e) {
-    document.getElementById('ov-loading').textContent = '❌ Error cargando datos: ' + e.message;
+    document.getElementById('ov-loading').innerHTML = '❌ Error: ' + e.message;
   }
+}
+
+function poblarFiltros() {
+  const edificios = [...new Set(allResidentes.map(r => r.lote).filter(Boolean))].sort();
+  ['morosos-edificio', 'res-edificio'].forEach(id => {
+    const sel = document.getElementById(id);
+    edificios.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e; opt.textContent = 'Edificio ' + e;
+      sel.appendChild(opt);
+    });
+  });
 }
 
 function calcularMetricas() {
   const pagos2026 = allPagos.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith('2026'));
-  
-  // Per resident: calculate debt
-  const deudaMap = {};
-  allResidentes.forEach(r => { deudaMap[r.id_residente] = { res: r, pagos: 0, pendientes: 0, deuda: 0 }; });
-  
-  pagos2026.forEach(p => {
-    if (!deudaMap[p.id_residente]) return;
-    if (p.estado === 'pagado') deudaMap[p.id_residente].pagos++;
-    else { deudaMap[p.id_residente].pendientes++; deudaMap[p.id_residente].deuda += (p.monto || 500); }
+  const pagosHist = allPagos;
+
+  deudaMap = {};
+  allResidentes.forEach(r => {
+    deudaMap[r.id_residente] = { res: r, pags2026: 0, pends2026: 0, deuda2026: 0, deudaHist: 0, ultimoPago: null };
   });
 
-  const morosos = Object.values(deudaMap).filter(d => d.deuda > 0);
-  const alcorriente = Object.values(deudaMap).filter(d => d.deuda === 0);
-  const totalDeuda = morosos.reduce((s,d) => s + d.deuda, 0);
+  pagos2026.forEach(p => {
+    if (!deudaMap[p.id_residente]) return;
+    if (p.estado === 'pagado') {
+      deudaMap[p.id_residente].pags2026++;
+      if (!deudaMap[p.id_residente].ultimoPago || p.fecha_vencimiento > deudaMap[p.id_residente].ultimoPago)
+        deudaMap[p.id_residente].ultimoPago = p.fecha_vencimiento;
+    } else {
+      deudaMap[p.id_residente].pends2026++;
+      deudaMap[p.id_residente].deuda2026 += (p.monto || 500);
+    }
+  });
+
+  pagosHist.forEach(p => {
+    if (!deudaMap[p.id_residente]) return;
+    if (p.estado === 'pendiente') deudaMap[p.id_residente].deudaHist += (p.monto || 500);
+  });
+
+  const morosos = Object.values(deudaMap).filter(d => d.deuda2026 > 0);
+  const alcorriente = Object.values(deudaMap).filter(d => d.deuda2026 === 0);
+  const totalDeuda2026 = morosos.reduce((s, d) => s + d.deuda2026, 0);
+  const totalDeudaHist = Object.values(deudaMap).reduce((s, d) => s + d.deudaHist, 0);
   const totalPagado = pagos2026.filter(p => p.estado === 'pagado').length * 500;
   const totalEsperado = pagos2026.length * 500;
 
-  allMorosos = morosos.sort((a,b) => b.deuda - a.deuda);
+  allMorosos = morosos.sort((a, b) => b.deuda2026 - a.deuda2026);
 
-  // Update KPIs
+  // KPIs
   document.getElementById('ov-alcorriente').textContent = alcorriente.length;
-  document.getElementById('ov-alcorriente-pct').textContent = Math.round(alcorriente.length/allResidentes.length*100) + '% del total';
+  document.getElementById('ov-alcorriente-pct').textContent = Math.round(alcorriente.length / allResidentes.length * 100) + '% del total';
   document.getElementById('ov-morosos').textContent = morosos.length;
-  document.getElementById('ov-morosos-pct').textContent = Math.round(morosos.length/allResidentes.length*100) + '% del total';
-  document.getElementById('ov-cartera').textContent = '$' + totalDeuda.toLocaleString();
+  document.getElementById('ov-morosos-pct').textContent = Math.round(morosos.length / allResidentes.length * 100) + '% del total';
+  document.getElementById('ov-cartera').textContent = '$' + totalDeuda2026.toLocaleString();
+  document.getElementById('ov-cartera-hist').textContent = 'Histórico: $' + totalDeudaHist.toLocaleString();
 
-  // Progress bars
-  const pctCorriente = Math.round(alcorriente.length/allResidentes.length*100);
-  const pctMorosos = Math.round(morosos.length/allResidentes.length*100);
-  const pctIng = totalEsperado > 0 ? Math.round(totalPagado/totalEsperado*100) : 0;
-  document.getElementById('prog-corriente').style.width = pctCorriente + '%';
-  document.getElementById('prog-corriente-txt').textContent = pctCorriente + '%';
-  document.getElementById('prog-morosos').style.width = pctMorosos + '%';
-  document.getElementById('prog-morosos-txt').textContent = pctMorosos + '%';
-  document.getElementById('prog-ing').style.width = pctIng + '%';
-  document.getElementById('prog-ing-txt').textContent = pctIng + '%';
+  // Progress
+  const pctC = Math.round(alcorriente.length / allResidentes.length * 100);
+  const pctM = Math.round(morosos.length / allResidentes.length * 100);
+  const pctI = totalEsperado > 0 ? Math.round(totalPagado / totalEsperado * 100) : 0;
+  document.getElementById('prog-corriente').style.width = pctC + '%';
+  document.getElementById('prog-corriente-txt').textContent = pctC + '%';
+  document.getElementById('prog-morosos').style.width = pctM + '%';
+  document.getElementById('prog-morosos-txt').textContent = pctM + '%';
+  document.getElementById('prog-ing').style.width = pctI + '%';
+  document.getElementById('prog-ing-txt').textContent = pctI + '%';
 
-  // Chart by month
-  const meses = ['ENE','FEB','MAR','ABR','MAY'];
-  const chart = meses.map(m => {
-    const num = {'ENE':'01','FEB':'02','MAR':'03','ABR':'04','MAY':'05'}[m];
-    const mesPagos = pagos2026.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.includes('-'+num+'-') && p.estado === 'pagado');
-    const mesPend = pagos2026.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.includes('-'+num+'-') && p.estado === 'pendiente');
-    const total = mesPagos.length + mesPend.length;
-    const pct = total > 0 ? Math.round(mesPagos.length/total*100) : 0;
-    return {m, pct, pag: mesPagos.length, pend: mesPend.length};
-  });
-
-  document.getElementById('ov-chart').innerHTML = chart.map(c => `
-    <div style="margin-bottom:10px">
+  // Chart
+  const meses = [['ENE','01'],['FEB','02'],['MAR','03'],['ABR','04'],['MAY','05']];
+  document.getElementById('ov-chart').innerHTML = meses.map(([m, n]) => {
+    const mp = pagos2026.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.includes('-' + n + '-'));
+    const pag = mp.filter(p => p.estado === 'pagado').length;
+    const pend = mp.filter(p => p.estado !== 'pagado').length;
+    const total = pag + pend;
+    const pct = total > 0 ? Math.round(pag / total * 100) : 0;
+    return `<div style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
-        <span>${c.m} 2026</span>
-        <span style="font-weight:600;color:var(--ink)">${c.pct}% — ${c.pag} pagados / ${c.pend} pendientes</span>
+        <span>${m} 2026</span>
+        <span style="font-weight:600;color:var(--ink)">${pct}% — ${pag} pagados / ${pend} pendientes</span>
       </div>
       <div style="height:7px;background:var(--coral-light);border-radius:100px;overflow:hidden">
-        <div style="height:100%;width:${c.pct}%;background:var(--green);border-radius:100px"></div>
+        <div style="height:100%;width:${pct}%;background:var(--green);border-radius:100px"></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
-  // Top morosos
-  document.getElementById('top-morosos').innerHTML = allMorosos.slice(0,5).map(d => `
+  // Top morosos with historical
+  document.getElementById('top-morosos').innerHTML = allMorosos.slice(0, 5).map(d => `
     <tr>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.res.nombre_completo}</td>
-      <td>${d.res.departamento}</td>
-      <td style="font-weight:700;color:var(--coral)">$${d.deuda.toLocaleString()}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${d.res.nombre_completo}</td>
+      <td style="font-weight:600">${d.res.departamento}</td>
+      <td style="font-weight:700;color:var(--coral)">$${d.deuda2026.toLocaleString()}</td>
+      <td style="color:var(--muted);font-size:12px">$${d.deudaHist.toLocaleString()}</td>
     </tr>`).join('');
 
   // Ultimos pagos
-  const pagados = allPagos.filter(p => p.estado === 'pagado').slice(0,5);
+  const pagados = allPagos.filter(p => p.estado === 'pagado').slice(0, 5);
   document.getElementById('ultimos-pagos').innerHTML = pagados.map(p => `
     <tr>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nombre}</td>
-      <td>${p.departamento}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${p.nombre}</td>
+      <td style="font-weight:600">${p.departamento}</td>
       <td><span class="badge paid">✓ ${fmtMes(p.fecha_vencimiento)}</span></td>
     </tr>`).join('');
 
-  // Tabla morosos
+  // Cartera stats
+  document.getElementById('cartera-stats').innerHTML = `
+    <div class="stat-chip"><div class="stat-chip-val coral">$${totalDeuda2026.toLocaleString()}</div><div class="stat-chip-lbl">Adeudo 2026</div></div>
+    <div class="stat-chip"><div class="stat-chip-val" style="color:var(--yellow)">$${totalDeudaHist.toLocaleString()}</div><div class="stat-chip-lbl">Histórico total</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">${morosos.length}</div><div class="stat-chip-lbl">Deudores</div></div>
+    <div class="stat-chip"><div class="stat-chip-val green">$${totalPagado.toLocaleString()}</div><div class="stat-chip-lbl">Recuperado 2026</div></div>`;
+
+  renderCartera('2026');
   renderMorosos(allMorosos);
-
-  // Tabla residentes
-  document.getElementById('tabla-residentes-admin').innerHTML = allResidentes.map(r => `
-    <tr>
-      <td style="color:var(--muted)">${r.id_residente}</td>
-      <td style="font-weight:600">${r.departamento}</td>
-      <td>${r.nombre_completo}</td>
-      <td style="color:var(--muted)">${r.lote || '—'}</td>
-      <td><code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:11px">${r.user_id || '—'}</code></td>
-    </tr>`).join('');
-
-  // Tabla pagos
   filtrarPagosMes();
-
-  // Mapa
-  renderMapa();
+  renderResidentes(allResidentes);
 
   document.getElementById('ov-loading').classList.add('hidden');
   document.getElementById('ov-content').classList.remove('hidden');
+  document.getElementById('cartera-loading').classList.add('hidden');
+  document.getElementById('cartera-content').classList.remove('hidden');
 }
 
-function renderMorosos(data) {
-  document.getElementById('tabla-morosos').innerHTML = data.map(d => `
+function renderCartera(vista) {
+  carteraVista = vista;
+  document.getElementById('cartera-titulo').textContent = vista === '2026' ? 'Cartera vencida 2026' : 'Historial completo de adeudos';
+  const data = vista === '2026'
+    ? allMorosos
+    : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
+
+  document.getElementById('tabla-cartera').innerHTML = data.length === 0
+    ? '<tr><td colspan="6" class="empty-row">✓ Sin adeudos registrados</td></tr>'
+    : data.map(d => `
+      <tr>
+        <td style="font-weight:600">${d.res.departamento}</td>
+        <td>${d.res.nombre_completo}</td>
+        <td>${vista === '2026' ? d.pends2026 + ' meses' : '—'}</td>
+        <td style="font-weight:700;color:var(--coral)">$${(vista === '2026' ? d.deuda2026 : d.deudaHist).toLocaleString()}</td>
+        <td style="color:var(--muted);font-size:12px">${d.ultimoPago ? fmtMes(d.ultimoPago) : 'Sin pagos'}</td>
+        <td><span class="badge overdue">Moroso</span></td>
+      </tr>`).join('');
+}
+
+let carteraSearch = '';
+function filtrarCartera(q) {
+  carteraSearch = q.toLowerCase();
+  const vista = carteraVista;
+  const base = vista === '2026'
+    ? allMorosos
+    : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
+  const f = base.filter(d =>
+    d.res.nombre_completo.toLowerCase().includes(carteraSearch) ||
+    d.res.departamento.includes(carteraSearch)
+  );
+  document.getElementById('tabla-cartera').innerHTML = f.map(d => `
     <tr>
       <td style="font-weight:600">${d.res.departamento}</td>
       <td>${d.res.nombre_completo}</td>
-      <td>${d.pendientes} meses</td>
-      <td style="font-weight:700;color:var(--coral)">$${d.deuda.toLocaleString()}</td>
+      <td>${vista === '2026' ? d.pends2026 + ' meses' : '—'}</td>
+      <td style="font-weight:700;color:var(--coral)">$${(vista === '2026' ? d.deuda2026 : d.deudaHist).toLocaleString()}</td>
+      <td style="color:var(--muted);font-size:12px">${d.ultimoPago ? fmtMes(d.ultimoPago) : 'Sin pagos'}</td>
       <td><span class="badge overdue">Moroso</span></td>
     </tr>`).join('');
 }
 
+function switchCartera(vista, el) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCartera(vista);
+}
+
+function renderMorosos(data) {
+  const orden = document.getElementById('morosos-orden') ? document.getElementById('morosos-orden').value : 'deuda';
+  const sorted = [...data].sort((a, b) => {
+    if (orden === 'deuda') return b.deuda2026 - a.deuda2026;
+    if (orden === 'meses') return b.pends2026 - a.pends2026;
+    return a.res.nombre_completo.localeCompare(b.res.nombre_completo);
+  });
+  document.getElementById('morosos-count').textContent = sorted.length + ' residentes';
+  document.getElementById('tabla-morosos').innerHTML = sorted.length === 0
+    ? '<tr><td colspan="7" class="empty-row">✓ Sin morosos para este filtro</td></tr>'
+    : sorted.map(d => `
+      <tr>
+        <td style="font-weight:600">${d.res.departamento}</td>
+        <td><span class="badge blue">${d.res.lote || '—'}</span></td>
+        <td>${d.res.nombre_completo}</td>
+        <td>${d.pends2026} meses</td>
+        <td style="font-weight:700;color:var(--coral)">$${d.deuda2026.toLocaleString()}</td>
+        <td style="color:var(--muted)">$${d.deudaHist.toLocaleString()}</td>
+        <td><span class="badge overdue">Moroso</span></td>
+      </tr>`).join('');
+}
+
 function filtrarMorosos(q) {
-  const f = allMorosos.filter(d => 
+  const edificio = document.getElementById('morosos-edificio').value;
+  let f = allMorosos;
+  if (edificio !== 'todos') f = f.filter(d => d.res.lote === edificio);
+  if (q) f = f.filter(d =>
     d.res.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
     d.res.departamento.includes(q)
   );
   renderMorosos(f);
 }
 
-function filtrarResidentes(q) {
-  const f = allResidentes.filter(r =>
-    r.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
-    r.departamento.includes(q)
-  );
-  document.getElementById('tabla-residentes-admin').innerHTML = f.map(r => `
-    <tr>
-      <td style="color:var(--muted)">${r.id_residente}</td>
-      <td style="font-weight:600">${r.departamento}</td>
-      <td>${r.nombre_completo}</td>
-      <td style="color:var(--muted)">${r.lote || '—'}</td>
-      <td><code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:11px">${r.user_id || '—'}</code></td>
-    </tr>`).join('');
-}
-
 function filtrarPagosMes() {
   const mes = document.getElementById('pagos-mes').value;
-  const f = mes === 'todos' ? allPagos.filter(p => p.estado === 'pagado').slice(0,100)
-    : allPagos.filter(p => p.estado === 'pagado' && p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
+  const q = (document.getElementById('pagos-search') ? document.getElementById('pagos-search').value : '').toLowerCase();
+  let f = allPagos.filter(p => p.estado === 'pagado');
+  if (mes === 'todos') f = f.slice(0, 200);
+  else if (mes.length === 4) f = f.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
+  else f = f.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
+  if (q) f = f.filter(p => (p.nombre || '').toLowerCase().includes(q) || (p.departamento || '').includes(q));
+  document.getElementById('pagos-count').textContent = f.length + ' registros';
   document.getElementById('tabla-pagos-admin').innerHTML = f.map(p => `
     <tr>
       <td style="font-weight:600">${p.departamento}</td>
-      <td>${p.nombre}</td>
-      <td>${p.concepto}</td>
+      <td style="font-size:12px">${p.nombre}</td>
+      <td style="font-size:12px">${p.concepto}</td>
       <td style="font-weight:600;color:var(--green)">$${p.monto}</td>
+      <td style="color:var(--muted);font-size:12px">${fmtMes(p.fecha_vencimiento)}</td>
       <td><span class="badge paid">✓ Pagado</span></td>
     </tr>`).join('');
 }
 
-function renderMapa() {
-  const mes = document.getElementById('mapa-mes') ? document.getElementById('mapa-mes').value : '2026-05';
-  const pagosMes = allPagos.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
-  const pagoMap = {};
-  pagosMes.forEach(p => { pagoMap[p.departamento] = p.estado; });
-
-  const deptos = [...new Set(allResidentes.map(r => r.departamento))].sort();
-  document.getElementById('mapa-grid').innerHTML = deptos.map(d => {
-    const estado = pagoMap[d];
-    const cls = estado === 'pagado' ? 'pagado' : estado === 'pendiente' ? 'pendiente' : 'vacio';
-    const icon = estado === 'pagado' ? '✓' : estado === 'pendiente' ? '✗' : '?';
-    return `<div class="depto-cell ${cls}" title="Depto ${d}">${d}<br>${icon}</div>`;
+function renderResidentes(data) {
+  document.getElementById('res-count').textContent = data.length + ' residentes';
+  document.getElementById('tabla-residentes-admin').innerHTML = data.map((r, i) => {
+    const dm = deudaMap[r.id_residente];
+    const deuda = dm ? dm.deuda2026 : 0;
+    const estado = deuda === 0
+      ? '<span class="badge paid">✓ Al corriente</span>'
+      : `<span class="badge overdue">$${deuda.toLocaleString()} adeudo</span>`;
+    return `<tr>
+      <td style="color:var(--muted)">${i + 1}</td>
+      <td style="font-weight:600">${r.departamento}</td>
+      <td><span class="badge blue">${r.lote || '—'}</span></td>
+      <td>${r.nombre_completo}</td>
+      <td>${estado}</td>
+    </tr>`;
   }).join('');
+}
+
+function filtrarResidentes(q) {
+  const edificio = document.getElementById('res-edificio').value;
+  let f = allResidentes;
+  if (edificio !== 'todos') f = f.filter(r => r.lote === edificio);
+  if (q) f = f.filter(r =>
+    r.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
+    r.departamento.includes(q)
+  );
+  renderResidentes(f);
 }
 
 function fmtMes(f) {
@@ -549,8 +670,8 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  const t = { overview:'Resumen general — Manzana 80', mapa:'Mapa de pagos', morosos:'Lista de morosos', pagos:'Pagos recibidos', incidencias:'Incidencias', residentes:'Residentes' };
-  document.getElementById('topbar-title').textContent = t[id] || id;
+  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', residentes:'Residentes', incidencias:'Incidencias' };
+  document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
 }
 
 function adminLogout() {
