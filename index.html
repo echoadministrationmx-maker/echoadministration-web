@@ -337,13 +337,13 @@ footer{background:var(--ink);padding:56px 0 28px}
   <span class="nav-logo-name">Echo <span>Administración</span></span>
  </div>
  <div class="nav-links">
-  <a href="#servicios">Servicios</a>
+  <a href="#servicios" data-i18n="nav-servicios">Servicios</a>
   <a href="#renta-vacacional" style="color:var(--green);font-weight:600">Airbnb ✦</a>
-  <a href="/convenios" style="color:var(--blue);font-weight:600">Convenios</a>
-  <a href="#como-funciona">Cómo funciona</a>
-  <a href="#proyectos">Proyectos</a>
-  <a href="#precios">Precios</a>
-  <a href="#contacto">Contacto</a>
+  <a href="/convenios" style="color:var(--blue);font-weight:600" data-i18n="nav-convenios">Convenios</a>
+  <a href="#como-funciona" data-i18n="nav-como">Cómo funciona</a>
+  <a href="#proyectos" data-i18n="nav-proyectos">Proyectos</a>
+  <a href="#precios" data-i18n="nav-precios">Precios</a>
+  <a href="#contacto" data-i18n="nav-contacto">Contacto</a>
  </div>
  <div class="nav-right">
   <a href="/portal" class="nav-portal">Portal residentes →</a>
@@ -473,7 +473,7 @@ footer{background:var(--ink);padding:56px 0 28px}
      <p>App web donde cada residente ve su estado de cuenta, paga en línea, reporta incidencias y descarga documentos.</p>
      <ul class="tio-list">
       <li>Portal de residentes por condominio</li>
-      <li>Pagos con Mercado Pago (OXXO, tarjeta, SPEI)</li>
+      <li>Pagos: OXXO, Tarjeta y SPEI</li>
       <li>Bot de WhatsApp con recordatorios</li>
       <li>Reportes financieros en tiempo real</li>
       <li>Gestión de multas e incidencias</li>
@@ -489,7 +489,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section section-alt" id="servicios">
  <div class="container">
   <div class="badge badge-blue" data-i18n="badge-servicios">Servicios</div>
-  <h2>Todo en un solo contrato,<br>sin sorpresas.</h2>
+  <h2 data-i18n="h2-servicios">Todo en un solo contrato,<br>sin sorpresas.</h2>
   <p class="lead">Sin subcontratar partes. Sin intermediarios. Un solo número para todo.</p>
   <div class="svc-grid reveal">
    <div class="svc-item featured">
@@ -517,27 +517,27 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section" id="como-funciona">
  <div class="container">
   <div class="badge badge-blue" data-i18n="badge-como">Cómo funciona</div>
-  <h2>Del primer contacto a la<br>operación saneada en 30 días</h2>
+  <h2 data-i18n="h2-como">Del primer contacto a la<br>operación saneada en 30 días</h2>
   <p class="lead">Un proceso simple, sin burocracia. Nos encargamos de todo el onboarding.</p>
   <div class="steps-grid reveal">
    <div class="step">
     <div class="step-circle" style="position:relative">🤝<div class="step-num">1</div></div>
-    <h3>Diagnóstico gratis</h3>
+    <h3 data-i18n="step1-h">Diagnóstico gratis</h3>
     <p>Analizamos tu condominio, morosidad actual y presupuesto. Te damos una propuesta en 24 horas.</p>
    </div>
    <div class="step">
     <div class="step-circle" style="position:relative">📋<div class="step-num">2</div></div>
-    <h3>Firma del contrato</h3>
+    <h3 data-i18n="step2-h">Firma del contrato</h3>
     <p>Contrato claro con todos los servicios incluidos. Sin letra pequeña ni costos ocultos.</p>
    </div>
    <div class="step">
     <div class="step-circle" style="position:relative">⚙️<div class="step-num">3</div></div>
-    <h3>Configuración del portal</h3>
+    <h3 data-i18n="step3-h">Configuración del portal</h3>
     <p>Activamos el portal de residentes con todos los departamentos y cargamos el historial de pagos.</p>
    </div>
    <div class="step">
     <div class="step-circle" style="position:relative">🚀<div class="step-num">4</div></div>
-    <h3>Operación activa</h3>
+    <h3 data-i18n="step4-h">Operación activa</h3>
     <p>En 30 días ves los primeros resultados de cobranza. Reporte mensual al Comité de Vigilancia.</p>
    </div>
   </div>
@@ -548,7 +548,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section section-alt">
  <div class="container">
   <div class="badge badge-blue" data-i18n="badge-numeros">Resultados reales</div>
-  <h2>De déficit a operación<br><span style="color:var(--green)">saneada en 60 días.</span></h2>
+  <h2 data-i18n="h2-numeros">De déficit a operación<br><span style="color:var(--green)">saneada en 60 días.</span></h2>
   <p class="lead">Ejemplo real: 320 unidades, 60% de morosidad. Antes y después con Echo Administración.</p>
   <div class="numbers-wrap reveal">
    <div class="num-card bad">
@@ -579,7 +579,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section" id="legal">
  <div class="container">
   <div class="badge badge-blue" data-i18n="badge-legal">Marco jurídico</div>
-  <h2>4 herramientas legales que<br>la competencia no usa.</h2>
+  <h2 data-i18n="h2-legal">4 herramientas legales que<br>la competencia no usa.</h2>
   <p class="lead">Conocemos y aplicamos la Ley de Propiedad en Condominio de cada estado para recuperar lo que se debe.</p>
   <div class="legal-grid reveal">
    <div class="lcard"><div class="lnum">01</div><div class="ltag">Art. 39 · Ley Estatal QRoo</div><h3>⚖️ Título Ejecutivo</h3><p>El Acta de Asamblea tiene fuerza ejecutiva. Podemos iniciar juicio civil y solicitar embargo precautorio sobre bienes o la unidad.</p></div>
@@ -594,7 +594,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section section-alt" id="proyectos">
  <div class="container">
   <div class="badge badge-green" data-i18n="badge-proyectos">Dónde operamos</div>
-  <h2>11 condominios en Tulum<br>ya confían en nosotros.</h2>
+  <h2 data-i18n="h2-proyectos">11 condominios en Tulum<br>ya confían en nosotros.</h2>
   <p class="lead">Presencia activa en Tulum, Tampico, Ciudad de México y Mazatlán — expandiendo a toda la República.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
       <span style="background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 14px;border-radius:100px">📍 Tulum, Q.Roo</span>
@@ -754,7 +754,7 @@ footer{background:var(--ink);padding:56px 0 28px}
   <p class="lead">Cuota mensual fija + comisión solo si recuperamos cartera vencida. Nuestros incentivos son los tuyos.</p>
   <div class="pricing-grid reveal">
    <div class="price-card">
-    <div class="price-name">Echo SaaS</div>
+    <div class="price-name" data-i18n="plan1-name">Echo SaaS</div>
     <div class="price-amount"><sup>$</sup>70,000</div>
     <div class="price-period">+ IVA / mes · Tecnología completa</div>
     <div class="price-divider"></div>
@@ -769,9 +769,9 @@ footer{background:var(--ink);padding:56px 0 28px}
     <a href="#contacto" class="btn btn-outline" style="width:100%;justify-content:center">Solicitar info</a>
    </div>
    <div class="price-card featured">
-    <div class="price-name">Echo Co-Piloto ⭐</div>
+    <div class="price-name" data-i18n="plan2-name">Echo Co-Piloto ⭐</div>
     <div class="price-amount"><sup>$</sup>106,900</div>
-    <div class="price-period">MXN / mes · hasta 320 unidades</div>
+    <div class="price-period">MXN / mes · </div>
     <div class="price-divider"></div>
     <ul class="price-features">
      <li>Administración y contabilidad</li>
@@ -784,7 +784,7 @@ footer{background:var(--ink);padding:56px 0 28px}
     <a href="#contacto" class="btn btn-primary" style="width:100%;justify-content:center">Solicitar propuesta →</a>
    </div>
    <div class="price-card">
-    <div class="price-name">Echo Premium</div>
+    <div class="price-name" data-i18n="plan3-name">Echo Premium</div>
     <div class="price-amount" style="font-size:28px">A la<br>medida</div>
     <div class="price-period">+300 unidades o multi-condominio</div>
     <div class="price-divider"></div>
@@ -806,7 +806,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section">
  <div class="container">
   <div class="badge badge-green" data-i18n="badge-testi">Lo que dicen nuestros condominios</div>
-  <h2>Condominios que eliminaron<br>su déficit con nosotros.</h2>
+  <h2 data-i18n="h2-testi">Condominios que eliminaron<br>su déficit con nosotros.</h2>
   <div class="testi-grid reveal">
    <div class="testi-card">
     <div class="testi-stars">★★★★★</div>
@@ -858,7 +858,7 @@ footer{background:var(--ink);padding:56px 0 28px}
       </div>
     </div>
     <div style="text-align:center">
-      <a href="/convenios" class="btn btn-primary" style="font-size:15px;padding:14px 32px">Ver todos los convenios por estado →</a>
+      <a href="/convenios" class="btn btn-primary" style="font-size:15px;padding:14px 32px">Ver convenios por ciudad →</a>
     </div>
   </div>
 </section>
@@ -913,8 +913,8 @@ footer{background:var(--ink);padding:56px 0 28px}
    <h2 data-i18n="cta-h2">Elimina el déficit de<br>tu condominio hoy.</h2>
    <p data-i18n="cta-p">Migración en 72 horas. Diagnóstico gratuito. Te mostramos exactamente cuánto puedes recuperar desde el primer mes.</p>
    <div class="cta-btns">
-    <a href="https://wa.me/529981234567" class="btn btn-white">📲 WhatsApp directo</a>
-    <a href="#contacto" class="btn" style="background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.3)">Formulario de contacto</a>
+    <a href="https://wa.me/529981234567" class="btn btn-white" data-i18n="cta-btn1">📲 WhatsApp directo</a>
+    <a href="#contacto" class="btn" style="background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.3)" data-i18n="cta-btn2">Formulario de contacto</a>
    </div>
   </div>
  </div>
@@ -924,7 +924,7 @@ footer{background:var(--ink);padding:56px 0 28px}
 <section class="section" id="contacto">
  <div class="container">
   <div class="badge badge-blue" data-i18n="badge-contacto">Contacto</div>
-  <h2>Hablemos sobre<br>tu condominio.</h2>
+  <h2 data-i18n="h2-contacto">Hablemos sobre<br>tu condominio.</h2>
   <p class="lead">Sin compromisos. Te preparamos una propuesta con números reales en menos de 24 horas.</p>
   <div class="contact-wrap reveal">
    <div>
@@ -956,7 +956,7 @@ footer{background:var(--ink);padding:56px 0 28px}
  <div class="container">
   <div class="fi">
    <div class="fb"><div class="fn">Echo <span>Administración</span></div><p>La única empresa en México que combina equipo en campo con plataforma digital propia para condominios.</p></div>
-   <div class="fc"><h4>Empresa</h4><ul><li><a href="#">Quiénes somos</a></li><li><a href="#como-funciona">Cómo funciona</a></li><li><a href="#proyectos">Proyectos</a></li><li><a href="#precios">Precios</a></li></ul></div>
+   <div class="fc"><h4>Empresa</h4><ul><li><a href="#">Quiénes somos</a></li><li><a href="#como-funciona" data-i18n="nav-como">Cómo funciona</a></li><li><a href="#proyectos" data-i18n="nav-proyectos">Proyectos</a></li><li><a href="#precios" data-i18n="nav-precios">Precios</a></li></ul></div>
    <div class="fc"><h4>Servicios</h4><ul><li><a href="#servicios">Administración</a></li><li><a href="#servicios">Cobranza activa</a></li><li><a href="#servicios">Vigilancia</a></li><li><a href="#portal">Portal residentes</a></li></ul></div>
    <div class="fc"><h4>Contacto</h4><ul><li><a href="https://wa.me/529981234567">WhatsApp</a></li><li><a href="mailto:echoadministrationmx@gmail.com">Email</a></li><li><a href="#contacto">Formulario</a></li></ul></div>
   </div>
@@ -975,76 +975,150 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 <script>
 const translations = {
   es: {
+    'lang-btn': '🌐 EN',
+    'nav-servicios': 'Servicios',
+    'nav-convenios': 'Convenios',
+    'nav-como': 'Cómo funciona',
+    'nav-proyectos': 'Proyectos',
+    'nav-precios': 'Precios',
+    'nav-contacto': 'Contacto',
     'nav-portal': 'Portal residentes →',
     'nav-demo': 'Solicitar demo',
     'hero-eyebrow': 'Disponible en toda la República Mexicana',
-    'hero-h1': 'La administración que <span class="hl">sí resuelve</span> el déficit.',
-    'hero-sub': 'La única empresa en México que combina equipo profesional en campo con plataforma propia. Cobranza activa, portal de residentes y pagos en línea — todo en un solo contrato.',
+    'hero-h1': 'Automatizamos tu condominio, reducimos la morosidad un <span class="hl">20%</span> y blindamos tus finanzas en 72 horas.',
+    'hero-sub': 'La plataforma y el equipo que los desarrolladores e inversionistas eligen para gestionar sus propiedades sin fricciones, con transparencia total y reportes contables en tiempo real.',
     'hero-btn1': 'Solicitar propuesta gratis →',
     'hero-btn2': 'Ver cómo funciona',
     'hero-social': '<strong>11 condominios</strong> en Tulum ya nos confían su administración',
     'badge-problema': 'El problema que resolvemos',
-    'h2-problema': '¿Por qué el 98% de los condominios<br>operan sin administración formal?',
-    'lead-problema': 'Porque las opciones existentes son o muy caras, o solo software, o personal sin respaldo legal. Nosotros somos las tres cosas juntas.',
+    'h2-problema': '¿Por qué los comités y dueños<br>cambian su vieja administración por <span style="color:var(--blue)">Echo?</span>',
+    'lead-problema': 'Cero opacidad. Cobranza que sí funciona. Transición en 72 horas sin interrumpir tu condominio.',
     'badge-propuesta': 'Nuestra propuesta única',
-    'h2-propuesta': 'Somos empresa <em style="font-style:normal;color:var(--blue)">y</em> plataforma.<br>Nadie más ofrece las dos.',
     'badge-servicios': 'Servicios',
     'h2-servicios': 'Todo en un solo contrato,<br>sin sorpresas.',
+    'lead-servicios': 'Sin subcontratar partes. Sin intermediarios. Un solo número para todo.',
     'badge-como': 'Cómo funciona',
     'h2-como': 'Del primer contacto a la<br>operación saneada en 30 días',
+    'lead-como': 'Un proceso simple, sin burocracia. Nos encargamos de todo el onboarding.',
     'badge-numeros': 'Resultados reales',
     'h2-numeros': 'De déficit a operación<br><span style="color:var(--green)">saneada en 60 días.</span>',
+    'lead-numeros': 'Ejemplo hipotético basado en condominios reales en Tulum. Los números varían según cada proyecto.',
     'badge-legal': 'Marco jurídico',
     'h2-legal': '4 herramientas legales que<br>la competencia no usa.',
+    'lead-legal': 'Conocemos y aplicamos la Ley de Propiedad en Condominio de cada estado para recuperar lo que se debe.',
     'badge-proyectos': 'Dónde operamos',
     'h2-proyectos': '11 condominios en Tulum<br>ya confían en nosotros.',
+    'lead-proyectos': 'Presencia activa en Tulum, Tampico, Ciudad de México y Mazatlán — expandiendo a toda la República.',
+    'badge-airbnb': 'Servicio add-on · Solo para clientes Echo',
+    'h2-airbnb': '¿Tu depto en Airbnb?<br><span style="color:var(--blue)">Nosotros lo gestionamos todo.</span>',
+    'lead-airbnb': 'Si eres propietario e inversionista, convierte tu departamento en una fuente de ingresos sin que tengas que hacer nada.',
+    'badge-convenios': 'Beneficios exclusivos',
+    'h2-convenios': 'Convenios para residentes<br><span style="color:var(--blue)">en toda la República.</span>',
     'badge-precios': 'Precios transparentes',
-    'h2-precios': 'Sin costos ocultos.<br>Sin sorpresas al final del mes.',
+    'h2-precios': 'Elige el plan que<br>se adapta a tu condominio.',
+    'lead-precios': 'Elige según quién hace el trabajo. Tecnología incluida en todos los planes. Sin costos ocultos.',
     'badge-testi': 'Lo que dicen nuestros condominios',
     'h2-testi': 'Condominios que eliminaron<br>su déficit con nosotros.',
+    'badge-aliados': 'Aliados comerciales',
+    'h2-aliados': 'Integrado con las plataformas<br>que ya usas.',
     'badge-contacto': 'Contacto',
     'h2-contacto': 'Hablemos sobre<br>tu condominio.',
-    'cta-h2': 'Elimina el déficit de<br>tu condominio hoy.',
-    'cta-p': 'Diagnóstico gratuito en 24 horas. Sin compromisos. Te decimos exactamente cuánto puedes recuperar.',
+    'lead-contacto': 'Sin compromisos. Te preparamos una propuesta con números reales en menos de 24 horas.',
+    'cta-h2': '320 departamentos activos ya respaldan<br>nuestra infraestructura. <span style="color:#7BA8FF">Tú eres el siguiente.</span>',
+    'cta-p': 'Migración en 72 horas. Diagnóstico gratuito. Te mostramos exactamente cuánto puedes recuperar desde el primer mes.',
     'cta-btn1': '📲 WhatsApp directo',
     'cta-btn2': 'Formulario de contacto',
-    'lang-btn': '🌐 EN',
+    'step1-h': 'Diagnóstico gratis',
+    'step1-p': 'Analizamos tu condominio, morosidad actual y presupuesto. Te damos una propuesta en 24 horas.',
+    'step2-h': 'Firma del contrato',
+    'step2-p': 'Contrato claro con todos los servicios incluidos. Sin letra pequeña ni costos ocultos.',
+    'step3-h': 'Configuración del portal',
+    'step3-p': 'Activamos el portal de residentes con todos los departamentos y cargamos el historial de pagos.',
+    'step4-h': 'Operación activa',
+    'step4-p': 'En 30 días ves los primeros resultados de cobranza. Reporte mensual al Comité de Vigilancia.',
+    'plan1-name': 'Echo SaaS',
+    'plan1-desc': 'Para condominios con administrador interno que necesitan tecnología de punta.',
+    'plan2-name': 'Echo Co-Piloto ⭐',
+    'plan2-desc': 'Para comités que quieren mantener el control financiero sin lidiar con operaciones.',
+    'plan3-name': 'Echo Premium',
+    'plan3-desc': 'Para desarrolladores e inversionistas que quieren delegar el 100% de la operación.',
+    'consulta': 'Consulta precio',
+    'portal-badge': 'Portal de residentes',
+    'portal-h2': 'Tu condominio, digitalizado desde hoy.',
+    'btn-contacto': 'Solicitar diagnóstico gratuito →',
   },
   en: {
+    'lang-btn': '🌐 ES',
+    'nav-servicios': 'Services',
+    'nav-convenios': 'Partnerships',
+    'nav-como': 'How it works',
+    'nav-proyectos': 'Projects',
+    'nav-precios': 'Pricing',
+    'nav-contacto': 'Contact',
     'nav-portal': 'Residents Portal →',
     'nav-demo': 'Request demo',
     'hero-eyebrow': 'Available across Mexico',
-    'hero-h1': 'The management that <span class="hl">actually solves</span> the deficit.',
-    'hero-sub': 'The only company in Mexico combining a professional field team with a proprietary platform. Active collections, residents portal, and online payments — all in one contract.',
+    'hero-h1': 'We automate your condominium, reduce delinquency by <span class="hl">20%</span> and secure your finances in 72 hours.',
+    'hero-sub': 'The platform and team that developers and investors choose to manage their properties without friction, with full transparency and real-time financial reports.',
     'hero-btn1': 'Request free proposal →',
     'hero-btn2': 'See how it works',
     'hero-social': '<strong>11 condominiums</strong> in Tulum already trust us',
     'badge-problema': 'The problem we solve',
-    'h2-problema': 'Why do 98% of condominiums<br>operate without formal management?',
-    'lead-problema': 'Because existing options are either too expensive, software-only, or staff without legal backing. We are all three combined.',
+    'h2-problema': 'Why do committees and owners<br>switch their old management to <span style="color:var(--blue)">Echo?</span>',
+    'lead-problema': 'Zero opacity. Collections that actually work. Migration in 72 hours without interrupting your condominium.',
     'badge-propuesta': 'Our unique value',
-    'h2-propuesta': 'We are a company <em style="font-style:normal;color:var(--blue)">and</em> a platform.<br>No one else offers both.',
     'badge-servicios': 'Services',
     'h2-servicios': 'Everything in one contract,<br>no surprises.',
+    'lead-servicios': 'No subcontracting. No middlemen. One number for everything.',
     'badge-como': 'How it works',
     'h2-como': 'From first contact to<br>a healthy operation in 30 days',
+    'lead-como': 'A simple process, no bureaucracy. We handle the entire onboarding.',
     'badge-numeros': 'Real results',
     'h2-numeros': 'From deficit to<br><span style="color:var(--green)">healthy operations in 60 days.</span>',
+    'lead-numeros': 'Hypothetical example based on real condominiums in Tulum. Numbers vary per project.',
     'badge-legal': 'Legal framework',
     'h2-legal': '4 legal tools your<br>competitors don't use.',
+    'lead-legal': 'We know and apply the Condominium Property Law of each state to recover what is owed.',
     'badge-proyectos': 'Where we operate',
     'h2-proyectos': '11 condominiums in Tulum<br>already trust us.',
+    'lead-proyectos': 'Active presence in Tulum, Tampico, Mexico City and Mazatlán — expanding nationwide.',
+    'badge-airbnb': 'Add-on service · Echo clients only',
+    'h2-airbnb': 'Your unit on Airbnb?<br><span style="color:var(--blue)">We manage everything.</span>',
+    'lead-airbnb': 'If you're a property owner and investor, turn your unit into a source of income without lifting a finger.',
+    'badge-convenios': 'Exclusive benefits',
+    'h2-convenios': 'Partnerships for residents<br><span style="color:var(--blue)">across Mexico.</span>',
     'badge-precios': 'Transparent pricing',
-    'h2-precios': 'No hidden costs.<br>No surprises at the end of the month.',
+    'h2-precios': 'Choose the plan that<br>fits your condominium.',
+    'lead-precios': 'Choose based on who does the work. Full technology included in all plans. No hidden costs.',
     'badge-testi': 'What our condominiums say',
     'h2-testi': 'Condominiums that eliminated<br>their deficit with us.',
+    'badge-aliados': 'Commercial partners',
+    'h2-aliados': 'Integrated with the platforms<br>you already use.',
     'badge-contacto': 'Contact',
     'h2-contacto': 'Let's talk about<br>your condominium.',
-    'cta-h2': 'Eliminate your condominium's<br>deficit today.',
-    'cta-p': 'Free diagnosis in 24 hours. No commitments. We tell you exactly how much you can recover.',
+    'lead-contacto': 'No commitments. We prepare a proposal with real numbers in less than 24 hours.',
+    'cta-h2': '320 active units already back<br>our infrastructure. <span style="color:#7BA8FF">You're next.</span>',
+    'cta-p': 'Migration in 72 hours. Free diagnosis. We show you exactly how much you can recover from day one.',
     'cta-btn1': '📲 WhatsApp',
     'cta-btn2': 'Contact form',
-    'lang-btn': '🌐 ES',
+    'step1-h': 'Free diagnosis',
+    'step1-p': 'We analyze your condominium, current delinquency and budget. We give you a proposal in 24 hours.',
+    'step2-h': 'Contract signing',
+    'step2-p': 'Clear contract with all services included. No fine print, no hidden costs.',
+    'step3-h': 'Portal setup',
+    'step3-p': 'We activate the residents portal with all units and load the payment history.',
+    'step4-h': 'Live operations',
+    'step4-p': 'In 30 days you see the first collection results. Monthly report to the Oversight Committee.',
+    'plan1-name': 'Echo SaaS',
+    'plan1-desc': 'For condominiums with an internal administrator who need cutting-edge technology.',
+    'plan2-name': 'Echo Co-Pilot ⭐',
+    'plan2-desc': 'For committees who want financial control without dealing with day-to-day operations.',
+    'plan3-name': 'Echo Premium',
+    'plan3-desc': 'For developers and investors who want to delegate 100% of operations.',
+    'consulta': 'Get pricing',
+    'portal-badge': 'Residents portal',
+    'portal-h2': 'Your condominium, digitized today.',
+    'btn-contacto': 'Request free diagnosis →',
   }
 };
 
@@ -1055,15 +1129,11 @@ function toggleLang() {
   const t = translations[currentLang];
   document.getElementById('lang-btn').textContent = t['lang-btn'];
   document.documentElement.lang = currentLang;
-
-  // Update all translatable elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (t[key]) el.innerHTML = t[key];
   });
-
-  // Update page title
-  document.title = currentLang === 'en' 
+  document.title = currentLang === 'en'
     ? 'Echo Administration — Company & Platform for your Condominium'
     : 'Echo Administración — Empresa + Plataforma para tu Condominio';
 }
