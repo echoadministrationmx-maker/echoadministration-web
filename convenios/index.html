@@ -1,1 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convenios para Residentes — Echo Administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0C1320;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--yellow:#D97706;--yellow-light:#FFFBEB}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--body)}
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-mark{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.nav-logo-mark svg{width:18px;height:18px}
+.nav-logo-name{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;color:var(--ink)}
+.nav-logo-name span{color:var(--blue)}
+.nav-back{font-size:14px;color:var(--blue);text-decoration:none;font-weight:500}
+.hero{background:linear-gradient(135deg,var(--ink),#1847CC);padding:64px 32px;text-align:center;color:#fff}
+.hero h1{font-family:'Bricolage Grotesque',sans-serif;font-size:42px;font-weight:800;margin-bottom:12px;letter-spacing:-.03em}
+.hero p{font-size:16px;opacity:.75;max-width:500px;margin:0 auto 28px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:600;color:#fff;margin-bottom:20px}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+.section{padding:56px 0}
+.filtros-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:20px 0;position:sticky;top:64px;z-index:50}
+.filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filtros-label{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.filtro-btn{font-size:13px;font-weight:500;color:var(--muted);background:var(--bg);border:1.5px solid var(--border);border-radius:100px;padding:7px 16px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.filtro-btn:hover,.filtro-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.filtro-cat{font-size:13px;font-weight:500;color:var(--muted);background:var(--bg);border:1.5px solid var(--border);border-radius:100px;padding:7px 16px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.filtro-cat:hover,.filtro-cat.active{background:var(--blue-light);color:var(--blue);border-color:var(--blue)}
+.convenios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.conv-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:28px;transition:transform .15s,box-shadow .15s,border-color .15s}
+.conv-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(24,71,204,.1);border-color:rgba(24,71,204,.2)}
+.conv-card.destacado{border-color:var(--blue);position:relative;overflow:hidden}
+.conv-card.destacado::before{content:'★ Destacado';position:absolute;top:12px;right:12px;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px}
+.conv-ico{font-size:36px;margin-bottom:14px}
+.conv-estado{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.conv-estado-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.conv-name{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.conv-desc{font-size:13.5px;color:var(--muted);line-height:1.65;margin-bottom:16px}
+.conv-beneficio{background:var(--green-light);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--green);margin-bottom:12px}
+.conv-tags{display:flex;gap:6px;flex-wrap:wrap}
+.conv-tag{font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:3px 10px;color:var(--muted)}
+.conv-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-top:14px}
+.conv-status.activo{background:var(--green-light);color:var(--green)}
+.conv-status.proximo{background:var(--yellow-light);color:var(--yellow)}
+.cta-aliado{background:var(--ink);border-radius:20px;padding:48px;text-align:center;margin:48px 0;color:#fff}
+.cta-aliado h2{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:800;margin-bottom:10px}
+.cta-aliado p{font-size:15px;opacity:.7;margin-bottom:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;text-decoration:none;transition:all .18s}
+.btn-white{background:#fff;color:var(--blue)}.btn-white:hover{background:#f0f4ff}
+.btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.empty{text-align:center;padding:64px;color:var(--muted)}
+.empty div{font-size:48px;margin-bottom:16px}
+footer{background:var(--ink);padding:28px 32px;text-align:center;font-size:13px;color:rgba(255,255,255,.35)}
+@media(max-width:768px){.convenios-grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
+</style>
+</head>
+<body>
 
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+    <span class="nav-logo-name">Echo <span>Administración</span></span>
+  </a>
+  <a href="/" class="nav-back">← Regresar al inicio</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">🤝 Beneficios exclusivos para residentes Echo</div>
+  <h1>Convenios y beneficios</h1>
+  <p>Descuentos y experiencias exclusivas en los mejores negocios de tu ciudad. Solo para residentes Echo.</p>
+</div>
+
+<div class="filtros-wrap">
+  <div class="container">
+    <div class="filtros">
+      <span class="filtros-label">🏙️ Ciudad:</span>
+      <button class="filtro-btn active" onclick="filtrarCiudad('todos',this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrarCiudad('tulum',this)">Tulum</button>
+      <button class="filtro-btn" onclick="filtrarCiudad('tampico',this)">Tampico</button>
+      <button class="filtro-btn" onclick="filtrarCiudad('cdmx',this)">CDMX</button>
+      <button class="filtro-btn" onclick="filtrarCiudad('mazatlan',this)">Mazatlán</button>
+      <span style="width:1px;height:20px;background:var(--border);margin:0 4px"></span>
+      <span class="filtros-label">🏷️ Categoría:</span>
+      <button class="filtro-cat active" onclick="filtrarCat('todas',this)">Todas</button>
+      <button class="filtro-cat" onclick="filtrarCat('restaurantes',this)">Restaurantes</button>
+      <button class="filtro-cat" onclick="filtrarCat('tours',this)">Tours</button>
+      <button class="filtro-cat" onclick="filtrarCat('transporte',this)">Transporte</button>
+      <button class="filtro-cat" onclick="filtrarCat('eventos',this)">Eventos</button>
+      <button class="filtro-cat" onclick="filtrarCat('bienestar',this)">Bienestar</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div id="convenios-grid" class="convenios-grid"></div>
+    <div id="empty" class="empty hidden"><div>🔍</div><p>No hay convenios para este filtro todavía.<br>¡Estamos trabajando en más alianzas!</p></div>
+    <div class="cta-aliado">
+      <h2>¿Tienes un negocio?</h2>
+      <p>Únete a nuestra red de aliados y llega a cientos de residentes en toda la República.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="mailto:echoadministrationmx@gmail.com" class="btn btn-white">✉️ Contactar para alianza</a>
+        <a href="https://wa.me/529981234567" class="btn btn-ghost">📲 WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 Echo Administración · Tulum · Tampico · CDMX · Mazatlán</footer>
+
+<script>
+const convenios = [
+  {nombre:'Casa Tortuga',ico:'🐢',estado:'tulum',cat:'restaurantes',desc:'Restaurante y beach club en el corazón de Tulum.',beneficio:'10% de descuento en cuenta de alimentos',tags:['Beach club','Mariscos','Tulum'],status:'activo',destacado:true},
+  {nombre:'Mia Restaurant',ico:'🌺',estado:'tulum',cat:'restaurantes',desc:'Experiencia gastronómica única con vista al Mar Caribe.',beneficio:'15% de descuento en cena para 2+',tags:['Fine dining','Vista al mar'],status:'activo',destacado:true},
+  {nombre:'Bagatelle Tulum',ico:'🥂',estado:'tulum',cat:'restaurantes',desc:'El restaurante más exclusivo de Tulum. Gastronomía y ambiente VIP.',beneficio:'Reservación preferencial + descuento en consumo',tags:['VIP','Música en vivo'],status:'activo',destacado:true},
+  {nombre:'Tours Cenotes',ico:'🤿',estado:'tulum',cat:'tours',desc:'Recorridos por los cenotes más impresionantes de la Riviera Maya.',beneficio:'15% off en tours seleccionados',tags:['Cenotes','Snorkel'],status:'activo'},
+  {nombre:'Traslados Cancún-Tulum',ico:'🚗',estado:'tulum',cat:'transporte',desc:'Traslados privados entre aeropuerto de Cancún y Tulum.',beneficio:'Tarifa preferente para residentes y huéspedes',tags:['Aeropuerto','Privado'],status:'activo'},
+  {nombre:'Fiestas Luna Llena',ico:'🌙',estado:'tulum',cat:'eventos',desc:'Acceso preferencial a los mejores eventos de Tulum.',beneficio:'Lista de invitados + descuento en consumo mínimo',tags:['Nightlife','Playa'],status:'activo'},
+  {nombre:'Spa Tulum Wellness',ico:'💆',estado:'tulum',cat:'bienestar',desc:'Spa y centro de bienestar con tratamientos holísticos.',beneficio:'20% en masajes y tratamientos',tags:['Masajes','Yoga'],status:'proximo'},
+  {nombre:'El Tajín Tampico',ico:'🌮',estado:'tampico',cat:'restaurantes',desc:'La mejor cocina tampiqueña con platillos tradicionales.',beneficio:'10% de descuento en tu cuenta',tags:['Comida local','Mariscos'],status:'proximo'},
+  {nombre:'Tours Laguna del Carpintero',ico:'🦜',estado:'tampico',cat:'tours',desc:'Recorridos en lancha por la Laguna del Carpintero.',beneficio:'Tarifa preferente para residentes Echo',tags:['Naturaleza','Aves'],status:'proximo'},
+  {nombre:'Transporte Tampico',ico:'🚕',estado:'tampico',cat:'transporte',desc:'Servicio de transporte confiable en Tampico.',beneficio:'Descuento en traslados programados',tags:['Aeropuerto','Seguro'],status:'proximo'},
+  {nombre:'Restaurante CDMX',ico:'🍜',estado:'cdmx',cat:'restaurantes',desc:'Gastronomía de vanguardia en la Ciudad de México.',beneficio:'Beneficios exclusivos para residentes Echo',tags:['Gourmet','Moderno'],status:'proximo'},
+  {nombre:'Tours Culturales CDMX',ico:'🏛️',estado:'cdmx',cat:'tours',desc:'Recorridos culturales e históricos por la CDMX.',beneficio:'Descuentos en tours y museos',tags:['Cultura','Historia'],status:'proximo'},
+  {nombre:'Mariscos Mazatlán',ico:'🦐',estado:'mazatlan',cat:'restaurantes',desc:'Los mejores mariscos del Pacífico en Mazatlán.',beneficio:'10% de descuento en mariscos',tags:['Mariscos','Pacífico'],status:'proximo'},
+  {nombre:'Tours Isla de la Piedra',ico:'🏖️',estado:'mazatlan',cat:'tours',desc:'Excursiones a las playas y puntos turísticos de Mazatlán.',beneficio:'Tarifa especial para residentes Echo',tags:['Playa','Aventura'],status:'proximo'},
+];
+
+const ciudadLabels = {tulum:'Tulum, Q.Roo',tampico:'Tampico, Tamps.',cdmx:'Ciudad de México',mazatlan:'Mazatlán, Sin.'};
+let eActivo='todos', cActiva='todas';
+
+function render() {
+  let f = convenios;
+  if (eActivo!=='todos') f=f.filter(c=>c.estado===eActivo);
+  if (cActiva!=='todas') f=f.filter(c=>c.cat===cActiva);
+  const grid=document.getElementById('convenios-grid');
+  const empty=document.getElementById('empty');
+  if (!f.length){grid.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  grid.innerHTML=f.map(c=>`
+    <div class="conv-card ${c.destacado?'destacado':''}">
+      <div class="conv-ico">${c.ico}</div>
+      <div class="conv-estado"><span class="conv-estado-dot"></span>${ciudadLabels[c.estado]||c.estado}</div>
+      <div class="conv-name">${c.nombre}</div>
+      <div class="conv-desc">${c.desc}</div>
+      <div class="conv-beneficio">🎁 ${c.beneficio}</div>
+      <div class="conv-tags">${c.tags.map(t=>`<span class="conv-tag">${t}</span>`).join('')}</div>
+      <span class="conv-status ${c.status}">${c.status==='activo'?'✓ Convenio activo':'⏳ Próximamente'}</span>
+    </div>`).join('');
+}
+
+function filtrarCiudad(v,el){eActivo=v;document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
+function filtrarCat(v,el){cActiva=v;document.querySelectorAll('.filtro-cat').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
+render();
+</script>
+</body>
+</html>
