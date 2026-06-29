@@ -160,6 +160,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Documentos
       </button>
+      <button class="nav-item" onclick="go('comunidad',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Comunidad
+      </button>
     </div>
     <div class="sb-bottom">
       <button class="btn-out" onclick="doLogout()">← Cerrar sesión</button>
@@ -261,6 +265,57 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
+      <!-- COMUNIDAD Y AYUDA -->
+      <div class="page" id="page-comunidad">
+
+        <!-- 1) EMERGENCIAS -->
+        <div class="card" style="border-color:#FECACA;background:linear-gradient(135deg,#FEF2F2,#fff)">
+          <div class="card-title" style="color:var(--coral)">🚨 Emergencias · Quintana Roo</div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #FECACA;border-radius:10px;padding:18px">
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--coral)">Emergencia general</div>
+              <div style="font-size:46px;font-weight:800;color:var(--coral);line-height:1;margin-top:2px">911</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Policía · Bomberos · Ambulancia</div>
+            </div>
+            <a href="tel:911" style="display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#fff;text-decoration:none;border-radius:10px;padding:15px 26px;font-size:16px;font-weight:700">📞 Marcar 911</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px">
+            <a href="tel:+529848061349" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Cruz Roja Tulum</div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 806 1349</div>
+            </a>
+            <a href="tel:+529841234567" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Protección Civil</div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">Editar número</div>
+            </a>
+            <a href="tel:+529841234567" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Bomberos Tulum</div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">Editar número</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- 2) SOPORTE WHATSAPP -->
+        <a id="wa-soporte" href="#" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;text-decoration:none;background:#25D366;border-radius:12px;padding:18px 20px;margin-bottom:16px">
+          <span style="font-size:30px">💬</span>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:700;color:#fff">Soporte por WhatsApp</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.9)">Escríbenos y te ayudamos con tu portal o tus pagos.</div>
+          </div>
+          <span style="color:#fff;font-size:22px">›</span>
+        </a>
+
+        <!-- 3) CONVENIOS ACTIVOS -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div class="card-title" style="margin-bottom:0">🤝 Convenios activos para residentes</div>
+            <span class="kpi-pill success" style="margin-top:0">Beneficios exclusivos</span>
+          </div>
+          <div id="convenios-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"></div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>
@@ -279,6 +334,43 @@ const H = {
 let residente = null;
 let pagos = [];
 
+/* ============================================================
+   EDITABLE — Convenios. Agrega o quita objetos de esta lista.
+   ============================================================ */
+const CONVENIOS_ACTIVOS = [
+  { nombreNegocio: 'Restaurante La Palapa', descuento: '15% en alimentos',            vigencia: '31 dic 2026' },
+  { nombreNegocio: 'Spa Maya Wellness',     descuento: '20% en masajes',              vigencia: '30 sep 2026' },
+  { nombreNegocio: 'Gimnasio Tulum Fit',    descuento: '1 mes gratis al inscribirse', vigencia: '31 dic 2026' },
+  { nombreNegocio: 'Farmacia del Centro',   descuento: '10% en medicamentos',         vigencia: 'Permanente'  },
+];
+
+/* ============================================================
+   EDITABLE — WhatsApp. Formato: 52 + 1 + 10 dígitos (MX).
+   ============================================================ */
+const WHATSAPP_NUMERO = '5215576099114';
+const WHATSAPP_TEXTO  = 'Hola Echo Administration, necesito ayuda con mi portal';
+
+function renderConvenios() {
+  const g = document.getElementById('convenios-grid');
+  if (!g) return;
+  if (!CONVENIOS_ACTIVOS.length) {
+    g.innerHTML = '<p style="color:var(--muted);font-size:13px">Aún no hay convenios activos. ¡Pronto habrá beneficios para ti!</p>';
+    return;
+  }
+  g.innerHTML = CONVENIOS_ACTIVOS.map(c => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">${c.nombreNegocio}</div>
+      <div style="font-size:13px;font-weight:600;color:var(--blue);margin-top:4px">${c.descuento}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">Vigencia: ${c.vigencia}</div>
+    </div>`).join('');
+}
+
+function initComunidad() {
+  renderConvenios();
+  const wa = document.getElementById('wa-soporte');
+  if (wa) wa.href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(WHATSAPP_TEXTO)}`;
+}
+
 async function doLogin() {
   const u = document.getElementById('input-user').value.trim();
   const p = document.getElementById('input-pass').value.trim();
@@ -291,62 +383,63 @@ async function doLogin() {
   btn.disabled = true; btn.textContent = 'Verificando...';
 
   try {
-    const r = await fetch(`${URL}/residentes?user_id=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}&limit=1`, { headers: H });
+    const ctrl = new AbortController();
+    const reloj = setTimeout(() => ctrl.abort(), 12000);
+    const r = await fetch(`${URL}/rpc/login_residente`, {
+      method: 'POST',
+      headers: H,
+      body: JSON.stringify({ p_user_id: u, p_password: p }),
+      signal: ctrl.signal
+    });
+    clearTimeout(reloj);
     const d = await r.json();
 
-    if (!r.ok || !d || d.length === 0) {
+    if (!r.ok || !d || !d.ok) {
       err.style.display = 'block';
       err.textContent = 'Clave o contraseña incorrecta. Contacta: echoadministrationmx@gmail.com';
       btn.disabled = false; btn.textContent = 'Entrar al portal →';
       return;
     }
 
-    residente = d[0];
+    residente = d.residente;
+    pagos = d.pagos || [];
     document.getElementById('sb-nombre').textContent = residente.nombre_completo;
     document.getElementById('sb-depto').textContent = 'Depto ' + residente.departamento + ' · Manzana 80';
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('portal').classList.remove('hidden');
-    cargarDatos();
+    pintarDatos();
 
   } catch(e) {
     err.style.display = 'block';
-    err.textContent = 'Error de conexión: ' + e.message;
+    err.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
     btn.disabled = false; btn.textContent = 'Entrar al portal →';
   }
 }
 
-async function cargarDatos() {
-  try {
-    const r = await fetch(`${URL}/pagos?id_residente=eq.${residente.id_residente}&order=fecha_vencimiento.desc`, { headers: H });
-    pagos = await r.json() || [];
+function pintarDatos() {
+  const pags = pagos.filter(p => p.estado === 'pagado');
+  const pends = pagos.filter(p => p.estado === 'pendiente');
+  const deuda = pends.reduce((s,p) => s + (p.monto || 500), 0);
 
-    const pags = pagos.filter(p => p.estado === 'pagado');
-    const pends = pagos.filter(p => p.estado === 'pendiente');
-    const deuda = pends.reduce((s,p) => s + (p.monto || 500), 0);
+  document.getElementById('kpi-deuda').textContent = '$' + deuda.toLocaleString();
+  document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? pends.length + ' meses pendientes' : '✓ Al corriente';
+  document.getElementById('kpi-pagados').textContent = pags.length;
+  document.getElementById('kpi-pendientes').textContent = pends.length;
+  document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
+  document.getElementById('ec-total').textContent = '$' + deuda.toLocaleString();
+  document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
+  document.getElementById('ec-pag').textContent = pags.length;
+  document.getElementById('ec-pend').textContent = pends.length;
+  document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
+  document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
 
-    document.getElementById('kpi-deuda').textContent = '$' + deuda.toLocaleString();
-    document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? pends.length + ' meses pendientes' : '✓ Al corriente';
-    document.getElementById('kpi-pagados').textContent = pags.length;
-    document.getElementById('kpi-pendientes').textContent = pends.length;
-    document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
-    document.getElementById('ec-total').textContent = '$' + deuda.toLocaleString();
-    document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
-    document.getElementById('ec-pag').textContent = pags.length;
-    document.getElementById('ec-pend').textContent = pends.length;
-    document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
-    document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
+  renderMovimientos(pagos.slice(0, 6));
+  renderCuenta(pagos);
 
-    renderMovimientos(pagos.slice(0, 6));
-    renderCuenta(pagos);
-
-    document.getElementById('dash-loading').classList.add('hidden');
-    document.getElementById('dash-content').classList.remove('hidden');
-    document.getElementById('cuenta-loading').classList.add('hidden');
-    document.getElementById('cuenta-content').classList.remove('hidden');
-
-  } catch(e) {
-    document.getElementById('dash-loading').textContent = '❌ Error: ' + e.message;
-  }
+  document.getElementById('dash-loading').classList.add('hidden');
+  document.getElementById('dash-content').classList.remove('hidden');
+  document.getElementById('cuenta-loading').classList.add('hidden');
+  document.getElementById('cuenta-content').classList.remove('hidden');
 }
 
 function renderMovimientos(data) {
@@ -387,7 +480,7 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos' };
+  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Comunidad y ayuda' };
   document.getElementById('topbar-title').textContent = t[id] || id;
 }
 
@@ -413,6 +506,7 @@ function doPago() {
   alert('🚀 Próximamente: Pago con Mercado Pago\n\nPor ahora contacta:\nechoadministrationmx@gmail.com\nWhatsApp: +52 998 123 4567');
 }
 
+initComunidad();
 document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>
 </body>
