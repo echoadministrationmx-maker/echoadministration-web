@@ -374,36 +374,43 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <script>
 const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
 const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
-const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json' };
-const ADMIN_USER = 'echoadmin';
-const ADMIN_PASS = 'Echo2026#';
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
 
 let allResidentes = [], allPagos = [], allMorosos = [], carteraVista = '2026';
 let deudaMap = {};
 
-function adminLogin() {
+async function adminLogin() {
   const u = document.getElementById('a-user').value.trim();
   const p = document.getElementById('a-pass').value.trim();
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
+  const errEl = document.getElementById('a-err');
+  errEl.style.display = 'none';
+  if (!u || !p) { errEl.textContent = 'Llena ambos campos.'; errEl.style.display = 'block'; return; }
+  try {
+    const ctrl = new AbortController();
+    const reloj = setTimeout(() => ctrl.abort(), 15000);
+    const r = await fetch(`${URL}/rpc/admin_panel`, {
+      method: 'POST',
+      headers: H,
+      body: JSON.stringify({ p_user: u, p_password: p }),
+      signal: ctrl.signal
+    });
+    clearTimeout(reloj);
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) {
+      errEl.textContent = 'Usuario o contraseña incorrectos.';
+      errEl.style.display = 'block';
+      return;
+    }
+    allResidentes = d.residentes || [];
+    allPagos = d.pagos || [];
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('admin').classList.remove('hidden');
     document.getElementById('tb-fecha').textContent = new Date().toLocaleDateString('es-MX', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    cargarDatos();
-  } else {
-    document.getElementById('a-err').style.display = 'block';
-  }
-}
-
-async function cargarDatos() {
-  try {
-    const rRes = await fetch(`${URL}/residentes?order=departamento.asc&limit=1000`, { headers: H });
-    allResidentes = await rRes.json() || [];
-    const rPag = await fetch(`${URL}/pagos?order=fecha_vencimiento.desc&limit=20000`, { headers: H });
-    allPagos = await rPag.json() || [];
     calcularMetricas();
     poblarFiltros();
   } catch(e) {
-    document.getElementById('ov-loading').innerHTML = '❌ Error: ' + e.message;
+    errEl.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
+    errEl.style.display = 'block';
   }
 }
 
