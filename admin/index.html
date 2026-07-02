@@ -360,10 +360,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <!-- INCIDENCIAS -->
       <div class="page" id="page-incidencias">
         <div class="card">
-          <div class="card-hdr"><span class="card-title">📋 Incidencias reportadas</span></div>
-          <div style="background:var(--yellow-light);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:16px;font-size:13px;color:var(--yellow)">
-            ⏳ Módulo en desarrollo. Próximamente verás todos los reportes de residentes en tiempo real.
+          <div class="card-hdr">
+            <span class="card-title">📋 Incidencias reportadas</span>
+            <span id="inc-admin-count" style="font-size:12px;color:var(--muted)"></span>
           </div>
+          <div style="margin-bottom:14px">
+            <select id="inc-admin-filtro" onchange="renderIncidenciasAdmin()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)">
+              <option value="todos">Todas</option>
+              <option value="Pendiente">Pendientes</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Resuelta">Resueltas</option>
+            </select>
+          </div>
+          <div id="inc-admin-lista"></div>
         </div>
       </div>
 
@@ -377,6 +386,7 @@ const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
 const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
 
 let allResidentes = [], allPagos = [], allMorosos = [], carteraVista = '2026';
+let allIncidencias = [], adminUser = '', adminPass = '';
 let deudaMap = {};
 
 async function adminLogin() {
@@ -403,11 +413,15 @@ async function adminLogin() {
     }
     allResidentes = d.residentes || [];
     allPagos = d.pagos || [];
+    allIncidencias = d.incidencias || [];
+    adminUser = u;
+    adminPass = p;
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('admin').classList.remove('hidden');
     document.getElementById('tb-fecha').textContent = new Date().toLocaleDateString('es-MX', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
     calcularMetricas();
     poblarFiltros();
+    renderIncidenciasAdmin();
   } catch(e) {
     errEl.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
     errEl.style.display = 'block';
@@ -670,6 +684,92 @@ function fmtMes(f) {
   const m = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const p = f.split('-');
   return m[parseInt(p[1])] + ' ' + p[0];
+}
+
+function fmtFechaInc(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+  catch (e) { return iso; }
+}
+
+function renderIncidenciasAdmin() {
+  const sel = document.getElementById('inc-admin-filtro');
+  const filtro = sel ? sel.value : 'todos';
+  let data = allIncidencias;
+  if (filtro !== 'todos') data = data.filter(i => (i.estado || 'Pendiente') === filtro);
+  const countEl = document.getElementById('inc-admin-count');
+  if (countEl) countEl.textContent = data.length + ' reporte(s)';
+  const cont = document.getElementById('inc-admin-lista');
+  if (!cont) return;
+  if (!data.length) {
+    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sin incidencias para este filtro.</div>';
+    return;
+  }
+  const badge = est => {
+    const map = { 'Pendiente':['#FEF3C7','#92400E'], 'En proceso':['#DBEAFE','#1E40AF'], 'Resuelta':['#D1FAE5','#065F46'] };
+    const c = map[est] || ['#F3F4F6','#374151'];
+    return '<span style="background:' + c[0] + ';color:' + c[1] + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">' + est + '</span>';
+  };
+  const btnEstado = (id, est, actual) => {
+    const activo = est === actual;
+    const style = 'font-size:12px;font-family:inherit;cursor:pointer;border-radius:6px;padding:5px 10px;border:1px solid var(--border);' + (activo ? 'background:var(--blue);color:#fff;border-color:var(--blue)' : 'background:#fff;color:var(--ink)');
+    return `<button onclick="cambiarEstadoIncidencia(${id},'${est}')" style="${style}">${est}</button>`;
+  };
+  cont.innerHTML = data.map(i => {
+    const est = i.estado || 'Pendiente';
+    const fotoBtn = i.tiene_foto
+      ? `<button onclick="verFotoIncidencia(${i.id},this)" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:5px 10px">📷 Ver foto</button>`
+      : '';
+    return `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div>
+          <span style="font-weight:700;color:var(--ink)">${i.categoria || 'Otro'}</span>
+          <span style="color:var(--muted);font-size:12px"> · Depto ${i.departamento || '—'} · ${i.nombre || ''}</span>
+        </div>
+        ${badge(est)}
+      </div>
+      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(i.descripcion || '').replace(/</g,'&lt;')}</div>
+      <div id="inc-foto-${i.id}" style="margin-top:8px">${fotoBtn}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(i.created_at)}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        ${btnEstado(i.id,'Pendiente',est)}
+        ${btnEstado(i.id,'En proceso',est)}
+        ${btnEstado(i.id,'Resuelta',est)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function verFotoIncidencia(id, btn) {
+  btn.disabled = true; btn.textContent = 'Cargando…';
+  try {
+    const r = await fetch(`${URL}/rpc/obtener_foto_incidencia`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id })
+    });
+    const d = await r.json();
+    const cont = document.getElementById('inc-foto-' + id);
+    if (d && d.ok && d.foto) cont.innerHTML = '<img src="' + d.foto + '" style="max-width:240px;border-radius:8px;border:1px solid var(--border)">';
+    else cont.innerHTML = '<span style="font-size:12px;color:var(--muted)">Sin foto disponible.</span>';
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '📷 Ver foto';
+  }
+}
+
+async function cambiarEstadoIncidencia(id, estado) {
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_incidencia_estado`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_estado: estado })
+    });
+    const d = await r.json();
+    if (d && d.ok) {
+      const inc = allIncidencias.find(x => x.id === id);
+      if (inc) inc.estado = estado;
+      renderIncidenciasAdmin();
+    }
+  } catch (e) {}
 }
 
 function go(id, el) {
