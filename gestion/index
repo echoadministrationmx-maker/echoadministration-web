@@ -1,1 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de la plataforma — Echo Rentas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1847CC;--blue-mid:#2558E8;--blue-light:#EBF0FD;--green:#059669;--ink:#0C1320;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh;line-height:1.6}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;color:var(--ink);letter-spacing:-.02em}
+.hidden{display:none!important}
+/* LOGIN */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#0C1320,#1847CC)}
+.lbox{background:#fff;border-radius:20px;padding:40px 34px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.llogo{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:22px;font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:var(--ink)}
+.llogo span{color:var(--blue)}
+.lm{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.lbox h2{font-size:20px;text-align:center;margin-bottom:4px}
+.lsub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px}
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.fg input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none}
+.fg input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,71,204,.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:9px;font-family:inherit;font-weight:700;cursor:pointer;transition:all .18s}
+.btn-primary{background:var(--blue);color:#fff;padding:13px;font-size:15px;width:100%}
+.btn-primary:hover{background:var(--blue-mid)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.lerr{display:none;background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center}
+/* APP */
+.top{background:#fff;border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:10}
+.top .l{display:flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque';font-weight:800;color:var(--ink)}
+.top .l span{color:var(--blue)}
+.bout{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit}
+.bout:hover{color:var(--ink)}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 22px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px}
+.kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.kpi .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;color:var(--ink);margin-top:5px}
+.kpi .v.blue{color:var(--blue)}.kpi .v.green{color:var(--green)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.bar h2{font-size:20px}
+select{padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--ink)}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.chip{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:10px}
+.fields div{font-size:13px;color:var(--body)}
+.fields .k{color:var(--muted)}
+.sbtn{font-size:12px;font-family:inherit;cursor:pointer;border-radius:6px;padding:5px 11px;border:1px solid var(--border);background:#fff;color:var(--ink)}
+.sbtn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px}
+@media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
 
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div class="llogo"><div class="lm"><svg viewBox="0 0 20 20" width="17" height="17"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>Echo <span>Rentas</span></div>
+    <h2>Panel de la plataforma</h2>
+    <div class="lsub">Acceso privado · Solicitudes de propietarios</div>
+    <div class="fg"><label>Usuario</label><input id="u" placeholder="plataforma" autocomplete="username"></div>
+    <div class="fg"><label>Contraseña</label><input id="p" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn btn-primary" id="bin" onclick="entrar()">Entrar</button>
+    <div class="lerr" id="err">Usuario o contraseña incorrectos.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="top">
+    <div class="l"><div class="lm" style="width:26px;height:26px"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>Echo <span>Rentas</span></div>
+    <button class="bout" onclick="salir()">← Cerrar sesión</button>
+  </div>
+  <div class="wrap">
+    <h1 style="font-size:24px;margin-bottom:4px">Solicitudes de propietarios</h1>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px">Propietarios interesados en que administremos su departamento.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Total</div><div class="v" id="k-total">0</div></div>
+      <div class="kpi"><div class="l">Nuevas</div><div class="v blue" id="k-nuevo">0</div></div>
+      <div class="kpi"><div class="l">Contactadas</div><div class="v" id="k-cont">0</div></div>
+      <div class="kpi"><div class="l">Cerradas</div><div class="v green" id="k-cerr">0</div></div>
+    </div>
+    <div class="bar">
+      <h2>Bandeja</h2>
+      <select id="filtro" onchange="render()">
+        <option value="todos">Todas</option>
+        <option value="Nuevo">Nuevas</option>
+        <option value="Contactado">Contactadas</option>
+        <option value="Cerrado">Cerradas</option>
+      </select>
+    </div>
+    <div id="lista"></div>
+  </div>
+</div>
+
+<script>
+const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
+const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
+let DATA = [], U = '', P = '';
+
+async function entrar() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value.trim();
+  const err = document.getElementById('err');
+  const btn = document.getElementById('bin');
+  err.style.display = 'none';
+  if (!u || !p) { err.textContent = 'Llena ambos campos.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Verificando…';
+  try {
+    const r = await fetch(`${URL}/rpc/panel_rentas`, { method:'POST', headers:H, body: JSON.stringify({ p_user:u, p_password:p }) });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) { err.textContent = 'Usuario o contraseña incorrectos.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Entrar'; return; }
+    DATA = d.solicitudes || []; U = u; P = p;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    render();
+  } catch (e) {
+    err.textContent = 'Error de conexión. Intenta de nuevo.'; err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+function salir() { location.reload(); }
+
+function chip(est) {
+  const m = { 'Nuevo':['#DBEAFE','#1E40AF'], 'Contactado':['#FEF3C7','#92400E'], 'Cerrado':['#D1FAE5','#065F46'] };
+  const c = m[est] || ['#F3F4F6','#374151'];
+  return '<span class="chip" style="background:'+c[0]+';color:'+c[1]+'">'+est+'</span>';
+}
+function fmt(iso) { if(!iso) return ''; try { return new Date(iso).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){ return iso; } }
+function fila(k, v) { return v ? '<div><span class="k">'+k+':</span> '+(''+v).replace(/</g,'&lt;')+'</div>' : ''; }
+function sbtn(id, est, actual) { return '<button class="sbtn'+(est===actual?' on':'')+'" onclick="cambiar('+id+",'"+est+"')\">"+est+'</button>'; }
+
+function render() {
+  const f = document.getElementById('filtro').value;
+  document.getElementById('k-total').textContent = DATA.length;
+  document.getElementById('k-nuevo').textContent = DATA.filter(s=>(s.estado||'Nuevo')==='Nuevo').length;
+  document.getElementById('k-cont').textContent = DATA.filter(s=>s.estado==='Contactado').length;
+  document.getElementById('k-cerr').textContent = DATA.filter(s=>s.estado==='Cerrado').length;
+  let data = DATA;
+  if (f !== 'todos') data = data.filter(s => (s.estado||'Nuevo') === f);
+  const cont = document.getElementById('lista');
+  if (!data.length) { cont.innerHTML = '<div class="empty">No hay solicitudes en este filtro. Cuando un propietario envíe el formulario en /rentas, aparecerá aquí.</div>'; return; }
+  cont.innerHTML = data.map(s => {
+    const est = s.estado || 'Nuevo';
+    return '<div class="card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
+      + '<div style="font-weight:700;color:var(--ink);font-size:16px;font-family:Bricolage Grotesque">'+(s.nombre||'').replace(/</g,'&lt;')+'</div>'+chip(est)+'</div>'
+      + '<div class="fields">'
+      + fila('Teléfono', s.telefono) + fila('Correo', s.correo)
+      + fila('Desarrollo', s.desarrollo) + fila('Dirección', s.direccion)
+      + fila('Recámaras', s.habitaciones) + fila('Baños', s.banos)
+      + fila('Capacidad', s.capacidad) + fila('¿Se renta?', s.se_renta)
+      + fila('Plataformas', s.plataformas) + fila('Disponibilidad', s.disponibilidad)
+      + '</div>'
+      + (s.comentarios ? '<div style="font-size:13px;margin-top:8px"><span class="k" style="color:var(--muted)">Comentarios:</span> '+(''+s.comentarios).replace(/</g,'&lt;')+'</div>' : '')
+      + '<div style="font-size:11px;color:var(--muted);margin-top:10px">'+fmt(s.created_at)+'</div>'
+      + '<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">'+sbtn(s.id,'Nuevo',est)+sbtn(s.id,'Contactado',est)+sbtn(s.id,'Cerrado',est)+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+async function cambiar(id, estado) {
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_solicitud_estado`, { method:'POST', headers:H, body: JSON.stringify({ p_user:U, p_password:P, p_id:id, p_estado:estado }) });
+    const d = await r.json();
+    if (d && d.ok) { const s = DATA.find(x=>x.id===id); if (s) s.estado = estado; render(); }
+  } catch (e) {}
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && !document.getElementById('login').classList.contains('hidden')) entrar(); });
+</script>
+</body>
+</html>
