@@ -3,8 +3,10 @@
   "rewrites": [
     { "source": "/portal", "destination": "/portal/index.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/gestion", "destination": "/gestion/index.html" },
+    { "source": "/rentas", "destination": "/rentas/index.html" },
     { "source": "/convenios", "destination": "/convenios/index.html" },
-    { "source": "/privacidad", "destination": "/privacidad/index.html" },
-    { "source": "/terminos", "destination": "/terminos/index.html" }
+    { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/terminos", "destination": "/terminos.html" }
   ]
 }
