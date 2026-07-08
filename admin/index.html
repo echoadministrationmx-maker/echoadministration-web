@@ -169,6 +169,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Incidencias
       </button>
+      <button class="nav-item" onclick="go('llamadas',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Llamadas
+      </button>
+      <button class="nav-item" onclick="go('comunidad',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Comunidad
+      </button>
     </div>
     <div class="sb-bottom"><button class="btn-out" onclick="adminLogout()">← Cerrar sesión</button></div>
   </div>
@@ -376,6 +384,75 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         </div>
       </div>
 
+      <div class="page" id="page-llamadas">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">📌 Registrar llamada de atención</span></div>
+          <div style="display:grid;gap:14px;max-width:560px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Residente / Departamento</label>
+              <select id="ll-residente" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)"></select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Motivo</label>
+              <input id="ll-motivo" placeholder="Ej. Ruido excesivo, mascota sin correa…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Descripción</label>
+              <textarea id="ll-desc" rows="3" placeholder="Detalle de la llamada de atención…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
+            </div>
+            <div id="ll-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="ll-btn" onclick="crearLlamada()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Registrar llamada</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Historial de llamadas</span><span id="ll-count" style="font-size:12px;color:var(--muted)"></span></div>
+          <div id="ll-lista"></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-comunidad">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">📅 Crear evento</span></div>
+          <div style="display:grid;gap:12px;max-width:560px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Título</label>
+              <input id="ev-titulo" placeholder="Ej. Asamblea trimestral" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Fecha</label>
+              <input id="ev-fecha" type="date" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Descripción</label>
+              <textarea id="ev-desc" rows="2" placeholder="Detalles del evento…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
+            </div>
+            <div id="ev-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="ev-btn" onclick="crearEvento()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Agregar evento</button>
+          </div>
+          <div style="margin-top:18px" id="ev-lista"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">🗳️ Crear encuesta</span></div>
+          <div style="display:grid;gap:12px;max-width:560px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Pregunta</label>
+              <input id="en-pregunta" placeholder="Ej. ¿Qué día prefieren la asamblea?" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div style="display:grid;gap:8px">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted)">Opciones (mínimo 2)</label>
+              <input id="en-op1" placeholder="Opción 1" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op2" placeholder="Opción 2" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op3" placeholder="Opción 3 (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op4" placeholder="Opción 4 (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div id="en-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="en-btn" onclick="crearEncuesta()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Publicar encuesta</button>
+          </div>
+          <div style="margin-top:18px" id="en-lista"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -386,7 +463,7 @@ const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
 const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
 
 let allResidentes = [], allPagos = [], allMorosos = [], carteraVista = '2026';
-let allIncidencias = [], adminUser = '', adminPass = '';
+let allIncidencias = [], allLlamadas = [], allEventos = [], allEncuestas = [], adminUser = '', adminPass = '';
 let deudaMap = {};
 
 async function adminLogin() {
@@ -414,6 +491,9 @@ async function adminLogin() {
     allResidentes = d.residentes || [];
     allPagos = d.pagos || [];
     allIncidencias = d.incidencias || [];
+    allLlamadas = d.llamadas || [];
+    allEventos = d.eventos || [];
+    allEncuestas = d.encuestas || [];
     adminUser = u;
     adminPass = p;
     document.getElementById('login-screen').classList.add('hidden');
@@ -422,6 +502,10 @@ async function adminLogin() {
     calcularMetricas();
     poblarFiltros();
     renderIncidenciasAdmin();
+    poblarSelectResidentes();
+    renderLlamadasAdmin();
+    renderEventosAdmin();
+    renderEncuestasAdmin();
   } catch(e) {
     errEl.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
     errEl.style.display = 'block';
@@ -772,12 +856,207 @@ async function cambiarEstadoIncidencia(id, estado) {
   } catch (e) {}
 }
 
+function poblarSelectResidentes() {
+  const sel = document.getElementById('ll-residente');
+  if (!sel) return;
+  const ordenados = [...allResidentes].sort((a,b) => (''+a.departamento).localeCompare(''+b.departamento, 'es', {numeric:true}));
+  sel.innerHTML = '<option value="">Selecciona un residente…</option>' +
+    ordenados.map(r => '<option value="'+r.id_residente+'">Depto '+(r.departamento||'?')+' · '+(r.nombre_completo||'')+'</option>').join('');
+}
+
+function mostrarMsgLl(texto, ok) {
+  const m = document.getElementById('ll-msg');
+  m.textContent = texto; m.style.display = 'block';
+  m.style.background = ok ? '#ECFDF5' : '#FEF2F2';
+  m.style.color = ok ? '#065F46' : '#DC2626';
+  m.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
+}
+
+async function crearLlamada() {
+  const idr = document.getElementById('ll-residente').value;
+  const motivo = document.getElementById('ll-motivo').value.trim();
+  const desc = document.getElementById('ll-desc').value.trim();
+  const btn = document.getElementById('ll-btn');
+  document.getElementById('ll-msg').style.display = 'none';
+  if (!idr) { mostrarMsgLl('Selecciona un residente.', false); return; }
+  if (!desc) { mostrarMsgLl('Escribe la descripción de la llamada.', false); return; }
+  btn.disabled = true; btn.textContent = 'Registrando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_llamada_atencion`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id_residente: parseInt(idr,10), p_motivo: motivo, p_descripcion: desc })
+    });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error('fail');
+    allLlamadas.unshift({ id: d.id, id_residente: parseInt(idr,10), departamento: d.departamento, motivo: motivo || 'General', descripcion: desc, estado: 'Activa', created_at: new Date().toISOString() });
+    renderLlamadasAdmin();
+    document.getElementById('ll-motivo').value = '';
+    document.getElementById('ll-desc').value = '';
+    document.getElementById('ll-residente').value = '';
+    mostrarMsgLl('✓ Llamada registrada. El residente ya la verá en su portal.', true);
+    btn.disabled = false; btn.textContent = 'Registrar llamada';
+  } catch (e) {
+    mostrarMsgLl('No se pudo registrar. Intenta de nuevo.', false);
+    btn.disabled = false; btn.textContent = 'Registrar llamada';
+  }
+}
+
+function renderLlamadasAdmin() {
+  const cont = document.getElementById('ll-lista');
+  if (!cont) return;
+  const countEl = document.getElementById('ll-count');
+  if (countEl) countEl.textContent = allLlamadas.length + ' registro(s)';
+  if (!allLlamadas.length) {
+    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Aún no hay llamadas de atención registradas.</div>';
+    return;
+  }
+  const badge = est => {
+    const map = { 'Activa':['#FEF2F2','#DC2626','#FECACA'], 'Resuelta':['#ECFDF5','#065F46','#A7F3D0'] };
+    const c = map[est] || ['#F3F4F6','#374151','var(--border)'];
+    return '<span style="background:'+c[0]+';color:'+c[1]+';border:1px solid '+c[2]+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">'+est+'</span>';
+  };
+  const btnEstado = (id, est, actual) => {
+    const activo = est === actual;
+    const style = 'font-size:12px;font-family:inherit;cursor:pointer;border-radius:6px;padding:5px 10px;border:1px solid var(--border);' + (activo ? 'background:var(--blue);color:#fff;border-color:var(--blue)' : 'background:#fff;color:var(--ink)');
+    return `<button onclick="cambiarEstadoLlamada(${id},'${est}')" style="${style}">${est}</button>`;
+  };
+  cont.innerHTML = allLlamadas.map(l => {
+    const est = l.estado || 'Activa';
+    return `
+    <div style="border:1px solid var(--border);border-left:3px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div><span style="font-weight:700;color:var(--ink)">${(l.motivo||'General').replace(/</g,'&lt;')}</span><span style="color:var(--muted);font-size:12px"> · Depto ${l.departamento||'—'}</span></div>
+        ${badge(est)}
+      </div>
+      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(l.descripcion||'').replace(/</g,'&lt;')}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(l.created_at)}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${btnEstado(l.id,'Activa',est)}${btnEstado(l.id,'Resuelta',est)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function cambiarEstadoLlamada(id, estado) {
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_llamada_estado`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_estado: estado })
+    });
+    const d = await r.json();
+    if (d && d.ok) {
+      const l = allLlamadas.find(x => x.id === id);
+      if (l) l.estado = estado;
+      renderLlamadasAdmin();
+    }
+  } catch (e) {}
+}
+
+function msgBox(el, texto, ok) {
+  el.textContent = texto; el.style.display = 'block';
+  el.style.background = ok ? '#ECFDF5' : '#FEF2F2';
+  el.style.color = ok ? '#065F46' : '#DC2626';
+  el.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
+}
+
+async function crearEvento() {
+  const titulo = document.getElementById('ev-titulo').value.trim();
+  const fecha = document.getElementById('ev-fecha').value;
+  const desc = document.getElementById('ev-desc').value.trim();
+  const btn = document.getElementById('ev-btn'); const msg = document.getElementById('ev-msg'); msg.style.display = 'none';
+  if (!titulo || !fecha) { msgBox(msg, 'Escribe al menos título y fecha.', false); return; }
+  btn.disabled = true; btn.textContent = 'Agregando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_evento`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_titulo: titulo, p_fecha: fecha, p_descripcion: desc }) });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error();
+    allEventos.push({ id: d.id, titulo, fecha, descripcion: desc });
+    allEventos.sort((a, b) => (''+a.fecha).localeCompare(''+b.fecha));
+    renderEventosAdmin();
+    document.getElementById('ev-titulo').value = ''; document.getElementById('ev-fecha').value = ''; document.getElementById('ev-desc').value = '';
+    msgBox(msg, '✓ Evento agregado. Ya aparece en el portal de los residentes.', true);
+    btn.disabled = false; btn.textContent = 'Agregar evento';
+  } catch (e) { msgBox(msg, 'No se pudo agregar. Intenta de nuevo.', false); btn.disabled = false; btn.textContent = 'Agregar evento'; }
+}
+
+async function eliminarEvento(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  try {
+    const r = await fetch(`${URL}/rpc/eliminar_evento`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id }) });
+    const d = await r.json();
+    if (d && d.ok) { allEventos = allEventos.filter(e => e.id !== id); renderEventosAdmin(); }
+  } catch (e) {}
+}
+
+function renderEventosAdmin() {
+  const cont = document.getElementById('ev-lista'); if (!cont) return;
+  if (!allEventos.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">Sin eventos por ahora.</div>'; return; }
+  cont.innerHTML = allEventos.map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div><div style="font-weight:700;color:var(--ink);font-size:14px">${(e.titulo||'').replace(/</g,'&lt;')}</div>
+      <div style="font-size:12px;color:var(--muted)">${e.fecha||''} · ${(e.descripcion||'').replace(/</g,'&lt;')}</div></div>
+      <button onclick="eliminarEvento(${e.id})" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid #FECACA;color:#DC2626;border-radius:6px;padding:6px 10px;white-space:nowrap">Eliminar</button>
+    </div>`).join('');
+}
+
+async function crearEncuesta() {
+  const preg = document.getElementById('en-pregunta').value.trim();
+  const ops = ['en-op1','en-op2','en-op3','en-op4'].map(i => document.getElementById(i).value.trim()).filter(x => x);
+  const btn = document.getElementById('en-btn'); const msg = document.getElementById('en-msg'); msg.style.display = 'none';
+  if (!preg) { msgBox(msg, 'Escribe la pregunta.', false); return; }
+  if (ops.length < 2) { msgBox(msg, 'Agrega al menos 2 opciones.', false); return; }
+  btn.disabled = true; btn.textContent = 'Publicando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_encuesta`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_pregunta: preg, p_opciones: ops }) });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error();
+    allEncuestas.unshift({ id: d.id, pregunta: preg, opciones: ops, activa: true, total: 0, conteos: ops.map(() => 0) });
+    renderEncuestasAdmin();
+    document.getElementById('en-pregunta').value = ''; ['en-op1','en-op2','en-op3','en-op4'].forEach(i => document.getElementById(i).value = '');
+    msgBox(msg, '✓ Encuesta publicada. Los residentes ya pueden votar.', true);
+    btn.disabled = false; btn.textContent = 'Publicar encuesta';
+  } catch (e) { msgBox(msg, 'No se pudo publicar. Intenta de nuevo.', false); btn.disabled = false; btn.textContent = 'Publicar encuesta'; }
+}
+
+async function cerrarEncuesta(id, activa) {
+  try {
+    const r = await fetch(`${URL}/rpc/cerrar_encuesta`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_activa: activa }) });
+    const d = await r.json();
+    if (d && d.ok) { const e = allEncuestas.find(x => x.id === id); if (e) e.activa = activa; renderEncuestasAdmin(); }
+  } catch (e) {}
+}
+
+function renderEncuestasAdmin() {
+  const cont = document.getElementById('en-lista'); if (!cont) return;
+  if (!allEncuestas.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">Sin encuestas por ahora.</div>'; return; }
+  cont.innerHTML = allEncuestas.map(e => {
+    const ops = e.opciones || []; const conteos = e.conteos || []; const total = e.total || 0;
+    const barras = ops.map((op, i) => {
+      const c = conteos[i] || 0; const pct = total ? Math.round(c * 100 / total) : 0;
+      return `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--ink)">${(''+op).replace(/</g,'&lt;')}</span><span style="color:var(--muted)">${c} (${pct}%)</span></div><div style="height:7px;background:var(--bg);border-radius:100px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--blue)"></div></div></div>`;
+    }).join('');
+    const badge = e.activa
+      ? '<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px">Activa</span>'
+      : '<span style="background:#F3F4F6;color:#374151;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px">Cerrada</span>';
+    const toggle = e.activa
+      ? `<button onclick="cerrarEncuesta(${e.id},false)" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid var(--border);color:var(--ink);border-radius:6px;padding:6px 10px">Cerrar</button>`
+      : `<button onclick="cerrarEncuesta(${e.id},true)" style="font-size:12px;font-family:inherit;cursor:pointer;background:var(--blue);border:none;color:#fff;border-radius:6px;padding:6px 10px">Reabrir</button>`;
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px"><div style="font-weight:700;color:var(--ink);font-size:14px">${(e.pregunta||'').replace(/</g,'&lt;')}</div>${badge}</div>
+      ${barras}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span style="font-size:11px;color:var(--muted)">${total} voto(s)</span>${toggle}</div>
+    </div>`;
+  }).join('');
+}
+
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', residentes:'Residentes', incidencias:'Incidencias' };
+  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
   document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
 }
 
