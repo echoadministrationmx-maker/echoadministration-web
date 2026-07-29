@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Volver a Echo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f4f6fa;
+        color: #0c1320;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100svh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      main {
+        width: min(100%, 420px);
+        background: #ffffff;
+        border: 1px solid #dce2ed;
+        border-radius: 24px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 18px 50px rgba(12, 19, 32, 0.1);
+      }
+
+      .mark {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 20px;
+        display: grid;
+        place-items: center;
+        border-radius: 20px;
+        background: #1847cc;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 800;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 27px;
+        letter-spacing: -0.8px;
+      }
+
+      p {
+        margin: 12px 0 24px;
+        color: #5a6a85;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      a {
+        min-height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        border-radius: 15px;
+        background: #1847cc;
+        color: #fff;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      small {
+        display: block;
+        margin-top: 16px;
+        color: #7d899d;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">E</div>
+      <h1>Regresando a Echo</h1>
+      <p id="message">
+        Estamos abriendo la aplicación para verificar el estado de tu pago.
+      </p>
+      <a id="return-link" href="https://www.echoadministration.com/portal/">
+        Volver a Echo
+      </a>
+      <small>
+        Si la aplicación no se abre automáticamente, toca el botón.
+      </small>
+    </main>
+    <script>
+      (() => {
+        const pageUrl = new URL(window.location.href);
+        const appReturn = pageUrl.searchParams.get("app_return");
+        const message = document.getElementById("message");
+        const link = document.getElementById("return-link");
+
+        if (!appReturn) {
+          message.textContent =
+            "Tu operación terminó. Puedes volver al portal para consultar tus pagos.";
+          return;
+        }
+
+        try {
+          const target = new URL(appReturn);
+          if (!["resident-portal:", "exp:"].includes(target.protocol)) {
+            throw new Error("callback_not_allowed");
+          }
+
+          for (const [key, value] of pageUrl.searchParams.entries()) {
+            if (key !== "app_return") target.searchParams.set(key, value);
+          }
+
+          link.href = target.toString();
+          window.setTimeout(() => window.location.replace(target.toString()), 250);
+        } catch {
+          message.textContent =
+            "No pudimos abrir la aplicación automáticamente. Vuelve al portal para consultar tus pagos.";
+        }
+      })();
+    </script>
+  </body>
+</html>
