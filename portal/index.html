@@ -1,4 +1,4 @@
-           <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -10,6 +10,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
 .hidden{display:none!important}
+@keyframes destacar{0%,100%{box-shadow:none}30%,70%{box-shadow:0 0 0 3px var(--blue)}}
+.destacar-transferencia{animation:destacar 1.4s ease-in-out 2}
 #login-screen{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0F1923 0%,#1847CC 100%)}
 .login-nav{padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
 .login-nav a{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none}
@@ -286,17 +288,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           </div>
           <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Método de pago</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--blue);background:var(--blue-light);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--blue);font-weight:600">💳 Tarjeta</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏦 SPEI</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏪 OXXO</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">📱 Mercado Pago</div>
+            <div id="opt-mp" class="pay-opt" onclick="selMetodo('mp')" style="border:1.5px solid var(--blue);background:var(--blue-light);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--blue);font-weight:600">📱 Mercado Pago<br><span style="font-weight:400;font-size:10px">Tarjeta · SPEI · OXXO</span></div>
+            <div id="opt-spei" class="pay-opt" onclick="selMetodo('spei')" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏦 Transferencia SPEI<br><span style="font-weight:400;font-size:10px">Directa, sin comisión</span></div>
           </div>
           <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
           <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
           <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
         </div>
 
-        <div class="card" style="max-width:420px;margin:16px auto 0">
+        <div id="card-transferencia" class="card" style="max-width:420px;margin:16px auto 0">
           <div class="card-title" style="display:flex;align-items:center;gap:10px">
             <span style="width:32px;height:32px;border-radius:8px;background:#00296B;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em">BBVA</span>
             <span>Transferencia bancaria</span>
@@ -967,11 +967,20 @@ function doLogout() {
   document.getElementById('login-error').style.display = 'none';
 }
 
-function selM(el) {
+function selMetodo(tipo) {
   document.querySelectorAll('.pay-opt').forEach(function(m) {
     m.style.borderColor = 'var(--border)'; m.style.background = 'transparent'; m.style.color = 'var(--muted)';
   });
+  const el = document.getElementById(tipo === 'spei' ? 'opt-spei' : 'opt-mp');
   el.style.borderColor = 'var(--blue)'; el.style.background = 'var(--blue-light)'; el.style.color = 'var(--blue)';
+
+  if (tipo === 'spei') {
+    const tarjeta = document.getElementById('card-transferencia');
+    tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    tarjeta.classList.remove('destacar-transferencia');
+    void tarjeta.offsetWidth;
+    tarjeta.classList.add('destacar-transferencia');
+  }
 }
 
 /* ============================================================
