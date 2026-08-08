@@ -291,7 +291,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏪 OXXO</div>
             <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">📱 Mercado Pago</div>
           </div>
-          <button onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
+          <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
+          <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
           <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
         </div>
 
@@ -438,7 +439,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 </div>
 
 <script>
-const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
+const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
+const URL = SUPABASE_URL + '/rest/v1';
+const AUTH_URL = SUPABASE_URL + '/auth/v1';
+const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
 const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
 const H = {
   'apikey': KEY,
@@ -457,6 +461,49 @@ let encuestas = [];
 let sesionUser = '';
 let sesionPass = '';
 let fotoBase64 = null;
+
+/* ============================================================
+   Sesión de pago (Mercado Pago) — Supabase Auth
+   El login del portal (login_residente) es independiente de
+   Supabase Auth. Para poder cobrar necesitamos además una
+   sesión real de Supabase Auth (mismo usuario/clave), porque
+   la Edge Function crear-preferencia exige un JWT autenticado.
+   ============================================================ */
+let mpAccessToken = null;
+let mpAuthPromise = null;
+let pagoEnProceso = false;
+
+async function resolverIdentidad(clave) {
+  try {
+    const r = await fetch(`${URL}/rpc/resolver_identidad`, {
+      method: 'POST',
+      headers: H,
+      body: JSON.stringify({ p_clave: clave })
+    });
+    if (!r.ok) return null;
+    const email = await r.json();
+    return email || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function iniciarSesionPago(clave, password) {
+  const email = await resolverIdentidad(clave);
+  if (!email) return null;
+  try {
+    const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json().catch(() => null);
+    if (!r.ok || !d || !d.access_token) return null;
+    return d.access_token;
+  } catch (e) {
+    return null;
+  }
+}
 
 /* ============================================================
    EDITABLE — Convenios. Agrega o quita objetos de esta lista.
@@ -540,6 +587,7 @@ async function doLogin() {
     encuestas = d.encuestas || [];
     sesionUser = u;
     sesionPass = p;
+    mpAuthPromise = iniciarSesionPago(u, p).then(tok => { mpAccessToken = tok; return tok; });
     document.getElementById('sb-nombre').textContent = residente.nombre_completo;
     document.getElementById('sb-depto').textContent = 'Depto ' + residente.departamento + ' · Manzana 80';
     document.getElementById('login-screen').classList.add('hidden');
@@ -870,6 +918,7 @@ function go(id, el) {
 
 function doLogout() {
   residente = null; pagos = []; incidencias = []; llamadas = []; eventos = []; encuestas = []; sesionUser = ''; sesionPass = ''; fotoBase64 = null;
+  mpAccessToken = null; mpAuthPromise = null; pagoEnProceso = false;
   document.getElementById('portal').classList.add('hidden');
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('input-user').value = '';
@@ -886,8 +935,72 @@ function selM(el) {
   el.style.borderColor = 'var(--blue)'; el.style.background = 'var(--blue-light)'; el.style.color = 'var(--blue)';
 }
 
-function doPago() {
-  alert('🚀 Próximamente: Pago con Mercado Pago\n\nPor ahora contacta:\nechoadministrationmx@gmail.com\nWhatsApp: +52 220 680 8919');
+function mostrarMsgPago(texto, tipo) {
+  const el = document.getElementById('pago-msg');
+  const estilos = {
+    info:  'background:var(--blue-light);color:var(--blue)',
+    error: 'background:#FDEDED;color:#C0392B',
+    ok:    'background:#E7F9EF;color:#1B8A4C'
+  };
+  el.style.cssText = 'display:block;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center;' + (estilos[tipo] || estilos.info);
+  el.textContent = texto;
+}
+
+async function doPago() {
+  if (pagoEnProceso) return;
+  const btn = document.getElementById('btn-pagar-mp');
+  const textoOriginal = btn.textContent;
+
+  if (!mpAccessToken && mpAuthPromise) {
+    btn.disabled = true; btn.textContent = 'Preparando sesión…';
+    mpAccessToken = await mpAuthPromise;
+  }
+
+  if (!mpAccessToken) {
+    btn.disabled = false; btn.textContent = textoOriginal;
+    mostrarMsgPago('No pudimos preparar tu sesión de pago. Cierra sesión, vuelve a entrar e inténtalo de nuevo. Si el problema sigue, contáctanos: echoadministrationmx@gmail.com', 'error');
+    return;
+  }
+
+  pagoEnProceso = true;
+  btn.disabled = true; btn.textContent = 'Preparando pago…';
+  document.getElementById('pago-msg').style.display = 'none';
+
+  try {
+    const ctrl = new AbortController();
+    const reloj = setTimeout(() => ctrl.abort(), 15000);
+    const r = await fetch(`${FUNCTIONS_URL}/crear-preferencia`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + mpAccessToken,
+        'apikey': KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ return_url: 'https://www.echoadministration.com/pago/' }),
+      signal: ctrl.signal
+    });
+    clearTimeout(reloj);
+    const d = await r.json().catch(() => null);
+
+    if (!r.ok || !d || !d.checkout_url) {
+      const mensajes = {
+        sin_adeudo: 'No tienes saldo pendiente por pagar. ¡Gracias!',
+        pago_en_proceso: 'Ya tienes un pago en proceso con Mercado Pago. Revisa la pestaña que se abrió o espera unos minutos.',
+        sesion_invalida: 'Tu sesión de pago expiró. Cierra sesión y vuelve a entrar.',
+        servicio_no_configurado: 'El pago en línea no está disponible por el momento. Contáctanos: echoadministrationmx@gmail.com'
+      };
+      mostrarMsgPago(mensajes[d && d.error] || 'No pudimos iniciar tu pago. Intenta de nuevo o contáctanos: echoadministrationmx@gmail.com', 'error');
+      return;
+    }
+
+    window.open(d.checkout_url, '_blank', 'noopener');
+    mostrarMsgPago('Abrimos Mercado Pago en una pestaña nueva. Completa tu pago ahí; no cierres esta pantalla.', 'info');
+  } catch (e) {
+    mostrarMsgPago('Error de conexión al preparar tu pago. Intenta de nuevo.', 'error');
+  } finally {
+    pagoEnProceso = false;
+    btn.disabled = false; btn.textContent = textoOriginal;
+  }
 }
 
 initComunidad();
