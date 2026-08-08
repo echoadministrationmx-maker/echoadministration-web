@@ -10,8 +10,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
 .hidden{display:none!important}
-@keyframes destacar{0%,100%{box-shadow:none}30%,70%{box-shadow:0 0 0 3px var(--blue)}}
-.destacar-transferencia{animation:destacar 1.4s ease-in-out 2}
 #login-screen{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0F1923 0%,#1847CC 100%)}
 .login-nav{padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
 .login-nav a{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none}
@@ -286,11 +284,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Saldo pendiente</span><span style="font-weight:700;color:var(--coral)" id="pago-total">$0</span></div>
             <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px"><span style="font-weight:700">Total a pagar</span><span style="font-weight:800;color:var(--green);font-size:20px" id="pago-total2">$0</span></div>
           </div>
-          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Método de pago</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-            <div id="opt-mp" class="pay-opt" onclick="selMetodo('mp')" style="border:1.5px solid var(--blue);background:var(--blue-light);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--blue);font-weight:600">📱 Mercado Pago<br><span style="font-weight:400;font-size:10px">Tarjeta · SPEI · OXXO</span></div>
-            <div id="opt-spei" class="pay-opt" onclick="selMetodo('spei')" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏦 Transferencia SPEI<br><span style="font-weight:400;font-size:10px">Directa, sin comisión</span></div>
-          </div>
           <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
           <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
           <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
@@ -338,7 +331,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div class="card">
           <div class="card-title">Documentos del condominio</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div onclick="abrirReglamento()" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+            <div onclick="abrirReglamento('alberca')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">💧</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento de alberca</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+            <div onclick="abrirReglamento('interno')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div></div>
             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Ene – Mar 2026</div></div></div>
@@ -350,7 +344,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div id="reglamento-modal" onclick="if(event.target===this)cerrarReglamento()" style="display:none;position:fixed;inset:0;background:rgba(12,19,32,.5);z-index:200;align-items:center;justify-content:center;padding:16px">
         <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
           <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-            <div style="font-size:16px;font-weight:700;color:var(--ink)">📋 Reglamento interno</div>
+            <div id="reglamento-titulo" style="font-size:16px;font-weight:700;color:var(--ink)">📋 Reglamento interno</div>
             <button onclick="cerrarReglamento()" style="background:var(--bg);border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;color:var(--muted)">✕</button>
           </div>
           <div id="reglamento-body" style="padding:20px;overflow-y:auto"></div>
@@ -967,29 +961,13 @@ function doLogout() {
   document.getElementById('login-error').style.display = 'none';
 }
 
-function selMetodo(tipo) {
-  document.querySelectorAll('.pay-opt').forEach(function(m) {
-    m.style.borderColor = 'var(--border)'; m.style.background = 'transparent'; m.style.color = 'var(--muted)';
-  });
-  const el = document.getElementById(tipo === 'spei' ? 'opt-spei' : 'opt-mp');
-  el.style.borderColor = 'var(--blue)'; el.style.background = 'var(--blue-light)'; el.style.color = 'var(--blue)';
-
-  if (tipo === 'spei') {
-    const tarjeta = document.getElementById('card-transferencia');
-    tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    tarjeta.classList.remove('destacar-transferencia');
-    void tarjeta.offsetWidth;
-    tarjeta.classList.add('destacar-transferencia');
-  }
-}
-
 /* ============================================================
    Reglamento interno — mismo contenido que la app móvil
    (lib/communityResources.ts: pool-rules + building-rules)
    ============================================================ */
-const REGLAMENTO_SECCIONES = [
-  {
-    titulo: 'Reglamento de la alberca',
+const REGLAMENTO_SECCIONES = {
+  alberca: {
+    titulo: 'Reglamento de alberca',
     icono: '💧',
     reglas: [
       'El horario de uso de la alberca es de 10:00 a 22:00 horas.',
@@ -1003,9 +981,9 @@ const REGLAMENTO_SECCIONES = [
       'Se prohíbe instalar casas de campaña en las áreas comunes del condominio.'
     ]
   },
-  {
-    titulo: 'Reglamento de los edificios',
-    icono: '🏢',
+  interno: {
+    titulo: 'Reglamento interno',
+    icono: '📋',
     reglas: [
       'No cambiar el color de la fachada, a no ser que sea un acuerdo de la asamblea.',
       'No construir, destruir o modificar las fachadas y paredes de tu edificio.',
@@ -1024,22 +1002,21 @@ const REGLAMENTO_SECCIONES = [
       'Ser un buen vecino implica mantener una actitud respetuosa y considerada hacia quienes viven cerca de ti.'
     ]
   }
-];
+};
 
-function renderReglamento() {
+function renderReglamento(tipo) {
+  const sec = REGLAMENTO_SECCIONES[tipo];
+  document.getElementById('reglamento-titulo').textContent = sec.icono + ' ' + sec.titulo;
   const cont = document.getElementById('reglamento-body');
-  cont.innerHTML = REGLAMENTO_SECCIONES.map(sec => `
-    <div style="margin-bottom:20px">
-      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:8px">${sec.icono} ${sec.titulo}</div>
-      <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
-        ${sec.reglas.map(r => `<li style="font-size:13px;color:var(--body);line-height:1.5">${r.replace(/</g,'&lt;')}</li>`).join('')}
-      </ol>
-    </div>
-  `).join('');
+  cont.innerHTML = `
+    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
+      ${sec.reglas.map(r => `<li style="font-size:13px;color:var(--body);line-height:1.5">${r.replace(/</g,'&lt;')}</li>`).join('')}
+    </ol>
+  `;
 }
 
-function abrirReglamento() {
-  renderReglamento();
+function abrirReglamento(tipo) {
+  renderReglamento(tipo);
   document.getElementById('reglamento-modal').style.display = 'flex';
 }
 
