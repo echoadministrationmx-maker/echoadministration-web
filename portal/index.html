@@ -1,1010 +1,307 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal de Residentes — Echo Administración</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
-.hidden{display:none!important}
-#login-screen{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0F1923 0%,#1847CC 100%)}
-.login-nav{padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
-.login-nav a{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none}
-.login-nav a:hover{color:#fff}
-.login-nav-links{display:flex;gap:20px}
-.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
-.login-box{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
-.lm{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
-.lm svg{width:20px;height:20px}
-.ln{font-size:17px;font-weight:800;color:var(--ink)}
-.ln span{color:var(--blue)}
-.login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
-.login-sub{font-size:13.5px;color:var(--muted);text-align:center;margin-bottom:28px}
-.fg{margin-bottom:16px}
-.fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
-.fg input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(24,71,204,.08)}
-.btn-login{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .2s}
-.btn-login:hover{background:#1240C0}
-.btn-login:disabled{opacity:.6;cursor:not-allowed}
-.login-error{background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
-.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
-.login-footer{padding:20px 32px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
-.login-footer a{font-size:12px;color:rgba(255,255,255,.35);text-decoration:none}
-.login-footer a:hover{color:rgba(255,255,255,.7)}
-
-#portal{min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:var(--bg)}
-.sidebar{background:var(--ink);display:flex;flex-direction:column}
-.sb-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
-.sb-lm{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
-.sb-lm svg{width:16px;height:16px}
-.sb-ln{font-size:14px;font-weight:700;color:#fff}
-.sb-ln span{color:#7BA8FF}
-.sb-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
-.sb-name{font-size:14px;font-weight:600;color:#fff}
-.sb-dept{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
-.nav{flex:1;padding:8px 0}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13.5px;color:rgba(255,255,255,.55);cursor:pointer;transition:background .1s;position:relative;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
-.nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
-.nav-item.active{color:#fff;background:rgba(26,71,204,.25)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
-.nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sb-bottom{padding:16px 20px;border-top:1px solid rgba(255,255,255,.07)}
-.btn-out{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:inherit;padding:0}
-.btn-out:hover{color:rgba(255,255,255,.8)}
-
-.main{display:flex;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
-.topbar-title{font-size:16px;font-weight:700;color:var(--ink)}
-.btn-ver{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.content{padding:24px;overflow-y:auto;flex:1}
-.page{display:none}.page.active{display:block}
-
-.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px}
-.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.kpi-val{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
-.kpi-val.danger{color:var(--coral)}.kpi-val.success{color:var(--green)}
-.kpi-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;margin-top:7px;font-weight:600}
-.kpi-pill.danger{background:var(--coral-light);color:var(--coral)}
-.kpi-pill.success{background:var(--green-light);color:var(--green)}
-.kpi-pill.warn{background:var(--yellow-light);color:var(--yellow)}
-
-.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-.card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:11px;color:var(--muted);font-weight:600;padding:9px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
-.tbl td{padding:11px 12px;font-size:13.5px;border-bottom:1px solid var(--border)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--bg)}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600}
-.badge.paid{background:var(--green-light);color:var(--green)}
-.badge.pending{background:var(--yellow-light);color:var(--yellow)}
-
-.ec-header{background:linear-gradient(135deg,var(--blue),#0E35A8);border-radius:12px;padding:24px;color:#fff;margin-bottom:16px}
-.ec-total{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 4px}
-.ec-chips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.ec-chip{background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center}
-.ec-chip-val{font-size:16px;font-weight:700}
-.ec-chip-lbl{font-size:10px;opacity:.7;margin-top:2px}
-.loading{text-align:center;padding:48px;color:var(--muted);font-size:15px}
-/* ===== Responsive móvil ===== */
-.hamburguesa{display:none;background:none;border:none;cursor:pointer;color:var(--ink);padding:4px;flex-shrink:0}
-.hamburguesa svg{width:24px;height:24px;display:block}
-.sb-overlay{display:none}
-@media (max-width:820px){
-  #portal{grid-template-columns:1fr}
-  .sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;z-index:60;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
-  #portal.menu-abierto .sidebar{transform:translateX(0)}
-  .sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
-  #portal.menu-abierto .sb-overlay{display:block}
-  .hamburguesa{display:block}
-  .topbar{padding:0 14px;height:54px}
-  .btn-ver{display:none}
-  .topbar-title{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .content{padding:16px}
-  .kpi-grid{grid-template-columns:1fr;gap:12px}
-  .card{overflow-x:auto}
-  .tbl th,.tbl td{padding:9px 8px;font-size:12.5px}
-}
-@media (max-width:480px){
-  .login-box{padding:30px 22px}
-  .login-nav{padding:16px 18px}
-  .kpi-val{font-size:22px}
-}
-</style>
-</head>
-<body>
-
-<div id="login-screen">
-  <div class="login-nav">
-    <a href="/">← Echo Administración</a>
-    <div class="login-nav-links">
-      <a href="/privacidad">Aviso de privacidad</a>
-      <a href="/terminos">Términos</a>
-    </div>
-  </div>
-  <div class="login-body">
-    <div class="login-box">
-      <div class="login-logo">
-        <div class="lm"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-        <span class="ln">Echo <span>Administración</span></span>
-      </div>
-      <h2>Portal de Residentes</h2>
-      <p class="login-sub">Manzana 80 · Aldea Tulum</p>
-      <div class="fg">
-        <label>Clave de acceso</label>
-        <input type="text" id="input-user" placeholder="Ej: 301D2, 204A, 101O1">
-      </div>
-      <div class="fg">
-        <label>Contraseña</label>
-        <input type="password" id="input-pass" placeholder="Tulum + tu clave">
-      </div>
-      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
-      <div class="login-error" id="login-error">Clave o contraseña incorrecta.</div>
-      <p class="login-hint">¿No sabes tu clave?<br><a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
-    </div>
-  </div>
-  <div class="login-footer">
-    <a href="/privacidad">Aviso de privacidad</a>
-    <a href="/terminos">Términos y condiciones</a>
-    <a href="mailto:echoadministrationmx@gmail.com">Contacto</a>
-    <a href="/">← Inicio</a>
-  </div>
-</div>
-
-<div id="portal" class="hidden">
-  <div class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-lm"><svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-      <span class="sb-ln">Echo <span>Admin</span></span>
-    </div>
-    <div class="sb-user">
-      <div class="sb-name" id="sb-nombre">—</div>
-      <div class="sb-dept" id="sb-depto">—</div>
-    </div>
-    <div class="nav">
-      <button class="nav-item active" onclick="go('dashboard',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Resumen
-      </button>
-      <button class="nav-item" onclick="go('cuenta',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Estado de cuenta
-      </button>
-      <button class="nav-item" onclick="go('pago',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Pagar ahora
-      </button>
-      <button class="nav-item" onclick="go('docs',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Documentos
-      </button>
-      <button class="nav-item" onclick="go('comunidad',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.94.36 1.86.7 2.73a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.35-1.35a2 2 0 0 1 2.11-.45c.87.34 1.79.57 2.73.7A2 2 0 0 1 22 16.92z"/></svg>
-        Contactos de emergencia
-      </button>
-      <button class="nav-item" onclick="go('comunidad2',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Comunidad
-      </button>
-      <button class="nav-item" onclick="go('convenios',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        Convenios
-      </button>
-      <button class="nav-item" onclick="go('incidencias',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Incidencias
-      </button>
-    </div>
-    <div class="sb-bottom">
-      <button class="btn-out" onclick="doLogout()">← Cerrar sesión</button>
-    </div>
-  </div>
-
-  <div class="sb-overlay" id="sb-overlay" onclick="toggleMenu()"></div>
-
-  <div class="main">
-    <div class="topbar">
-      <div style="display:flex;align-items:center;gap:12px;min-width:0">
-        <button class="hamburguesa" onclick="toggleMenu()" aria-label="Abrir menú">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <span class="topbar-title" id="topbar-title">Resumen</span>
-      </div>
-      <button class="btn-ver" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta →</button>
-    </div>
-    <div class="content">
-
-      <!-- DASHBOARD -->
-      <div class="page active" id="page-dashboard">
-        <div id="dash-loading" class="loading">⏳ Cargando tu información...</div>
-        <div id="dash-content" class="hidden">
-          <div id="dash-aviso-llamadas"></div>
-          <div class="kpi-grid">
-            <div class="kpi"><div class="kpi-label">Saldo pendiente</div><div class="kpi-val danger" id="kpi-deuda">$0</div><div class="kpi-pill danger" id="kpi-deuda-pill">—</div></div>
-            <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En el periodo</div></div>
-            <div class="kpi"><div class="kpi-label">Meses pendientes</div><div class="kpi-val" id="kpi-pendientes">0</div><div class="kpi-pill warn" id="kpi-pend-pill">2026</div></div>
-          </div>
-          <div class="card">
-            <div class="card-title">Últimos movimientos</div>
-            <table class="tbl">
-              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
-              <tbody id="tabla-mov"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ESTADO DE CUENTA -->
-      <div class="page" id="page-cuenta">
-        <div id="cuenta-loading" class="loading">⏳ Cargando estado de cuenta...</div>
-        <div id="cuenta-content" class="hidden">
-          <div class="ec-header">
-            <div style="font-size:13px;opacity:.7">Saldo total pendiente</div>
-            <div class="ec-total" id="ec-total">$0</div>
-            <div style="font-size:13px;opacity:.7;margin-top:4px" id="ec-sub">Manzana 80</div>
-            <div class="ec-chips">
-              <div class="ec-chip"><div class="ec-chip-val" id="ec-pag">0</div><div class="ec-chip-lbl">Pagados</div></div>
-              <div class="ec-chip"><div class="ec-chip-val" id="ec-pend">0</div><div class="ec-chip-lbl">Pendientes</div></div>
-              <div class="ec-chip"><div class="ec-chip-val">$500</div><div class="ec-chip-lbl">Cuota mensual</div></div>
-            </div>
-          </div>
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-              <div class="card-title" style="margin-bottom:0">Historial de pagos</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <select id="filtro-anio" onchange="filtrar()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:inherit;color:var(--body);outline:none">
-                  <option value="todos">Todos los años</option>
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                </select>
-                <button onclick="go('pago',document.querySelectorAll('.nav-item')[2])" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💳 Pagar ahora</button>
-              </div>
-            </div>
-            <table class="tbl">
-              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
-              <tbody id="tabla-cuenta"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- PAGAR -->
-      <div class="page" id="page-pago">
-        <div class="card" style="max-width:420px;margin:0 auto">
-          <div class="card-title">💳 Realizar pago</div>
-          <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px">
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Saldo pendiente</span><span style="font-weight:700;color:var(--coral)" id="pago-total">$0</span></div>
-            <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px"><span style="font-weight:700">Total a pagar</span><span style="font-weight:800;color:var(--green);font-size:20px" id="pago-total2">$0</span></div>
-          </div>
-          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Método de pago</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--blue);background:var(--blue-light);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--blue);font-weight:600">💳 Tarjeta</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏦 SPEI</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏪 OXXO</div>
-            <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">📱 Mercado Pago</div>
-          </div>
-          <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
-          <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
-          <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
-        </div>
-
-        <div style="max-width:420px;margin:16px auto 0;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div style="width:48px;height:48px;border-radius:12px;background:#E7F9EF;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💬</div>
-          <div style="flex:1;min-width:170px">
-            <div style="font-size:16px;font-weight:700;color:var(--ink)">¿Necesitas ayuda?</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:2px">Escríbenos para encontrar la mejor solución para tu situación.</div>
-          </div>
-          <a id="wa-soporte-pago" href="#" target="_blank" rel="noopener" style="background:#25D366;color:#fff;text-decoration:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:700;white-space:nowrap">Escríbenos</a>
-        </div>
-      </div>
-
-      <!-- DOCUMENTOS -->
-      <div class="page" id="page-docs">
-        <div class="card">
-          <div class="card-title">Documentos del condominio</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Ene – Mar 2026</div></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- COMUNIDAD Y AYUDA -->
-      <div class="page" id="page-comunidad">
-
-        <!-- 1) EMERGENCIAS -->
-        <div class="card" style="border-color:#FECACA;background:linear-gradient(135deg,#FEF2F2,#fff)">
-          <div class="card-title" style="color:var(--coral)">🚨 Emergencias · Quintana Roo</div>
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #FECACA;border-radius:10px;padding:18px">
-            <div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--coral)">Emergencia general</div>
-              <div style="font-size:46px;font-weight:800;color:var(--coral);line-height:1;margin-top:2px">911</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:4px">Policía · Bomberos · Ambulancia</div>
-            </div>
-            <a href="tel:911" style="display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#fff;text-decoration:none;border-radius:10px;padding:15px 26px;font-size:16px;font-weight:700">📞 Marcar 911</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px">
-            <a href="tel:+529848061349" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Cruz Roja Tulum</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 806 1349</div>
-            </a>
-            <a href="tel:+529848712688" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Protección Civil</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 871 2688</div>
-            </a>
-            <a href="tel:+529841336532" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Bomberos Tulum</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 133 6532</div>
-            </a>
-          </div>
-        </div>
-
-        <!-- 2) EMERGENCIA - ENVIAR UBICACIÓN POR WHATSAPP -->
-        <div class="card" style="border-color:#FECACA;background:linear-gradient(135deg,#FFF5F5,#fff)">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <span style="font-size:20px">📍</span>
-            <span style="font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--coral);text-transform:uppercase;line-height:1.35">En caso de emergencia manda WhatsApp con tu ubicación a:</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #FECACA;border-radius:10px;padding:18px">
-            <div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Central de monitoreo</div>
-              <div style="font-size:20px;font-weight:800;color:var(--ink);line-height:1.1;margin-top:2px">C2 Tulum</div>
-              <div style="font-size:26px;font-weight:800;color:var(--coral);line-height:1.1">984 240 5427</div>
-            </div>
-            <a href="https://wa.me/529842405427?text=Hola,%20comparto%20mi%20ubicaci%C3%B3n%20porque%20tengo%20una%20emergencia." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:10px;padding:15px 24px;font-size:15px;font-weight:700">💬 Enviar ubicación</a>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- CONVENIOS -->
-      <div class="page" id="page-convenios">
-        <div style="margin-bottom:6px">
-          <div style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.02em">Convenios para residentes</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:3px">Beneficios y descuentos exclusivos por ser parte de Manzana 80.</div>
-        </div>
-        <div id="convenios-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px"></div>
-      </div>
-
-      <!-- INCIDENCIAS -->
-      <!-- COMUNIDAD (eventos + encuestas) -->
-      <div class="page" id="page-comunidad2">
-        <div class="card">
-          <div class="card-title">📅 Eventos de tu manzana</div>
-          <div id="eventos-lista"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">🗳️ Encuestas activas</div>
-          <div id="encuestas-lista"></div>
-        </div>
-      </div>
-
-      <div class="page" id="page-incidencias">
-
-        <div class="card">
-          <div class="card-title">📌 Llamadas de atención a tu departamento</div>
-          <div id="llamadas-lista"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">📝 Reportar una incidencia</div>
-          <div style="display:grid;gap:14px">
-            <div>
-              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Categoría</label>
-              <select id="inc-categoria" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)">
-                <option>Plomería</option>
-                <option>Eléctrico</option>
-                <option>Áreas comunes</option>
-                <option>Seguridad</option>
-                <option>Limpieza</option>
-                <option>Otro</option>
-              </select>
-            </div>
-            <div>
-              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Descripción</label>
-              <textarea id="inc-desc" rows="4" placeholder="Describe el problema con el mayor detalle posible…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
-            </div>
-            <div>
-              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Foto (opcional)</label>
-              <input type="file" id="inc-foto" accept="image/*" onchange="prepararFoto(this)" style="font-size:13px;font-family:inherit">
-              <div id="inc-foto-preview" style="margin-top:10px"></div>
-            </div>
-            <div id="inc-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button id="inc-enviar" onclick="enviarIncidencia()" style="flex:1;min-width:160px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Enviar reporte</button>
-              <button onclick="correoIncidencia()" style="background:#fff;color:var(--blue);border:1px solid var(--blue);border-radius:8px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">✉️ Enviar por correo</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Mis reportes</div>
-          <div id="inc-lista"></div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
-const URL = SUPABASE_URL + '/rest/v1';
-const AUTH_URL = SUPABASE_URL + '/auth/v1';
-const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
-const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
-const H = {
-  'apikey': KEY,
-  'Authorization': 'Bearer ' + KEY,
-  'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'Prefer': 'return=representation'
-};
-
-let residente = null;
-let pagos = [];
-let incidencias = [];
-let llamadas = [];
-let eventos = [];
-let encuestas = [];
-let sesionUser = '';
-let sesionPass = '';
-let fotoBase64 = null;
-
-/* ============================================================
-   Sesión de pago (Mercado Pago) — Supabase Auth
-   El login del portal (login_residente) es independiente de
-   Supabase Auth. Para poder cobrar necesitamos además una
-   sesión real de Supabase Auth (mismo usuario/clave), porque
-   la Edge Function crear-preferencia exige un JWT autenticado.
-   ============================================================ */
-let mpAccessToken = null;
-let mpAuthPromise = null;
-let pagoEnProceso = false;
-
-async function resolverIdentidad(clave) {
-  try {
-    const r = await fetch(`${URL}/rpc/resolver_identidad`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify({ p_clave: clave })
-    });
-    if (!r.ok) return null;
-    const email = await r.json();
-    return email || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-async function iniciarSesionPago(clave, password) {
-  const email = await resolverIdentidad(clave);
-  if (!email) return null;
-  try {
-    const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
-      method: 'POST',
-      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const d = await r.json().catch(() => null);
-    if (!r.ok || !d || !d.access_token) return null;
-    return d.access_token;
-  } catch (e) {
-    return null;
-  }
-}
-
-/* ============================================================
-   EDITABLE — Convenios. Agrega o quita objetos de esta lista.
-   ============================================================ */
-const CONVENIOS_ACTIVOS = [
-  { icono: '🍽️', nombreNegocio: 'Restaurante La Palapa', descuento: '15% en alimentos',            vigencia: '31 dic 2026' },
-  { icono: '💆', nombreNegocio: 'Spa Maya Wellness',      descuento: '20% en masajes',              vigencia: '30 sep 2026' },
-  { icono: '🏋️', nombreNegocio: 'Gimnasio Tulum Fit',     descuento: '1 mes gratis al inscribirse', vigencia: '31 dic 2026' },
-  { icono: '💊', nombreNegocio: 'Farmacia del Centro',    descuento: '10% en medicamentos',         vigencia: 'Permanente'  },
-];
-
-/* ============================================================
-   EDITABLE — WhatsApp de soporte (botón en "Pagar ahora").
-   Reemplaza las X por tu número: 52 + 1 + 10 dígitos.
-   ============================================================ */
-const SOPORTE_NUMERO = '522206808919'; // WhatsApp de soporte Echo
-const SOPORTE_TEXTO  = 'Hola Echo Administration, necesito ayuda para realizar un convenio de pagos';
-
-function renderConvenios() {
-  const g = document.getElementById('convenios-grid');
-  if (!g) return;
-  if (!CONVENIOS_ACTIVOS.length) {
-    g.innerHTML = '<p style="color:var(--muted);font-size:13px">Aún no hay convenios activos. ¡Pronto habrá beneficios para ti!</p>';
-    return;
-  }
-  g.innerHTML = CONVENIOS_ACTIVOS.map(c => `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(12,19,32,.04);transition:transform .15s, box-shadow .15s"
-         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(12,19,32,.10)'"
-         onmouseout="this.style.transform='none';this.style.boxShadow='0 1px 2px rgba(12,19,32,.04)'">
-      <div style="width:54px;height:54px;border-radius:15px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;font-size:27px;margin-bottom:16px">${c.icono || '🏷️'}</div>
-      <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25">${c.nombreNegocio}</div>
-      <div style="display:inline-block;margin-top:10px;background:#EEF3FF;color:var(--blue);font-size:13px;font-weight:700;padding:5px 13px;border-radius:100px">${c.descuento}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:6px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Vigencia: ${c.vigencia}
-      </div>
-    </div>`).join('');
-}
-
-function initComunidad() {
-  renderConvenios();
-  const wa = document.getElementById('wa-soporte-pago');
-  if (wa) wa.href = `https://wa.me/${SOPORTE_NUMERO}?text=${encodeURIComponent(SOPORTE_TEXTO)}`;
-}
-
-async function doLogin() {
-  const u = document.getElementById('input-user').value.trim();
-  const p = document.getElementById('input-pass').value.trim();
-  const btn = document.getElementById('btn-login');
-  const err = document.getElementById('login-error');
-  err.style.display = 'none';
-
-  if (!u || !p) { err.style.display='block'; err.textContent='Llena ambos campos.'; return; }
-
-  btn.disabled = true; btn.textContent = 'Verificando...';
-
-  try {
-    const ctrl = new AbortController();
-    const reloj = setTimeout(() => ctrl.abort(), 12000);
-    const r = await fetch(`${URL}/rpc/login_residente`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify({ p_user_id: u, p_password: p }),
-      signal: ctrl.signal
-    });
-    clearTimeout(reloj);
-    const d = await r.json();
-
-    if (!r.ok || !d || !d.ok) {
-      err.style.display = 'block';
-      err.textContent = 'Clave o contraseña incorrecta. Contacta: echoadministrationmx@gmail.com';
-      btn.disabled = false; btn.textContent = 'Entrar al portal →';
-      return;
-    }
-
-    residente = d.residente;
-    pagos = d.pagos || [];
-    incidencias = d.incidencias || [];
-    llamadas = d.llamadas || [];
-    eventos = d.eventos || [];
-    encuestas = d.encuestas || [];
-    sesionUser = u;
-    sesionPass = p;
-    mpAuthPromise = iniciarSesionPago(u, p).then(tok => { mpAccessToken = tok; return tok; });
-    document.getElementById('sb-nombre').textContent = residente.nombre_completo;
-    document.getElementById('sb-depto').textContent = 'Depto ' + residente.departamento + ' · Manzana 80';
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('portal').classList.remove('hidden');
-    pintarDatos();
-    renderIncidencias();
-    renderLlamadas();
-    renderAvisoLlamadas();
-    renderComunidad();
-
-  } catch(e) {
-    err.style.display = 'block';
-    err.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
-    btn.disabled = false; btn.textContent = 'Entrar al portal →';
-  }
-}
-
-function pintarDatos() {
-  const pags = pagos.filter(p => p.estado === 'pagado');
-  const pends = pagos.filter(p => p.estado === 'pendiente');
-  const deuda = pends.reduce((s,p) => s + (p.monto || 500), 0);
-
-  document.getElementById('kpi-deuda').textContent = '$' + deuda.toLocaleString();
-  document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? pends.length + ' meses pendientes' : '✓ Al corriente';
-  document.getElementById('kpi-pagados').textContent = pags.length;
-  document.getElementById('kpi-pendientes').textContent = pends.length;
-  document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
-  document.getElementById('ec-total').textContent = '$' + deuda.toLocaleString();
-  document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
-  document.getElementById('ec-pag').textContent = pags.length;
-  document.getElementById('ec-pend').textContent = pends.length;
-  document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
-  document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
-
-  renderMovimientos(pagos.slice(0, 6));
-  renderCuenta(pagos);
-
-  document.getElementById('dash-loading').classList.add('hidden');
-  document.getElementById('dash-content').classList.remove('hidden');
-  document.getElementById('cuenta-loading').classList.add('hidden');
-  document.getElementById('cuenta-content').classList.remove('hidden');
-}
-
-function renderMovimientos(data) {
-  document.getElementById('tabla-mov').innerHTML = data.map(p => `
-    <tr>
-      <td>${p.concepto}</td>
-      <td>${fmt(p.fecha_vencimiento)}</td>
-      <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
-      <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
-    </tr>`).join('');
-}
-
-function renderCuenta(data) {
-  document.getElementById('tabla-cuenta').innerHTML = data.map(p => `
-    <tr>
-      <td>${p.concepto}</td>
-      <td>${fmt(p.fecha_vencimiento)}</td>
-      <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
-      <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
-    </tr>`).join('');
-}
-
-function filtrar() {
-  const a = document.getElementById('filtro-anio').value;
-  const f = a === 'todos' ? pagos : pagos.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(a));
-  renderCuenta(f);
-}
-
-function fmt(f) {
-  if (!f) return '—';
-  const m = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const p = f.split('-');
-  return m[parseInt(p[1])] + ' ' + p[0];
-}
-
-function prepararFoto(input) {
-  const file = input.files[0];
-  const prev = document.getElementById('inc-foto-preview');
-  if (!file) { fotoBase64 = null; prev.innerHTML = ''; return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const max = 1000;
-      let w = img.width, h = img.height;
-      if (w > max || h > max) {
-        if (w > h) { h = Math.round(h * max / w); w = max; }
-        else { w = Math.round(w * max / h); h = max; }
-      }
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      fotoBase64 = c.toDataURL('image/jpeg', 0.6);
-      prev.innerHTML = '<img src="' + fotoBase64 + '" style="max-width:140px;border-radius:8px;border:1px solid var(--border)">';
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function mostrarMsgInc(texto, ok) {
-  const m = document.getElementById('inc-msg');
-  m.textContent = texto;
-  m.style.display = 'block';
-  m.style.background = ok ? '#ECFDF5' : 'var(--coral-light)';
-  m.style.color = ok ? 'var(--green)' : 'var(--coral)';
-  m.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
-}
-
-async function enviarIncidencia() {
-  const cat = document.getElementById('inc-categoria').value;
-  const desc = document.getElementById('inc-desc').value.trim();
-  const btn = document.getElementById('inc-enviar');
-  document.getElementById('inc-msg').style.display = 'none';
-  if (!desc) { mostrarMsgInc('Por favor describe el problema antes de enviar.', false); return; }
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  try {
-    const r = await fetch(`${URL}/rpc/crear_incidencia`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_categoria: cat, p_descripcion: desc, p_foto: fotoBase64 })
-    });
-    const d = await r.json();
-    if (!r.ok || !d || !d.ok) {
-      mostrarMsgInc('No se pudo enviar el reporte. Intenta de nuevo.', false);
-      btn.disabled = false; btn.textContent = 'Enviar reporte';
-      return;
-    }
-    incidencias.unshift({ id: d.id, categoria: cat, descripcion: desc, estado: 'Pendiente', foto: fotoBase64, created_at: new Date().toISOString() });
-    renderIncidencias();
-    document.getElementById('inc-desc').value = '';
-    document.getElementById('inc-foto').value = '';
-    document.getElementById('inc-foto-preview').innerHTML = '';
-    fotoBase64 = null;
-    mostrarMsgInc('✓ Reporte enviado. Lo verás abajo en “Mis reportes”.', true);
-    btn.disabled = false; btn.textContent = 'Enviar reporte';
-  } catch (e) {
-    mostrarMsgInc('Error de conexión. Revisa tu internet e intenta de nuevo.', false);
-    btn.disabled = false; btn.textContent = 'Enviar reporte';
-  }
-}
-
-function correoIncidencia() {
-  const cat = document.getElementById('inc-categoria').value;
-  const desc = document.getElementById('inc-desc').value.trim();
-  const depto = residente ? residente.departamento : '';
-  const nombre = residente ? residente.nombre_completo : '';
-  const asunto = 'Incidencia ' + cat + ' - Depto ' + depto;
-  const cuerpo = 'Hola Echo Administration,\n\nReporto la siguiente incidencia:\n\n'
-    + 'Categoría: ' + cat + '\nDepartamento: ' + depto + '\nResidente: ' + nombre + '\n\n'
-    + 'Descripción:\n' + desc + '\n\n(Si tengo foto, la adjunto a este correo.)';
-  window.location.href = 'mailto:echoadministrationmx@gmail.com?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
-}
-
-function fmtFechaInc(iso) {
-  if (!iso) return '';
-  try { return new Date(iso).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }); }
-  catch (e) { return iso; }
-}
-
-function verLlamadas() {
-  go('incidencias', document.querySelector('.nav-item[onclick*=incidencias]'));
-}
-
-function renderAvisoLlamadas() {
-  const cont = document.getElementById('dash-aviso-llamadas');
-  if (!cont) return;
-  const activas = llamadas.filter(l => (l.estado || 'Activa') === 'Activa');
-  if (!activas.length) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
-  cont.style.display = 'block';
-  const n = activas.length;
-  cont.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid var(--coral);border-radius:12px;padding:16px;margin-bottom:18px">
-      <span style="font-size:22px">📌</span>
-      <div style="flex:1;min-width:180px">
-        <div style="font-weight:700;color:var(--ink);font-size:15px">Tienes ${n} llamada${n>1?'s':''} de atención activa${n>1?'s':''}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">Revisa los detalles en tu apartado de Incidencias.</div>
-      </div>
-      <button onclick="verLlamadas()" style="background:var(--coral);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Ver</button>
-    </div>`;
-}
-
-function renderComunidad() { renderEventos(); renderEncuestas(); }
-
-function renderEventos() {
-  const cont = document.getElementById('eventos-lista');
-  if (!cont) return;
-  if (!eventos.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">No hay eventos próximos por ahora.</div>'; return; }
-  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  cont.innerHTML = eventos.map(e => {
-    const d = e.fecha ? new Date(e.fecha + 'T00:00:00') : null;
-    const dia = d ? d.getDate() : '–';
-    const mes = d ? meses[d.getMonth()] : '';
-    return `
-    <div style="display:flex;gap:14px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="flex-shrink:0;width:54px;text-align:center;background:#EEF3FF;border-radius:10px;padding:8px 0">
-        <div style="font-size:20px;font-weight:800;color:var(--blue);line-height:1">${dia}</div>
-        <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase">${mes}</div>
-      </div>
-      <div style="flex:1">
-        <div style="font-weight:700;color:var(--ink);font-size:15px">${(e.titulo||'').replace(/</g,'&lt;')}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap">${(e.descripcion||'').replace(/</g,'&lt;')}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderEncuestas() {
-  const cont = document.getElementById('encuestas-lista');
-  if (!cont) return;
-  if (!encuestas.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">No hay encuestas activas por ahora.</div>'; return; }
-  cont.innerHTML = encuestas.map(enc => {
-    const ops = enc.opciones || [];
-    const conteos = enc.conteos || [];
-    const total = enc.total || 0;
-    const voted = enc.mi_voto !== null && enc.mi_voto !== undefined;
-    let opsHtml;
-    if (voted) {
-      opsHtml = ops.map((op, i) => {
-        const c = conteos[i] || 0;
-        const pct = total ? Math.round(c * 100 / total) : 0;
-        const mine = i === enc.mi_voto;
-        return `
-        <div onclick="votar(${enc.id},${i})" style="margin-bottom:10px;cursor:pointer">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:var(--ink);font-weight:${mine?'700':'500'}">${mine?'✓ ':''}${(''+op).replace(/</g,'&lt;')}</span>
-            <span style="color:var(--muted)">${pct}%</span>
-          </div>
-          <div style="height:9px;background:var(--bg);border-radius:100px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${mine?'var(--blue)':'#7BA8FF'}"></div></div>
-        </div>`;
-      }).join('');
-      opsHtml += '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + total + ' voto' + (total !== 1 ? 's' : '') + ' · Toca otra opción para cambiar tu voto</div>';
-    } else {
-      opsHtml = '<div style="display:grid;gap:8px">' + ops.map((op, i) =>
-        `<button onclick="votar(${enc.id},${i})" style="text-align:left;font-size:14px;font-family:inherit;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:#fff;color:var(--ink)" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">${(''+op).replace(/</g,'&lt;')}</button>`
-      ).join('') + '</div>';
-    }
-    return `
-    <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-      <div style="font-weight:700;color:var(--ink);font-size:15px;margin-bottom:12px">${(enc.pregunta||'').replace(/</g,'&lt;')}</div>
-      ${opsHtml}
-    </div>`;
-  }).join('');
-}
-
-async function votar(encuestaId, opcion) {
-  try {
-    const r = await fetch(`${URL}/rpc/votar_encuesta`, {
-      method: 'POST', headers: H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_encuesta_id: encuestaId, p_opcion: opcion })
-    });
-    const d = await r.json();
-    if (!r.ok || !d || !d.ok) return;
-    const enc = encuestas.find(e => e.id === encuestaId);
-    if (enc) {
-      const prev = enc.mi_voto;
-      if (!enc.conteos) enc.conteos = (enc.opciones || []).map(() => 0);
-      if (prev === null || prev === undefined) { enc.total = (enc.total || 0) + 1; }
-      else if (prev !== opcion) { enc.conteos[prev] = Math.max(0, (enc.conteos[prev] || 0) - 1); }
-      if (prev !== opcion) enc.conteos[opcion] = (enc.conteos[opcion] || 0) + 1;
-      enc.mi_voto = opcion;
-    }
-    renderEncuestas();
-  } catch (e) {}
-}
-
-function renderLlamadas() {
-  const cont = document.getElementById('llamadas-lista');
-  if (!cont) return;
-  if (!llamadas.length) {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px;color:var(--green);font-size:14px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px"><span>✓</span> No tienes llamadas de atención. ¡Todo en orden!</div>';
-    return;
-  }
-  const badge = est => {
-    const map = { 'Activa':['#FEF2F2','#DC2626','#FECACA'], 'Resuelta':['#ECFDF5','#065F46','#A7F3D0'] };
-    const c = map[est] || ['#F3F4F6','#374151','var(--border)'];
-    return '<span style="background:'+c[0]+';color:'+c[1]+';border:1px solid '+c[2]+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">'+est+'</span>';
-  };
-  cont.innerHTML = llamadas.map(l => `
-    <div style="border:1px solid var(--border);border-left:3px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="font-weight:700;color:var(--ink);font-size:14px">${(l.motivo || 'General').replace(/</g,'&lt;')}</div>
-        ${badge(l.estado || 'Activa')}
-      </div>
-      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(l.descripcion || '').replace(/</g,'&lt;')}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(l.created_at)}</div>
-    </div>`).join('');
-}
-
-function renderIncidencias() {
-  const cont = document.getElementById('inc-lista');
-  if (!cont) return;
-  if (!incidencias.length) {
-    cont.innerHTML = '<p style="color:var(--muted);font-size:13px">Aún no has reportado nada. Cuando lo hagas, aparecerá aquí con su estado.</p>';
-    return;
-  }
-  const badge = est => {
-    const map = { 'Pendiente':['#FEF3C7','#92400E'], 'En proceso':['#DBEAFE','#1E40AF'], 'Resuelta':['#D1FAE5','#065F46'], 'Resuelto':['#D1FAE5','#065F46'] };
-    const c = map[est] || ['#F3F4F6','#374151'];
-    return '<span style="background:' + c[0] + ';color:' + c[1] + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">' + est + '</span>';
-  };
-  cont.innerHTML = incidencias.map(i => `
-    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="font-weight:700;color:var(--ink);font-size:14px">${i.categoria || 'Otro'}</div>
-        ${badge(i.estado || 'Pendiente')}
-      </div>
-      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(i.descripcion || '').replace(/</g,'&lt;')}</div>
-      ${i.foto ? '<img src="' + i.foto + '" style="max-width:120px;border-radius:8px;margin-top:8px;border:1px solid var(--border)">' : ''}
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(i.created_at)}</div>
-    </div>`).join('');
-}
-
-function toggleMenu() {
-  document.getElementById('portal').classList.toggle('menu-abierto');
-}
-
-function go(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  if (el) el.classList.add('active');
-  document.getElementById('portal').classList.remove('menu-abierto');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', incidencias:'Incidencias' };
-  document.getElementById('topbar-title').textContent = t[id] || id;
-}
-
-function doLogout() {
-  residente = null; pagos = []; incidencias = []; llamadas = []; eventos = []; encuestas = []; sesionUser = ''; sesionPass = ''; fotoBase64 = null;
-  mpAccessToken = null; mpAuthPromise = null; pagoEnProceso = false;
-  document.getElementById('portal').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('input-user').value = '';
-  document.getElementById('input-pass').value = '';
-  document.getElementById('btn-login').disabled = false;
-  document.getElementById('btn-login').textContent = 'Entrar al portal →';
-  document.getElementById('login-error').style.display = 'none';
-}
-
-function selM(el) {
-  document.querySelectorAll('.pay-opt').forEach(function(m) {
-    m.style.borderColor = 'var(--border)'; m.style.background = 'transparent'; m.style.color = 'var(--muted)';
-  });
-  el.style.borderColor = 'var(--blue)'; el.style.background = 'var(--blue-light)'; el.style.color = 'var(--blue)';
-}
-
-function mostrarMsgPago(texto, tipo) {
-  const el = document.getElementById('pago-msg');
-  const estilos = {
-    info:  'background:var(--blue-light);color:var(--blue)',
-    error: 'background:#FDEDED;color:#C0392B',
-    ok:    'background:#E7F9EF;color:#1B8A4C'
-  };
-  el.style.cssText = 'display:block;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center;' + (estilos[tipo] || estilos.info);
-  el.textContent = texto;
-}
-
-async function doPago() {
-  if (pagoEnProceso) return;
-  const btn = document.getElementById('btn-pagar-mp');
-  const textoOriginal = btn.textContent;
-
-  if (!mpAccessToken && mpAuthPromise) {
-    btn.disabled = true; btn.textContent = 'Preparando sesión…';
-    mpAccessToken = await mpAuthPromise;
-  }
-
-  if (!mpAccessToken) {
-    btn.disabled = false; btn.textContent = textoOriginal;
-    mostrarMsgPago('No pudimos preparar tu sesión de pago. Cierra sesión, vuelve a entrar e inténtalo de nuevo. Si el problema sigue, contáctanos: echoadministrationmx@gmail.com', 'error');
-    return;
-  }
-
-  pagoEnProceso = true;
-  btn.disabled = true; btn.textContent = 'Preparando pago…';
-  document.getElementById('pago-msg').style.display = 'none';
-
-  try {
-    const ctrl = new AbortController();
-    const reloj = setTimeout(() => ctrl.abort(), 15000);
-    const r = await fetch(`${FUNCTIONS_URL}/crear-preferencia`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + mpAccessToken,
-        'apikey': KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ return_url: 'https://www.echoadministration.com/pago/' }),
-      signal: ctrl.signal
-    });
-    clearTimeout(reloj);
-    const d = await r.json().catch(() => null);
-
-    if (!r.ok || !d || !d.checkout_url) {
-      const mensajes = {
-        sin_adeudo: 'No tienes saldo pendiente por pagar. ¡Gracias!',
-        pago_en_proceso: 'Ya tienes un pago en proceso con Mercado Pago. Revisa la pestaña que se abrió o espera unos minutos.',
-        sesion_invalida: 'Tu sesión de pago expiró. Cierra sesión y vuelve a entrar.',
-        servicio_no_configurado: 'El pago en línea no está disponible por el momento. Contáctanos: echoadministrationmx@gmail.com'
-      };
-      mostrarMsgPago(mensajes[d && d.error] || 'No pudimos iniciar tu pago. Intenta de nuevo o contáctanos: echoadministrationmx@gmail.com', 'error');
-      return;
-    }
-
-    window.open(d.checkout_url, '_blank', 'noopener');
-    mostrarMsgPago('Abrimos Mercado Pago en una pestaña nueva. Completa tu pago ahí; no cierres esta pantalla.', 'info');
-  } catch (e) {
-    mostrarMsgPago('Error de conexión al preparar tu pago. Intenta de nuevo.', 'error');
-  } finally {
-    pagoEnProceso = false;
-    btn.disabled = false; btn.textContent = textoOriginal;
-  }
-}
-
-initComunidad();
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-</script>
-</body>
-</html>
+--- /home/claude/echoadministration-web/portal/index.html	2026-08-08 00:06:36.069990158 +0000
++++ /home/claude/web-work/echoadministration-web/portal/index.html	2026-08-08 02:13:09.735999368 +0000
+@@ -291,10 +291,38 @@
+             <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">🏪 OXXO</div>
+             <div class="pay-opt" onclick="selM(this)" style="border:1.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--muted)">📱 Mercado Pago</div>
+           </div>
+-          <button onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
++          <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
++          <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
+           <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
+         </div>
+ 
++        <div class="card" style="max-width:420px;margin:16px auto 0">
++          <div class="card-title" style="display:flex;align-items:center;gap:10px">
++            <span style="width:32px;height:32px;border-radius:8px;background:#00296B;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em">BBVA</span>
++            <span>Transferencia bancaria</span>
++          </div>
++          <p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Manzana 80 Aldea Tulum A.C.</p>
++          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Banco</span><span style="font-weight:600">BBVA</span></div>
++          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Cuenta</span><span style="font-weight:600;user-select:all">0125301696</span></div>
++          <div style="background:var(--blue-light);border:1.5px solid var(--blue);border-radius:8px;padding:12px;margin:14px 0">
++            <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--blue);margin-bottom:4px">CLABE interbancaria</div>
++            <div id="clabe-valor" style="font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.03em;user-select:all">012 69400 1253 016 969</div>
++            <button onclick="copiarClabe()" style="margin-top:8px;background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar CLABE</button>
++          </div>
++          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px">
++            <span>✏️</span>
++            <div>
++              <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Escribe este concepto</div>
++              <div style="font-size:13.5px;font-weight:700">Edif + Depto + Mes</div>
++            </div>
++          </div>
++          <p style="font-size:12px;color:var(--muted);line-height:1.5">Después de transferir, envía tu comprobante a <a href="mailto:aldeamz80@gmail.com?subject=Comprobante%20de%20pago%20-%20Manzana%2080" style="color:var(--blue);font-weight:600">aldeamz80@gmail.com</a> para que se registre tu pago.</p>
++          <div style="display:flex;gap:6px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
++            <span style="font-size:12px">🛡️</span>
++            <p style="font-size:11px;color:var(--muted);line-height:1.5;margin:0">Verifica que la cuenta, CLABE y beneficiario coincidan antes de transferir. No envíes contraseñas ni datos de tarjeta.</p>
++          </div>
++        </div>
++
+         <div style="max-width:420px;margin:16px auto 0;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+           <div style="width:48px;height:48px;border-radius:12px;background:#E7F9EF;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💬</div>
+           <div style="flex:1;min-width:170px">
+@@ -310,7 +338,7 @@
+         <div class="card">
+           <div class="card-title">Documentos del condominio</div>
+           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
++            <div onclick="abrirReglamento()" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
+             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div></div>
+             <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Ene – Mar 2026</div></div></div>
+@@ -318,6 +346,18 @@
+         </div>
+       </div>
+ 
++      <!-- REGLAMENTO (modal) -->
++      <div id="reglamento-modal" onclick="if(event.target===this)cerrarReglamento()" style="display:none;position:fixed;inset:0;background:rgba(12,19,32,.5);z-index:200;align-items:center;justify-content:center;padding:16px">
++        <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
++          <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
++            <div style="font-size:16px;font-weight:700;color:var(--ink)">📋 Reglamento interno</div>
++            <button onclick="cerrarReglamento()" style="background:var(--bg);border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;color:var(--muted)">✕</button>
++          </div>
++          <div id="reglamento-body" style="padding:20px;overflow-y:auto"></div>
++          <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-shrink:0">¿Dudas sobre el reglamento? Escribe a <a href="mailto:aldeamz80@gmail.com" style="color:var(--blue);font-weight:600">aldeamz80@gmail.com</a></div>
++        </div>
++      </div>
++
+       <!-- COMUNIDAD Y AYUDA -->
+       <div class="page" id="page-comunidad">
+ 
+@@ -438,7 +478,10 @@
+ </div>
+ 
+ <script>
+-const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
++const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
++const URL = SUPABASE_URL + '/rest/v1';
++const AUTH_URL = SUPABASE_URL + '/auth/v1';
++const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+ const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
+ const H = {
+   'apikey': KEY,
+@@ -459,6 +502,49 @@
+ let fotoBase64 = null;
+ 
+ /* ============================================================
++   Sesión de pago (Mercado Pago) — Supabase Auth
++   El login del portal (login_residente) es independiente de
++   Supabase Auth. Para poder cobrar necesitamos además una
++   sesión real de Supabase Auth (mismo usuario/clave), porque
++   la Edge Function crear-preferencia exige un JWT autenticado.
++   ============================================================ */
++let mpAccessToken = null;
++let mpAuthPromise = null;
++let pagoEnProceso = false;
++
++async function resolverIdentidad(clave) {
++  try {
++    const r = await fetch(`${URL}/rpc/resolver_identidad`, {
++      method: 'POST',
++      headers: H,
++      body: JSON.stringify({ p_clave: clave })
++    });
++    if (!r.ok) return null;
++    const email = await r.json();
++    return email || null;
++  } catch (e) {
++    return null;
++  }
++}
++
++async function iniciarSesionPago(clave, password) {
++  const email = await resolverIdentidad(clave);
++  if (!email) return null;
++  try {
++    const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
++      method: 'POST',
++      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
++      body: JSON.stringify({ email, password })
++    });
++    const d = await r.json().catch(() => null);
++    if (!r.ok || !d || !d.access_token) return null;
++    return d.access_token;
++  } catch (e) {
++    return null;
++  }
++}
++
++/* ============================================================
+    EDITABLE — Convenios. Agrega o quita objetos de esta lista.
+    ============================================================ */
+ const CONVENIOS_ACTIVOS = [
+@@ -540,6 +626,7 @@
+     encuestas = d.encuestas || [];
+     sesionUser = u;
+     sesionPass = p;
++    mpAuthPromise = iniciarSesionPago(u, p).then(tok => { mpAccessToken = tok; return tok; });
+     document.getElementById('sb-nombre').textContent = residente.nombre_completo;
+     document.getElementById('sb-depto').textContent = 'Depto ' + residente.departamento + ' · Manzana 80';
+     document.getElementById('login-screen').classList.add('hidden');
+@@ -870,6 +957,7 @@
+ 
+ function doLogout() {
+   residente = null; pagos = []; incidencias = []; llamadas = []; eventos = []; encuestas = []; sesionUser = ''; sesionPass = ''; fotoBase64 = null;
++  mpAccessToken = null; mpAuthPromise = null; pagoEnProceso = false;
+   document.getElementById('portal').classList.add('hidden');
+   document.getElementById('login-screen').classList.remove('hidden');
+   document.getElementById('input-user').value = '';
+@@ -886,8 +974,156 @@
+   el.style.borderColor = 'var(--blue)'; el.style.background = 'var(--blue-light)'; el.style.color = 'var(--blue)';
+ }
+ 
+-function doPago() {
+-  alert('🚀 Próximamente: Pago con Mercado Pago\n\nPor ahora contacta:\nechoadministrationmx@gmail.com\nWhatsApp: +52 220 680 8919');
++/* ============================================================
++   Reglamento interno — mismo contenido que la app móvil
++   (lib/communityResources.ts: pool-rules + building-rules)
++   ============================================================ */
++const REGLAMENTO_SECCIONES = [
++  {
++    titulo: 'Reglamento de la alberca',
++    icono: '💧',
++    reglas: [
++      'El horario de uso de la alberca es de 10:00 a 22:00 horas.',
++      'Cuando la alberca se encuentre en mantenimiento y exista señalización informativa, queda estrictamente prohibido su uso, ya que los productos utilizados pueden causar daños severos en la piel y los ojos.',
++      'El uso de la alberca es exclusivo para propietarios, inquilinos y sus invitados, siempre y cuando respeten el presente reglamento.',
++      'Antes de ingresar a la alberca, los usuarios deberán ducharse para retirar del cuerpo el exceso de bloqueadores, bronceadores, tierra u otras sustancias.',
++      'Queda estrictamente prohibido utilizar la alberca con ropa no adecuada, como shorts, pantalones, playeras, ropa interior, sandalias, zapatos u otros similares.',
++      'Los niños menores de 3 años deberán utilizar calzón especial para alberca (no pañal).',
++      'Los menores de edad deberán permanecer siempre bajo la supervisión de un adulto.',
++      'Dentro de la alberca y en el andador perimetral queda estrictamente prohibido consumir alimentos o bebidas.',
++      'Se prohíbe instalar casas de campaña en las áreas comunes del condominio.'
++    ]
++  },
++  {
++    titulo: 'Reglamento de los edificios',
++    icono: '🏢',
++    reglas: [
++      'No cambiar el color de la fachada, a no ser que sea un acuerdo de la asamblea.',
++      'No construir, destruir o modificar las fachadas y paredes de tu edificio.',
++      'Se prohíbe realizar construcciones no autorizadas por la A.C.',
++      'Evitar utilizar los balcones o barandales para colgar ropa o cualquier otro objeto.',
++      'Las mascotas deben permanecer dentro del departamento y, para sacarlas, deben portar correa. Es responsabilidad de cada persona recoger sus heces.',
++      'Atiende a tu mascota para que sus ladridos sean moderados y no molesten a los vecinos en horas inadecuadas. Cuídala dentro de tu propiedad.',
++      'Mantén limpio tu patio y evita acumular objetos que produzcan insectos. Si tienes mascota, limpia diariamente; puedes usar agua con cloro después de lavar para evitar aromas desagradables.',
++      'Cumplir las reglas del área de alberca cuando disfrutes de esta amenidad.',
++      'Dar a conocer el reglamento a los inquilinos y visitantes.',
++      'Las áreas comunes son de todos: no se podrán obstruir con construcciones, invadir o modificar instalando puntos de venta, tendederos en áreas verdes u otros objetos.',
++      'La basura de casa debe depositarse en los contenedores asignados y, de preferencia, separada en orgánica e inorgánica. Los botes del parque son solamente para la basura de esa área.',
++      'El horario de ruido por reparación o construcción es de 8:00 a 17:00 horas.',
++      'Las reuniones en los departamentos deben terminar a las 22:00 horas con música en volumen moderado. Después de esa hora se debe moderar el ruido; en caso contrario, se podrá llamar a las autoridades.',
++      'Evita tirar colillas, latas o cualquier basura en pasillos, escaleras o jardines. Utiliza siempre los botes de basura.',
++      'Ser un buen vecino implica mantener una actitud respetuosa y considerada hacia quienes viven cerca de ti.'
++    ]
++  }
++];
++
++function renderReglamento() {
++  const cont = document.getElementById('reglamento-body');
++  cont.innerHTML = REGLAMENTO_SECCIONES.map(sec => `
++    <div style="margin-bottom:20px">
++      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:8px">${sec.icono} ${sec.titulo}</div>
++      <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
++        ${sec.reglas.map(r => `<li style="font-size:13px;color:var(--body);line-height:1.5">${r.replace(/</g,'&lt;')}</li>`).join('')}
++      </ol>
++    </div>
++  `).join('');
++}
++
++function abrirReglamento() {
++  renderReglamento();
++  document.getElementById('reglamento-modal').style.display = 'flex';
++}
++
++function cerrarReglamento() {
++  document.getElementById('reglamento-modal').style.display = 'none';
++}
++
++async function copiarClabe() {
++  const clabe = '012694001253016969';
++  try {
++    await navigator.clipboard.writeText(clabe);
++  } catch (e) {
++    const ta = document.createElement('textarea');
++    ta.value = clabe;
++    ta.style.position = 'fixed';
++    ta.style.opacity = '0';
++    document.body.appendChild(ta);
++    ta.select();
++    try { document.execCommand('copy'); } catch (e2) {}
++    document.body.removeChild(ta);
++  }
++  const el = document.getElementById('clabe-valor');
++  const original = el.textContent;
++  el.textContent = '✓ Copiada';
++  setTimeout(() => { el.textContent = original; }, 1500);
++}
++
++function mostrarMsgPago(texto, tipo) {
++  const el = document.getElementById('pago-msg');
++  const estilos = {
++    info:  'background:var(--blue-light);color:var(--blue)',
++    error: 'background:#FDEDED;color:#C0392B',
++    ok:    'background:#E7F9EF;color:#1B8A4C'
++  };
++  el.style.cssText = 'display:block;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center;' + (estilos[tipo] || estilos.info);
++  el.textContent = texto;
++}
++
++async function doPago() {
++  if (pagoEnProceso) return;
++  const btn = document.getElementById('btn-pagar-mp');
++  const textoOriginal = btn.textContent;
++
++  if (!mpAccessToken && mpAuthPromise) {
++    btn.disabled = true; btn.textContent = 'Preparando sesión…';
++    mpAccessToken = await mpAuthPromise;
++  }
++
++  if (!mpAccessToken) {
++    btn.disabled = false; btn.textContent = textoOriginal;
++    mostrarMsgPago('No pudimos preparar tu sesión de pago. Cierra sesión, vuelve a entrar e inténtalo de nuevo. Si el problema sigue, contáctanos: echoadministrationmx@gmail.com', 'error');
++    return;
++  }
++
++  pagoEnProceso = true;
++  btn.disabled = true; btn.textContent = 'Preparando pago…';
++  document.getElementById('pago-msg').style.display = 'none';
++
++  try {
++    const ctrl = new AbortController();
++    const reloj = setTimeout(() => ctrl.abort(), 15000);
++    const r = await fetch(`${FUNCTIONS_URL}/crear-preferencia`, {
++      method: 'POST',
++      headers: {
++        'Authorization': 'Bearer ' + mpAccessToken,
++        'apikey': KEY,
++        'Content-Type': 'application/json'
++      },
++      body: JSON.stringify({ return_url: 'https://www.echoadministration.com/pago/' }),
++      signal: ctrl.signal
++    });
++    clearTimeout(reloj);
++    const d = await r.json().catch(() => null);
++
++    if (!r.ok || !d || !d.checkout_url) {
++      const mensajes = {
++        sin_adeudo: 'No tienes saldo pendiente por pagar. ¡Gracias!',
++        pago_en_proceso: 'Ya tienes un pago en proceso con Mercado Pago. Revisa la pestaña que se abrió o espera unos minutos.',
++        sesion_invalida: 'Tu sesión de pago expiró. Cierra sesión y vuelve a entrar.',
++        servicio_no_configurado: 'El pago en línea no está disponible por el momento. Contáctanos: echoadministrationmx@gmail.com'
++      };
++      mostrarMsgPago(mensajes[d && d.error] || 'No pudimos iniciar tu pago. Intenta de nuevo o contáctanos: echoadministrationmx@gmail.com', 'error');
++      return;
++    }
++
++    window.open(d.checkout_url, '_blank', 'noopener');
++    mostrarMsgPago('Abrimos Mercado Pago en una pestaña nueva. Completa tu pago ahí; no cierres esta pantalla.', 'info');
++  } catch (e) {
++    mostrarMsgPago('Error de conexión al preparar tu pago. Intenta de nuevo.', 'error');
++  } finally {
++    pagoEnProceso = false;
++    btn.disabled = false; btn.textContent = textoOriginal;
++  }
+ }
+ 
+ initComunidad();
