@@ -6,6 +6,7 @@
     { "source": "/gestion", "destination": "/gestion/index.html" },
     { "source": "/rentas", "destination": "/rentas/index.html" },
     { "source": "/convenios", "destination": "/convenios/index.html" },
+    { "source": "/operaciones", "destination": "/operaciones/index.html" },
     { "source": "/privacidad", "destination": "/privacidad.html" },
     { "source": "/terminos", "destination": "/terminos.html" }
   ]
