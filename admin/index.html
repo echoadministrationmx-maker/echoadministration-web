@@ -197,7 +197,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div id="ov-loading" class="loading">⏳ Cargando datos...</div>
         <div id="ov-content" class="hidden">
           <div class="kpi-grid">
-            <div class="kpi blue" onclick="go('residentes',document.querySelectorAll('.nav-item')[4])">
+            <div class="kpi blue" onclick="go('residentes',document.querySelectorAll('.nav-item')[5])">
               <div class="kpi-label">Total departamentos</div>
               <div class="kpi-val blue" id="ov-total">320</div>
               <div class="kpi-sub">Manzana 80</div>
@@ -219,32 +219,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             </div>
           </div>
 
-          <div class="grid-3">
-            <div class="card">
-              <div class="card-hdr"><span class="card-title">📊 Cobranza 2026 por mes</span></div>
-              <div id="ov-chart"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">📊 Cobranza 2026 por mes</span>
+              <button class="card-link" onclick="go('cobranzames',document.querySelectorAll('.nav-item')[4])">Ver detalle →</button>
             </div>
-            <div class="card">
-              <div class="card-hdr"><span class="card-title">Estado de cobranza — mes actual</span></div>
-              <div id="ov-estado"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
-            </div>
+            <div id="ov-chart"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
           </div>
 
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-hdr">
-                <span class="card-title">✅ Últimos pagos</span>
-                <button class="card-link" onclick="go('pagos',document.querySelectorAll('.nav-item')[3])">Ver todos →</button>
-              </div>
-              <table class="tbl">
-                <thead><tr><th>Residente</th><th>Depto</th><th>Mes</th></tr></thead>
-                <tbody id="ultimos-pagos"></tbody>
-              </table>
-            </div>
-            <div class="card">
-              <div class="card-hdr"><span class="card-title">📈 Avance del año</span></div>
-              <div id="ov-anual"></div>
-            </div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-hdr"><span class="card-title">Estado de cobranza — mes actual</span></div>
+            <div id="ov-estado"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hdr"><span class="card-title">📈 Avance del año</span></div>
+            <div id="ov-anual"></div>
           </div>
         </div>
       </div>
@@ -572,15 +561,6 @@ function calcularMetricas() {
 
   // Cobranza mensual (misma fuente que la pestaña Cobranza mensual)
   cargarCobranzaOverview();
-
-  // Ultimos pagos
-  const pagados = allPagos.filter(p => p.estado === 'pagado').slice(0, 5);
-  document.getElementById('ultimos-pagos').innerHTML = pagados.map(p => `
-    <tr>
-      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${p.nombre}</td>
-      <td style="font-weight:600">${p.departamento}</td>
-      <td><span class="badge paid">✓ ${fmtMes(p.fecha_vencimiento)}</span></td>
-    </tr>`).join('');
 
   // Cartera stats
   document.getElementById('cartera-stats').innerHTML = `
@@ -1115,7 +1095,11 @@ const CM_MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','A
 const cmMoney = n => '$' + Number(n||0).toLocaleString('es-MX');
 
 async function cargarCobranzaMes() {
-  if (cmLoaded) { renderCobranzaMes(); return; }
+  if (cmLoaded) {
+    document.getElementById('cm-loading').classList.add('hidden');
+    document.getElementById('cm-content').classList.remove('hidden');
+    renderCobranzaMes(); return;
+  }
   try {
     const r = await fetch(`${URL}/rpc/pg_cobranza`, {
       method: 'POST', headers: H,
