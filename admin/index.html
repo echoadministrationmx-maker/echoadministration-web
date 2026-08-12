@@ -160,6 +160,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Pagos recibidos
       </button>
+      <button class="nav-item" onclick="go('cobranzames',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Cobranza mensual
+      </button>
       <div class="nav-section">Operaciones</div>
       <button class="nav-item" onclick="go('residentes',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -257,6 +261,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
                 <thead><tr><th>Residente</th><th>Depto</th><th>Mes</th></tr></thead>
                 <tbody id="ultimos-pagos"></tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COBRANZA MENSUAL -->
+      <div class="page" id="page-cobranzames">
+        <div id="cm-loading" class="loading">⏳ Cargando cobranza...</div>
+        <div id="cm-content" class="hidden">
+          <div class="detail-tabs" id="cm-years"></div>
+          <div class="kpi-grid" id="cm-kpis"></div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-head"><h3>Recaudación mes por mes</h3></div>
+            <div style="padding:8px 18px 18px" id="cm-table"></div>
+            <div style="padding:0 18px 18px;font-size:12px;color:#7A8699">
+              Ideal = 320 departamentos × cuota del mes ($500; $515 desde julio 2026). Se actualiza al registrar pagos.
             </div>
           </div>
         </div>
@@ -1056,8 +1076,79 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
+  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', cobranzames:'Cobranza mensual', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
   document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
+  if (id === 'cobranzames') cargarCobranzaMes();
+}
+
+// ===== COBRANZA MENSUAL =====
+let cmData = [], cmYear = 2026, cmLoaded = false;
+const CM_MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const cmMoney = n => '$' + Number(n||0).toLocaleString('es-MX');
+
+async function cargarCobranzaMes() {
+  if (cmLoaded) { renderCobranzaMes(); return; }
+  try {
+    const r = await fetch(`${URL}/rpc/pg_cobranza`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass })
+    });
+    const d = await r.json();
+    if (!d || d.ok === false) {
+      document.getElementById('cm-loading').textContent = 'No se pudo cargar la cobranza.';
+      return;
+    }
+    cmData = d.meses || [];
+    cmLoaded = true;
+    document.getElementById('cm-loading').classList.add('hidden');
+    document.getElementById('cm-content').classList.remove('hidden');
+    renderCobranzaMes();
+  } catch (e) {
+    document.getElementById('cm-loading').textContent = 'Error de conexión.';
+  }
+}
+
+function cmSetYear(y, el) {
+  cmYear = y;
+  document.querySelectorAll('#cm-years .detail-tab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderCobranzaMes();
+}
+
+function renderCobranzaMes() {
+  const years = [...new Set(cmData.map(m => m.anio))].sort();
+  const ys = document.getElementById('cm-years');
+  if (!ys.dataset.done) {
+    ys.innerHTML = years.map(y =>
+      `<button class="detail-tab${y === cmYear ? ' active' : ''}" onclick="cmSetYear(${y},this)">${y}</button>`
+    ).join('');
+    ys.dataset.done = '1';
+  }
+  const rows = cmData.filter(m => m.anio === cmYear);
+  const billed = rows.filter(m => m.facturables > 0);
+  const totIdeal = billed.reduce((a,m) => a + Number(m.ideal_monto), 0);
+  const totCob = billed.reduce((a,m) => a + Number(m.cobrado), 0);
+  const pct = totIdeal ? 100*totCob/totIdeal : 0;
+
+  document.getElementById('cm-kpis').innerHTML = `
+    <div class="kpi blue"><div class="kpi-label">Ideal del año</div><div class="kpi-val blue">${cmMoney(totIdeal)}</div><div class="kpi-sub">meses facturados</div></div>
+    <div class="kpi green"><div class="kpi-label">Cobrado</div><div class="kpi-val green">${cmMoney(totCob)}</div><div class="kpi-sub">${cmYear}</div></div>
+    <div class="kpi yellow"><div class="kpi-label">Recaudación</div><div class="kpi-val yellow">${pct.toFixed(1)}%</div><div class="kpi-sub">del ideal</div></div>`;
+
+  document.getElementById('cm-table').innerHTML = rows.map(m => {
+    const p = Number(m.pct_ideal || 0);
+    const color = p >= 70 ? 'var(--green)' : p >= 45 ? 'var(--yellow)' : 'var(--coral)';
+    const facturado = m.facturables > 0;
+    return `<div style="display:grid;grid-template-columns:110px 1fr 130px 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);${facturado?'':'opacity:.45'}">
+      <div style="font-weight:600;font-size:14px">${CM_MESES[m.mes]}
+        <div style="font-size:11px;color:var(--muted);font-weight:400">cuota ${cmMoney(m.cuota)}${facturado?'':' · no facturado'}</div></div>
+      <div style="height:20px;background:#F1F3F7;border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:6px"></div></div>
+      <div style="text-align:right;font-size:13px">${cmMoney(m.cobrado)}
+        <div style="font-size:11px;color:var(--muted)">de ${cmMoney(m.ideal_monto)}</div></div>
+      <div style="text-align:right;font-weight:800;color:${color}">${facturado ? p.toFixed(1)+'%' : '—'}</div>
+    </div>`;
+  }).join('');
 }
 
 function adminLogout() {
