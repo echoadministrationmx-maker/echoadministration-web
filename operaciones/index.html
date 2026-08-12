@@ -117,6 +117,7 @@
     <button class="tab" data-tab="pagos">Registrar pago</button>
     <button class="tab" data-tab="residentes">Residentes</button>
     <button class="tab" data-tab="incidencias">Incidencias</button>
+    <button class="tab" data-tab="llamadas">Llamadas</button>
     <button class="tab" data-tab="convenios">Convenios</button>
     <button class="tab" data-tab="descuentos">Descuentos</button>
   </div>
@@ -254,6 +255,25 @@
   </div>
 </div>
 
+<!-- LLAMADAS DE ATENCIÓN -->
+<div id="tab-llamadas" class="wrap hidden">
+  <div class="card pad">
+    <h2 style="margin:0 0 6px;font-size:1.2rem">Llamadas de atención</h2>
+    <p class="hint" style="margin:0 0 14px">Registra llamadas de atención a condóminos por faltas al reglamento y dales seguimiento.</p>
+    <details class="ll-new" style="margin-bottom:16px">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue)">+ Levantar llamada de atención</summary>
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-top:12px" class="cvgrid">
+        <div><label>Unidad</label><select id="llUnidad"></select></div>
+        <div><label>Motivo</label><input id="llMotivo" placeholder="Ruido, mascota, basura…"></div>
+        <div style="grid-column:1/-1"><label>Descripción</label><input id="llDesc" placeholder="Describe brevemente lo ocurrido"></div>
+      </div>
+      <button class="btn" id="llBtn" style="margin-top:12px">Registrar llamada</button>
+    </details>
+    <div class="hint" id="llCount"></div>
+    <div class="dirlist" id="llList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -263,8 +283,8 @@ const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto
 const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
-let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false};
-let INC=[], CV=[], DC=[], incF='todas';
+let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false};
+let INC=[], CV=[], DC=[], LL=[], incF='todas';
 let curYear=2026;
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 
@@ -299,13 +319,14 @@ function logout(){location.reload();}
 // ---------- TABS ----------
 function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
-  ['cobranza','pagos','residentes','incidencias','convenios','descuentos'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
   if(name==='cobranza'&&loaded.cobranza){reloadCobranza();}
   if(name==='pagos'&&!loaded.pagos){loadUnits();}
   if(name==='residentes'&&!loaded.residentes){loadDir();}
   if(name==='incidencias'&&!loaded.incidencias){loadInc();}
   if(name==='convenios'&&!loaded.convenios){loadCv();}
   if(name==='descuentos'&&!loaded.descuentos){loadDc();}
+  if(name==='llamadas'&&!loaded.llamadas){loadLl();}
 }
 
 // ---------- COBRANZA ----------
@@ -738,6 +759,70 @@ async function crearDescuento(){
   btn.disabled=false;btn.textContent='Publicar descuento';
 }
 
+// ---------- LLAMADAS DE ATENCIÓN ----------
+async function loadLl(){
+  try{
+    if(!loaded.pagos)await loadUnits();
+    const res=await rpc('admin_panel',{p_user:CREDS.p_user,p_password:CREDS.p_password});
+    if(res&&res.ok!==false){LL=res.llamadas||[];loaded.llamadas=true;renderLl();fillLlUnits();}
+  }catch(e){toast('No se pudieron cargar las llamadas.',true);}
+}
+function fillLlUnits(){
+  const sel=document.getElementById('llUnidad');sel.innerHTML='';
+  UNITS.forEach(u=>{
+    const o=document.createElement('option');o.value=u.id_residente;
+    o.textContent=`${u.ident} · ${(u.nombre_completo||'').slice(0,32)}`;
+    sel.appendChild(o);
+  });
+}
+function renderLl(){
+  const list=document.getElementById('llList');
+  const activas=LL.filter(l=>l.estado==='Activa').length;
+  document.getElementById('llCount').textContent=`${LL.length} llamadas · ${activas} activas`;
+  list.innerHTML='';
+  if(LL.length===0){list.innerHTML='<div class="hint">Sin llamadas registradas. Levanta la primera arriba.</div>';return;}
+  LL.forEach(l=>{
+    const activa=l.estado==='Activa';
+    const fecha=new Date(l.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    row.innerHTML=`
+      <div class="id">${l.departamento||'—'}</div>
+      <div class="nm">${l.motivo||'General'}
+        <small>${fecha}</small>
+        <div style="font-weight:400;font-size:.85rem;color:#485061;margin-top:4px">${(l.descripcion||'').slice(0,220)}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${activa?'debt':'clear'}">${l.estado||'Activa'}</span>
+        <button class="btn ghost llToggle" data-id="${l.id}" data-est="${activa?'Resuelta':'Activa'}" style="padding:8px 12px;font-size:.8rem">${activa?'Marcar resuelta':'Reactivar'}</button>
+      </div>`;
+    row.querySelector('.llToggle').addEventListener('click',async e=>{
+      const id=Number(e.target.dataset.id),estado=e.target.dataset.est;
+      e.target.disabled=true;
+      try{
+        const r=await rpc('actualizar_llamada_estado',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_estado:estado});
+        if(r&&r.ok){toast('Llamada actualizada');const it=LL.find(x=>x.id===id);if(it)it.estado=estado;renderLl();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+    });
+    list.appendChild(row);
+  });
+}
+async function crearLlamada(){
+  const idr=Number(document.getElementById('llUnidad').value);
+  const motivo=document.getElementById('llMotivo').value.trim();
+  const desc=document.getElementById('llDesc').value.trim();
+  if(!idr||!desc){toast('Elige unidad y escribe la descripción.',true);return;}
+  const btn=document.getElementById('llBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('crear_llamada_atencion',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:idr,p_motivo:motivo,p_descripcion:desc});
+    if(r&&r.ok){toast('Llamada registrada');
+      LL.unshift({id:r.id,departamento:r.departamento,motivo:motivo||'General',descripcion:desc,estado:'Activa',created_at:new Date().toISOString()});
+      document.getElementById('llMotivo').value='';document.getElementById('llDesc').value='';renderLl();}
+    else toast('No se pudo registrar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Registrar llamada';
+}
+
 // ---------- eventos ----------
 document.getElementById('loginBtn').onclick=doLogin;
 document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -753,6 +838,7 @@ document.getElementById('cleardq').onclick=()=>{document.getElementById('dq').va
 document.querySelectorAll('#incFilter button').forEach(b=>b.onclick=()=>{incF=b.dataset.f;document.querySelectorAll('#incFilter button').forEach(x=>x.classList.toggle('active',x===b));renderInc();});
 document.getElementById('cvBtn').onclick=crearConvenio;
 document.getElementById('dcBtn').onclick=crearDescuento;
+document.getElementById('llBtn').onclick=crearLlamada;
 </script>
 </body>
 </html>
