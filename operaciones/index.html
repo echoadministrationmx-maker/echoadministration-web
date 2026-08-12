@@ -168,6 +168,17 @@
       <div class="sum">Seleccionado: <b id="selSum">$0</b> <span id="selCount" style="color:#6a7382;font-weight:500"></span></div>
       <button class="btn ok" id="markBtn" style="margin-left:auto" disabled>Marcar como pagados</button>
     </div>
+    <div class="hidden" id="reciboBar" style="background:#EFF6FF;border-top:1px solid var(--mid);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-weight:600;font-size:.9rem">Pago aplicado por <b id="rbTotal">$0</b> · ¿Emitir comprobante?</span>
+      <select id="rbForma" style="width:auto;padding:9px 12px;font-size:.86rem">
+        <option>Transferencia</option>
+        <option>Dep. en efectivo</option>
+        <option>Efectivo</option>
+        <option>Mercado Pago</option>
+      </select>
+      <button class="btn" id="rbBtn" style="padding:10px 16px;font-size:.86rem">Emitir comprobante</button>
+      <button class="btn ghost" id="rbNo" style="padding:10px 14px;font-size:.86rem">Ahora no</button>
+    </div>
   </div>
 </div>
 
@@ -356,6 +367,7 @@ async function openUnit(u){
   document.getElementById('dName').textContent=u.nombre_completo||'';
   document.getElementById('dMeta').textContent='Cargando…';
   document.getElementById('dBody').innerHTML='';document.getElementById('abar').classList.add('hidden');
+  document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;
   d.scrollIntoView({behavior:'smooth',block:'start'});
   try{const res=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:u.id_residente});renderDetail(res);}
   catch(e){document.getElementById('dMeta').textContent='Error al cargar.';}
@@ -397,6 +409,7 @@ function onCheck(){
 async function markPaid(){
   const sel=selectedBoxes();if(!sel.length)return;
   const ids=sel.map(b=>Number(b.value)),btn=document.getElementById('markBtn');
+  const conceptos=sel.map(b=>({c:b.closest('.m').querySelector('.mo').textContent.trim(),m:Number(b.dataset.monto)}));
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando…';
   try{
     const res=await rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:ids});
@@ -404,9 +417,97 @@ async function markPaid(){
     toast(`${res.marcados} ${res.marcados===1?'mes marcado':'meses marcados'} como pagados`);
     const u=UNITS.find(x=>x.id_residente===CURRENT);if(u)u.adeudo=res.adeudo;renderUnits(document.getElementById('q').value);
     loaded.cobranza=false; // forzar recálculo al volver a cobranza
+    ofrecerRecibo(CURRENT, conceptos);
     const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:CURRENT});renderDetail(fresh);
   }catch(e){toast('Error de conexión.',true);}
   btn.textContent='Marcar como pagados';
+}
+
+// ---------- COMPROBANTE (diseño Canva) ----------
+let RECIBO_PEND=null;
+function ofrecerRecibo(idr, conceptos){
+  RECIBO_PEND={idr, conceptos, total:conceptos.reduce((a,c)=>a+c.m,0)};
+  const bar=document.getElementById('reciboBar');
+  document.getElementById('rbTotal').textContent=money(RECIBO_PEND.total);
+  bar.classList.remove('hidden');
+}
+async function emitirRecibo(){
+  if(!RECIBO_PEND)return;
+  const forma=document.getElementById('rbForma').value;
+  const btn=document.getElementById('rbBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const conceptosCap=RECIBO_PEND.conceptos.map(x=>({c:'Mantenimiento '+x.c, m:x.m}));
+    const res=await rpc('pg_emitir_recibo',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:RECIBO_PEND.idr,p_conceptos:conceptosCap,p_total:RECIBO_PEND.total,p_forma_pago:forma});
+    if(res&&res.ok){abrirRecibo(res.folio,res.nombre,res.ident,res.fecha,conceptosCap,RECIBO_PEND.total,forma);
+      document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;}
+    else toast('No se pudo emitir el comprobante.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Emitir comprobante';
+}
+function abrirRecibo(folio,nombre,ident,fecha,conceptos,total,forma){
+  const filas=conceptos.map(x=>`<tr style="border-bottom:1px solid #F3F4F6"><td style="padding:14px 0;color:#374151">${x.c}</td><td style="padding:14px 0;text-align:right;font-weight:500;color:#374151">$${Number(x.m).toLocaleString('es-MX',{minimumFractionDigits:2})}</td></tr>`).join('');
+  const tot='$'+Number(total).toLocaleString('es-MX',{minimumFractionDigits:2});
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Recibo #${folio} · Manzana 80</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{font-family:'DM Sans',sans-serif;background:#F3F4F6;margin:0;padding:24px}
+.hoja{max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.12);border:1px solid #DBEAFE}
+.head{background:#1E40AF;color:#fff;padding:32px;display:flex;justify-content:space-between;align-items:center}
+.head .co{font-size:12px;font-weight:600;letter-spacing:.15em;color:#BFDBFE;margin:0 0 4px}
+.head h1{font-size:32px;font-weight:700;margin:0;letter-spacing:-.01em}
+.head .sub{color:#BFDBFE;margin:2px 0 0}
+.head .folio p{margin:0;text-align:right}.head .folio .l{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:#BFDBFE}
+.head .folio .n{font-size:24px;font-weight:600}
+.cuerpo{padding:32px;display:grid;gap:28px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.lbl{font-size:12px;font-weight:700;color:#1E40AF;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}
+.val{font-size:17px;font-weight:500;color:#1F2937;margin:0}.mut{color:#4B5563;margin:2px 0 0}
+table{width:100%;border-collapse:collapse}
+th{padding-bottom:10px;font-size:12px;color:#6B7280;text-transform:uppercase;text-align:left;border-bottom:2px solid #DBEAFE}
+th:last-child{text-align:right}
+.tots{display:flex;justify-content:flex-end}.tots>div{width:50%}
+.fila{display:flex;justify-content:space-between;color:#4B5563;padding:4px 0}
+.fila.total{font-size:20px;font-weight:700;color:#1E3A5F;border-top:1px solid #E5E7EB;padding-top:10px;margin-top:6px}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;background:#EFF6FF;border-radius:10px;padding:16px;font-size:14px;color:#1E3A5F}
+.info b{display:block;margin-bottom:2px}
+footer{text-align:center;padding-top:18px;border-top:1px solid #E5E7EB}
+footer .q{font-style:italic;font-size:13px;color:#9CA3AF;margin:0}
+footer .m{font-weight:600;color:#2563EB;margin:8px 0 0}
+.printbar{max-width:720px;margin:0 auto 14px;display:flex;justify-content:flex-end}
+.printbar button{background:#1847CC;color:#fff;border:0;border-radius:10px;padding:12px 20px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+@media print{body{background:#fff;padding:0}.printbar{display:none}.hoja{box-shadow:none;border:0;border-radius:0}}
+@page{margin:12mm}
+</style></head><body>
+<div class="printbar"><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button></div>
+<div class="hoja">
+  <div class="head">
+    <div><p class="co">ECHO ADMINISTRATION</p><h1>MANZANA 80</h1><p class="sub">ALDEA TULUM</p></div>
+    <div class="folio"><p class="l">Folio</p><p class="n">#${folio}</p></div>
+  </div>
+  <div class="cuerpo">
+    <div class="dos">
+      <div><p class="lbl">Datos del Cliente</p><p class="val">${nombre||''}</p><p class="mut">Domicilio: ${(ident||'').replace('-',' ')}</p></div>
+      <div style="text-align:right"><p class="lbl">Fecha</p><p class="val">${fecha}</p></div>
+    </div>
+    <table><thead><tr><th>Concepto</th><th>Importe</th></tr></thead><tbody>${filas}</tbody></table>
+    <div class="tots"><div>
+      <div class="fila"><span>Subtotal</span><span>${tot}</span></div>
+      <div class="fila total"><span>Total</span><span>${tot}</span></div>
+    </div></div>
+    <div class="info">
+      <div><b>Forma de Pago</b>${forma}</div>
+      <div><b>Método</b>Una sola exhibición</div>
+      <div><b>Moneda</b>Pesos mexicanos</div>
+    </div>
+    <footer>
+      <p class="q">"Juntarse es el principio, mantenerse juntos el progreso, trabajar en equipo el éxito"</p>
+      <p class="m">ALDEAMZ80@GMAIL.COM</p>
+    </footer>
+  </div>
+</div>
+</body></html>`;
+  const w=window.open('','_blank');
+  if(!w){toast('Tu navegador bloqueó la ventana. Permite ventanas emergentes.',true);return;}
+  w.document.write(html);w.document.close();
 }
 
 // ---------- RESIDENTES ----------
@@ -427,15 +528,41 @@ function renderDir(filter){
     row.innerHTML=`
       <div class="id">${r.ident}</div>
       <div class="nm">${r.nombre_completo||''}<small>Clave: ${r.clave||'—'}</small></div>
-      <div class="contact">
+      <div class="contact" data-view>
         ${r.email?`<a href="mailto:${r.email.split('/')[0].trim()}" title="${r.email}">✉ ${r.email.split('/')[0].trim()}</a>`:`<span class="empty">✉ sin correo</span>`}
         ${r.telefono?`<a href="tel:${telClean}">✆ ${r.telefono}</a>`:`<span class="empty">✆ sin teléfono</span>`}
       </div>
-      <div class="db"><span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente'}</span></div>`;
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente'}</span>
+        <button class="btn ghost editC" style="padding:7px 12px;font-size:.78rem">✎ Editar</button>
+      </div>`;
+    row.querySelector('.editC').addEventListener('click',()=>editContact(row,r));
     list.appendChild(row);
   });
   if(items.length>120){const p=document.createElement('div');p.className='hint';p.textContent='Mostrando 120. Escribe para afinar.';list.appendChild(p);}
   if(items.length===0){const p=document.createElement('div');p.className='hint';p.textContent='Sin coincidencias.';list.appendChild(p);}
+}
+
+function editContact(row,r){
+  const view=row.querySelector('[data-view]');
+  view.innerHTML=`
+    <input class="ecMail" type="email" placeholder="correo@ejemplo.com" value="${(r.email||'').replace(/"/g,'&quot;')}" style="padding:8px 10px;font-size:.84rem;margin-bottom:4px">
+    <input class="ecTel" type="tel" placeholder="55 1234 5678" value="${(r.telefono||'').replace(/"/g,'&quot;')}" style="padding:8px 10px;font-size:.84rem">
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="btn ecSave" style="padding:7px 12px;font-size:.78rem">Guardar</button>
+      <button class="btn ghost ecCancel" style="padding:7px 12px;font-size:.78rem">Cancelar</button>
+    </div>`;
+  view.querySelector('.ecCancel').onclick=()=>renderDir(document.getElementById('dq').value);
+  view.querySelector('.ecSave').onclick=async()=>{
+    const email=view.querySelector('.ecMail').value.trim();
+    const tel=view.querySelector('.ecTel').value.trim();
+    const btn=view.querySelector('.ecSave');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+    try{
+      const res=await rpc('pg_actualizar_contacto',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:r.id_residente,p_email:email,p_telefono:tel});
+      if(res&&res.ok){toast('Contacto actualizado');r.email=email||null;r.telefono=tel||null;renderDir(document.getElementById('dq').value);}
+      else{toast('No se pudo guardar.',true);btn.disabled=false;btn.textContent='Guardar';}
+    }catch(e){toast('Error de conexión.',true);btn.disabled=false;btn.textContent='Guardar';}
+  };
 }
 
 // ---------- INCIDENCIAS ----------
@@ -619,6 +746,8 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab
 document.getElementById('q').addEventListener('input',e=>renderUnits(e.target.value));
 document.getElementById('clearq').onclick=()=>{document.getElementById('q').value='';renderUnits('');};
 document.getElementById('markBtn').onclick=markPaid;
+document.getElementById('rbBtn').onclick=emitirRecibo;
+document.getElementById('rbNo').onclick=()=>{document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;};
 document.getElementById('dq').addEventListener('input',e=>renderDir(e.target.value));
 document.getElementById('cleardq').onclick=()=>{document.getElementById('dq').value='';renderDir('');};
 document.querySelectorAll('#incFilter button').forEach(b=>b.onclick=()=>{incF=b.dataset.f;document.querySelectorAll('#incFilter button').forEach(x=>x.classList.toggle('active',x===b));renderInc();});
