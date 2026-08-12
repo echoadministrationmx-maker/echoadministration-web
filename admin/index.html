@@ -222,36 +222,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           <div class="grid-3">
             <div class="card">
               <div class="card-hdr"><span class="card-title">📊 Cobranza 2026 por mes</span></div>
-              <div id="ov-chart"></div>
+              <div id="ov-chart"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
             </div>
             <div class="card">
-              <div class="card-hdr"><span class="card-title">Estado de cobranza</span></div>
-              <div style="margin-bottom:14px">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Al corriente</span><span style="font-weight:600;color:var(--green)" id="prog-corriente-txt">—</span></div>
-                <div class="prog-bar"><div class="prog-fill green" id="prog-corriente" style="width:0%"></div></div>
-              </div>
-              <div style="margin-bottom:14px">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Morosos</span><span style="font-weight:600;color:var(--coral)" id="prog-morosos-txt">—</span></div>
-                <div class="prog-bar"><div class="prog-fill coral" id="prog-morosos" style="width:0%"></div></div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Recuperación</span><span style="font-weight:600;color:var(--blue)" id="prog-ing-txt">—</span></div>
-                <div class="prog-bar"><div class="prog-fill blue" id="prog-ing" style="width:0%"></div></div>
-              </div>
+              <div class="card-hdr"><span class="card-title">Estado de cobranza — mes actual</span></div>
+              <div id="ov-estado"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
             </div>
           </div>
 
           <div class="grid-2">
-            <div class="card">
-              <div class="card-hdr">
-                <span class="card-title">⚠️ Top morosos — 2026 + Histórico</span>
-                <button class="card-link" onclick="go('morosos',document.querySelectorAll('.nav-item')[2])">Ver todos →</button>
-              </div>
-              <table class="tbl">
-                <thead><tr><th>Residente</th><th>Depto</th><th>Adeudo 2026</th><th>Histórico total</th></tr></thead>
-                <tbody id="top-morosos"></tbody>
-              </table>
-            </div>
             <div class="card">
               <div class="card-hdr">
                 <span class="card-title">✅ Últimos pagos</span>
@@ -261,6 +240,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
                 <thead><tr><th>Residente</th><th>Depto</th><th>Mes</th></tr></thead>
                 <tbody id="ultimos-pagos"></tbody>
               </table>
+            </div>
+            <div class="card">
+              <div class="card-hdr"><span class="card-title">📈 Avance del año</span></div>
+              <div id="ov-anual"></div>
             </div>
           </div>
         </div>
@@ -587,44 +570,8 @@ function calcularMetricas() {
   document.getElementById('ov-cartera').textContent = '$' + totalDeuda2026.toLocaleString();
   document.getElementById('ov-cartera-hist').textContent = 'Histórico: $' + totalDeudaHist.toLocaleString();
 
-  // Progress
-  const pctC = Math.round(alcorriente.length / allResidentes.length * 100);
-  const pctM = Math.round(morosos.length / allResidentes.length * 100);
-  const pctI = totalEsperado > 0 ? Math.round(totalPagado / totalEsperado * 100) : 0;
-  document.getElementById('prog-corriente').style.width = pctC + '%';
-  document.getElementById('prog-corriente-txt').textContent = pctC + '%';
-  document.getElementById('prog-morosos').style.width = pctM + '%';
-  document.getElementById('prog-morosos-txt').textContent = pctM + '%';
-  document.getElementById('prog-ing').style.width = pctI + '%';
-  document.getElementById('prog-ing-txt').textContent = pctI + '%';
-
-  // Chart
-  const meses = [['ENE','01'],['FEB','02'],['MAR','03'],['ABR','04'],['MAY','05']];
-  document.getElementById('ov-chart').innerHTML = meses.map(([m, n]) => {
-    const mp = pagos2026.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.includes('-' + n + '-'));
-    const pag = mp.filter(p => p.estado === 'pagado').length;
-    const pend = mp.filter(p => p.estado !== 'pagado').length;
-    const total = pag + pend;
-    const pct = total > 0 ? Math.round(pag / total * 100) : 0;
-    return `<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
-        <span>${m} 2026</span>
-        <span style="font-weight:600;color:var(--ink)">${pct}% — ${pag} pagados / ${pend} pendientes</span>
-      </div>
-      <div style="height:7px;background:var(--coral-light);border-radius:100px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:var(--green);border-radius:100px"></div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Top morosos with historical
-  document.getElementById('top-morosos').innerHTML = allMorosos.slice(0, 5).map(d => `
-    <tr>
-      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${d.res.nombre_completo}</td>
-      <td style="font-weight:600">${d.res.departamento}</td>
-      <td style="font-weight:700;color:var(--coral)">$${d.deuda2026.toLocaleString()}</td>
-      <td style="color:var(--muted);font-size:12px">$${d.deudaHist.toLocaleString()}</td>
-    </tr>`).join('');
+  // Cobranza mensual (misma fuente que la pestaña Cobranza mensual)
+  cargarCobranzaOverview();
 
   // Ultimos pagos
   const pagados = allPagos.filter(p => p.estado === 'pagado').slice(0, 5);
@@ -1083,6 +1030,87 @@ function go(id, el) {
 
 // ===== COBRANZA MENSUAL =====
 let cmData = [], cmYear = 2026, cmLoaded = false;
+
+async function cargarCobranzaOverview() {
+  try {
+    if (!cmLoaded) {
+      const r = await fetch(`${URL}/rpc/pg_cobranza`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ p_user: adminUser, p_password: adminPass })
+      });
+      const d = await r.json();
+      if (!d || d.ok === false) return;
+      cmData = d.meses || [];
+      cmLoaded = true;
+    }
+    renderOvCobranza();
+  } catch (e) {}
+}
+
+function renderOvCobranza() {
+  const hoy = new Date();
+  const anio = hoy.getFullYear(), mesActual = hoy.getMonth() + 1;
+  const rows = cmData.filter(m => m.anio === anio && m.facturables > 0);
+
+  // Cobranza por mes (mismos % que la pestaña Cobranza mensual)
+  document.getElementById('ov-chart').innerHTML = rows.map(m => {
+    const p = Number(m.pct_ideal || 0);
+    const color = p >= 70 ? 'var(--green)' : p >= 45 ? 'var(--yellow)' : 'var(--coral)';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
+        <span>${CM_MESES[m.mes].slice(0,3).toUpperCase()} ${anio}</span>
+        <span style="font-weight:600;color:var(--ink)">${p.toFixed(1)}% — ${cmMoney(m.cobrado)} de ${cmMoney(m.ideal_monto)}</span>
+      </div>
+      <div style="height:7px;background:#F1F3F7;border-radius:100px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:100px"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="font-size:13px;color:var(--muted)">Sin meses facturados este año.</div>';
+
+  // Estado de cobranza — mes actual
+  const mAct = rows.find(m => m.mes === mesActual) || rows[rows.length - 1];
+  if (mAct) {
+    const pMes = Number(mAct.pct_ideal || 0);
+    const pPend = Math.max(0, 100 - pMes);
+    const totIdeal = rows.reduce((a,m)=>a+Number(m.ideal_monto),0);
+    const totCob = rows.reduce((a,m)=>a+Number(m.cobrado),0);
+    const pAnio = totIdeal ? 100*totCob/totIdeal : 0;
+    document.getElementById('ov-estado').innerHTML = `
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${CM_MESES[mAct.mes]} ${anio} · cuota ${cmMoney(mAct.cuota)} · ideal ${cmMoney(mAct.ideal_monto)}</div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Al corriente (cobrado del mes)</span><span style="font-weight:600;color:var(--green)">${pMes.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill green" style="width:${Math.min(pMes,100)}%"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Pendiente del mes</span><span style="font-weight:600;color:var(--coral)">${pPend.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill coral" style="width:${Math.min(pPend,100)}%"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Acumulado ${anio}</span><span style="font-weight:600;color:var(--blue)">${pAnio.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill blue" style="width:${Math.min(pAnio,100)}%"></div></div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">Cobrado del mes: <b style="color:var(--ink)">${cmMoney(mAct.cobrado)}</b> · Año: <b style="color:var(--ink)">${cmMoney(totCob)}</b> de ${cmMoney(totIdeal)}</div>`;
+  }
+
+  // Avance del año (resumen compacto)
+  const years=[...new Set(cmData.map(m=>m.anio))].sort();
+  document.getElementById('ov-anual').innerHTML = years.map(y=>{
+    const r=cmData.filter(m=>m.anio===y&&m.facturables>0);
+    const ti=r.reduce((a,m)=>a+Number(m.ideal_monto),0), tc=r.reduce((a,m)=>a+Number(m.cobrado),0);
+    const p=ti?100*tc/ti:0;
+    const color=p>=70?'var(--green)':p>=45?'var(--yellow)':'var(--coral)';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
+        <span style="font-weight:600;color:var(--ink)">${y}</span>
+        <span style="font-weight:600;color:var(--ink)">${p.toFixed(1)}% — ${cmMoney(tc)} de ${cmMoney(ti)}</span>
+      </div>
+      <div style="height:7px;background:#F1F3F7;border-radius:100px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:100px"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 const CM_MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const cmMoney = n => '$' + Number(n||0).toLocaleString('es-MX');
 
