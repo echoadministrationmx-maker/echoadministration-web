@@ -250,7 +250,7 @@ const SB_URL="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const SB_KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-let CREDS={u:'',p:''};
+let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
 let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false};
 let INC=[], CV=[], DC=[], incF='todas';
@@ -275,7 +275,7 @@ async function doLogin(){
   try{
     const res=await rpc('pg_cobranza',{p_user:u,p_password:p});
     if(!res||res.ok===false){msg.textContent='Usuario o contraseña incorrectos.';btn.disabled=false;btn.textContent='Entrar';return;}
-    CREDS={u,p};COB=res.meses||[];loaded.cobranza=true;
+    CREDS={p_user:u,p_password:p};COB=res.meses||[];loaded.cobranza=true;
     document.getElementById('login').classList.add('hidden');
     document.getElementById('bar').classList.remove('hidden');
     document.getElementById('who').textContent=u;
@@ -357,7 +357,7 @@ async function openUnit(u){
   document.getElementById('dMeta').textContent='Cargando…';
   document.getElementById('dBody').innerHTML='';document.getElementById('abar').classList.add('hidden');
   d.scrollIntoView({behavior:'smooth',block:'start'});
-  try{const res=await rpc('pg_pendientes_unidad',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:u.id_residente});renderDetail(res);}
+  try{const res=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:u.id_residente});renderDetail(res);}
   catch(e){document.getElementById('dMeta').textContent='Error al cargar.';}
 }
 function renderDetail(res){
@@ -399,12 +399,12 @@ async function markPaid(){
   const ids=sel.map(b=>Number(b.value)),btn=document.getElementById('markBtn');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando…';
   try{
-    const res=await rpc('pg_marcar_pagos',{p_user:CREDS.u,p_password:CREDS.p,p_ids:ids});
+    const res=await rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:ids});
     if(!res||res.ok===false){toast('No se pudo aplicar.',true);btn.disabled=false;btn.textContent='Marcar como pagados';return;}
     toast(`${res.marcados} ${res.marcados===1?'mes marcado':'meses marcados'} como pagados`);
     const u=UNITS.find(x=>x.id_residente===CURRENT);if(u)u.adeudo=res.adeudo;renderUnits(document.getElementById('q').value);
     loaded.cobranza=false; // forzar recálculo al volver a cobranza
-    const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:CURRENT});renderDetail(fresh);
+    const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:CURRENT});renderDetail(fresh);
   }catch(e){toast('Error de conexión.',true);}
   btn.textContent='Marcar como pagados';
 }
@@ -474,7 +474,7 @@ function renderInc(){
       const id=Number(e.target.dataset.id),estado=e.target.value;
       e.target.disabled=true;
       try{
-        const r=await rpc('pg_actualizar_incidencia',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_estado:estado});
+        const r=await rpc('pg_actualizar_incidencia',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_estado:estado});
         if(r&&r.ok){toast('Incidencia actualizada');const it=INC.find(x=>x.id===id);if(it)it.estado=estado;renderInc();}
         else toast('No se pudo actualizar.',true);
       }catch(err){toast('Error de conexión.',true);}
@@ -531,7 +531,7 @@ function renderCv(){
       const id=Number(e.target.dataset.id),estado=e.target.value;
       e.target.disabled=true;
       try{
-        const r=await rpc('pg_actualizar_convenio_pago',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_estado:estado});
+        const r=await rpc('pg_actualizar_convenio_pago',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_estado:estado});
         if(r&&r.ok){toast('Convenio actualizado');const it=CV.find(x=>x.id===id);if(it)it.estado=estado;renderCv();}
         else toast('No se pudo actualizar.',true);
       }catch(err){toast('Error de conexión.',true);}
@@ -550,7 +550,7 @@ async function crearConvenio(){
   if(!idr||!total||!abono){toast('Elige unidad, monto total y abono.',true);return;}
   const btn=document.getElementById('cvBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   try{
-    const r=await rpc('pg_crear_convenio_pago',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:idr,p_monto_total:total,p_abono_mensual:abono,p_dia_pago:dia,p_fecha_inicio:inicio,p_notas:notas});
+    const r=await rpc('pg_crear_convenio_pago',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:idr,p_monto_total:total,p_abono_mensual:abono,p_dia_pago:dia,p_fecha_inicio:inicio,p_notas:notas});
     if(r&&r.ok){toast('Convenio guardado');document.getElementById('cvTotal').value='';document.getElementById('cvAbono').value='';document.getElementById('cvNotas').value='';
       const res=await rpc('pg_convenios_pago',CREDS);if(res&&res.ok!==false){CV=res.convenios||[];renderCv();}}
     else toast('No se pudo guardar.',true);
@@ -586,7 +586,7 @@ function renderDc(){
       const id=Number(e.target.dataset.id),act=e.target.dataset.act==='1';
       e.target.disabled=true;
       try{
-        const r=await rpc('pg_actualizar_comercio',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_icono:null,p_nombre:null,p_descuento:null,p_vigencia:null,p_vigencia_fecha:null,p_activo:act});
+        const r=await rpc('pg_actualizar_comercio',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_icono:null,p_nombre:null,p_descuento:null,p_vigencia:null,p_vigencia_fecha:null,p_activo:act});
         if(r&&r.ok){toast(act?'Descuento visible en la app':'Descuento oculto');const it=DC.find(x=>x.id===id);if(it)it.activo=act;renderDc();}
         else toast('No se pudo actualizar.',true);
       }catch(err){toast('Error de conexión.',true);}
@@ -603,7 +603,7 @@ async function crearDescuento(){
   if(!nombre||!desc){toast('Escribe el negocio y el descuento.',true);return;}
   const btn=document.getElementById('dcBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   try{
-    const r=await rpc('pg_crear_comercio',{p_user:CREDS.u,p_password:CREDS.p,p_icono:icono,p_nombre:nombre,p_descuento:desc,p_vigencia:vig,p_vigencia_fecha:fecha});
+    const r=await rpc('pg_crear_comercio',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_icono:icono,p_nombre:nombre,p_descuento:desc,p_vigencia:vig,p_vigencia_fecha:fecha});
     if(r&&r.ok){toast('Descuento publicado');['dcIcono','dcNombre','dcDesc','dcVig','dcFecha'].forEach(i=>document.getElementById(i).value='');
       const res=await rpc('pg_comercios',CREDS);if(res&&res.ok!==false){DC=res.comercios||[];renderDc();}}
     else toast('No se pudo publicar.',true);
