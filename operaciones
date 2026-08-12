@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Operaciones · Echo Administración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1847CC;--ink:#0C1320;--accent:#7BA8FF;--silver:#F2F4F8;--mid:#E0E6F5;
+    --ok:#1B7A3D;--okbg:#E7F5EC;--warn:#B00020;--warnbg:#FBE9EC;--amber:#B87503;--amberbg:#FBF1DF;
+    --shadow:0 1px 2px rgba(12,19,32,.06),0 8px 24px rgba(12,19,32,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--silver);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.brand,.big{font-family:'Bricolage Grotesque','DM Sans',sans-serif;letter-spacing:-.01em}
+  .topbar{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--accent));display:grid;place-items:center;font-weight:800;font-family:'Bricolage Grotesque'}
+  .brand{font-weight:700;font-size:1.02rem}
+  .tabs{display:flex;gap:4px;margin-left:8px}
+  .tab{background:none;border:0;color:#ffffffaa;font-family:inherit;font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:8px;cursor:pointer}
+  .tab.active{background:#ffffff18;color:#fff}
+  .tab:hover{color:#fff}
+  .who{margin-left:auto;opacity:.6;font-size:.8rem;display:flex;gap:12px;align-items:center}
+  .logout{color:#fff9;background:none;border:0;cursor:pointer;font-family:inherit;font-size:.8rem;text-decoration:underline}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  .card{background:#fff;border:1px solid var(--mid);border-radius:16px;box-shadow:var(--shadow)}
+  .pad{padding:20px}
+  label{font-size:.82rem;font-weight:600;color:#485061;display:block;margin-bottom:6px}
+  input,select{width:100%;padding:12px 14px;border:1px solid var(--mid);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+  .btn{appearance:none;border:0;border-radius:10px;padding:12px 18px;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;background:var(--blue);color:#fff;transition:filter .15s}
+  .btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.ghost{background:var(--silver);color:var(--ink);border:1px solid var(--mid)}
+  .btn.ok{background:var(--ok)}
+  .hidden{display:none!important}
+  #login{max-width:400px;margin:8vh auto}
+  #login h1{font-size:1.5rem;margin:.2em 0 .1em} #login p{color:#485061;margin:.2em 0 1.4em;font-size:.92rem}
+  .field{margin-bottom:14px}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid #ffffff70;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:13px 20px;border-radius:12px;font-weight:600;font-size:.92rem;opacity:0;transition:.25s;z-index:50;box-shadow:var(--shadow)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)} .toast.err{background:var(--warn)}
+  .hint{font-size:.82rem;color:#6a7382;margin-top:10px}
+
+  /* Cobranza */
+  .cob-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .cob-head h2{margin:0;font-size:1.2rem}
+  .yearsel{display:flex;gap:6px}
+  .yearsel button{border:1px solid var(--mid);background:#fff;border-radius:999px;padding:7px 16px;font-family:inherit;font-weight:600;font-size:.9rem;cursor:pointer;color:#485061}
+  .yearsel button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  @media(max-width:620px){.kpis{grid-template-columns:1fr}}
+  .kpi{background:var(--silver);border:1px solid var(--mid);border-radius:12px;padding:14px 16px}
+  .kpi .lbl{font-size:.78rem;color:#6a7382;font-weight:600}
+  .kpi .val{font-family:'Bricolage Grotesque';font-weight:800;font-size:1.5rem;margin-top:2px}
+  .kpi .val.pct{color:var(--blue)}
+  .monthrow{display:grid;grid-template-columns:80px 1fr 96px 62px;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--silver)}
+  .monthrow .mo{font-weight:600;text-transform:capitalize}
+  .monthrow .mo small{display:block;color:#94a0b0;font-weight:500;font-size:.72rem}
+  .bar{height:22px;background:var(--silver);border-radius:6px;overflow:hidden;position:relative}
+  .bar .fill{height:100%;border-radius:6px;transition:width .5s}
+  .bar .fill.hi{background:var(--ok)} .bar .fill.mid{background:var(--amber)} .bar .fill.lo{background:var(--warn)}
+  .monthrow .amt{text-align:right;font-variant-numeric:tabular-nums;font-size:.86rem}
+  .monthrow .amt small{color:#94a0b0;display:block;font-size:.72rem}
+  .monthrow .pc{text-align:right;font-weight:800;font-family:'Bricolage Grotesque'}
+  .notbilled{opacity:.5}
+
+  /* Registrar pago (reutilizado) */
+  .search-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .search-row .field{flex:1;min-width:220px;margin:0}
+  .unitlist{margin-top:14px;display:grid;gap:8px;max-height:320px;overflow:auto}
+  .unit{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--mid);border-radius:12px;cursor:pointer;background:#fff;text-align:left;width:100%;font-family:inherit}
+  .unit:hover{border-color:var(--accent);background:#f7faff}
+  .unit .id{font-family:'Bricolage Grotesque';font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:4px 9px;font-size:.8rem;min-width:56px;text-align:center}
+  .unit .nm{flex:1;font-weight:500;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge{font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .badge.debt{background:var(--warnbg);color:var(--warn)} .badge.clear{background:var(--okbg);color:var(--ok)}
+  .detail-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--mid);padding:18px 20px}
+  .detail-head .id{font-family:'Bricolage Grotesque';font-weight:800;background:linear-gradient(135deg,var(--blue),var(--accent));color:#fff;border-radius:10px;padding:8px 12px}
+  .detail-head h2{margin:0;font-size:1.15rem} .detail-head .meta{font-size:.82rem;color:#6a7382}
+  .yeargroup{padding:8px 20px} .yeargroup h3{font-size:.95rem;margin:16px 0 8px;display:flex;align-items:center;gap:10px}
+  .yeargroup h3 .yr{font-family:'Bricolage Grotesque';font-weight:800;font-size:1.1rem}
+  .selall{font-size:.78rem;font-weight:600;color:var(--blue);background:none;border:0;cursor:pointer}
+  .months{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .m{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--mid);border-radius:10px;cursor:pointer;user-select:none;font-size:.9rem}
+  .m:hover{border-color:var(--accent)} .m.checked{background:#eef3ff;border-color:var(--accent)}
+  .m input{width:18px;height:18px;accent-color:var(--blue);flex:none}
+  .m .mo{flex:1;text-transform:capitalize} .m .mt{font-weight:700;font-variant-numeric:tabular-nums} .m .mt.partial{color:var(--warn)}
+  .actionbar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--mid);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-radius:0 0 16px 16px}
+  .actionbar .sum b{font-family:'Bricolage Grotesque';font-size:1.1rem}
+  .allclear{padding:30px 20px;text-align:center;color:var(--ok);font-weight:600}
+
+  /* Residentes */
+  .dirlist{display:grid;gap:8px;margin-top:14px}
+  .drow{display:grid;grid-template-columns:64px 1.4fr 1.6fr 96px;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--mid);border-radius:12px;background:#fff}
+  @media(max-width:720px){.drow{grid-template-columns:56px 1fr;grid-auto-flow:row}.drow .contact{grid-column:1/-1}.drow .db{grid-column:1/-1;text-align:left}}
+  .drow .id{font-family:'Bricolage Grotesque';font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:4px 8px;font-size:.78rem;text-align:center}
+  .drow .nm{font-weight:600;font-size:.92rem}
+  .drow .nm small{display:block;color:#94a0b0;font-weight:500;font-size:.72rem}
+  .contact{font-size:.82rem;display:flex;flex-direction:column;gap:2px}
+  .contact a{color:var(--blue);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .contact a:hover{text-decoration:underline}
+  .contact .empty{color:#c3cad6}
+  .db{text-align:right}
+  @media(max-width:560px){.cvgrid{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+<div class="topbar hidden" id="bar">
+  <div class="logo">E</div>
+  <div class="brand">Panel de Operaciones</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="cobranza">Cobranza</button>
+    <button class="tab" data-tab="pagos">Registrar pago</button>
+    <button class="tab" data-tab="residentes">Residentes</button>
+    <button class="tab" data-tab="incidencias">Incidencias</button>
+    <button class="tab" data-tab="convenios">Convenios</button>
+    <button class="tab" data-tab="descuentos">Descuentos</button>
+  </div>
+  <div class="who"><span id="who"></span><button class="logout" id="logout">Salir</button></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="card pad">
+  <div class="logo" style="width:40px;height:40px;font-size:1.2rem;margin-bottom:14px">E</div>
+  <h1>Panel de Operaciones</h1>
+  <p>Echo Administración · Manzana 80</p>
+  <div class="field"><label>Usuario</label><input id="u" autocomplete="username" placeholder="rosaura"></div>
+  <div class="field"><label>Contraseña</label><input id="p" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+  <button class="btn" id="loginBtn" style="width:100%">Entrar</button>
+  <div class="hint" id="loginMsg"></div>
+</div>
+
+<!-- COBRANZA -->
+<div id="tab-cobranza" class="wrap hidden">
+  <div class="card pad">
+    <div class="cob-head">
+      <h2>Cobranza mensual</h2>
+      <div class="yearsel" id="yearsel"></div>
+    </div>
+    <div class="kpis" id="cobKpis"></div>
+    <div id="cobTable"></div>
+    <div class="hint">Ideal = 320 departamentos × cuota del mes ($500, y $515 desde julio 2026). El % se actualiza solo cuando registras pagos.</div>
+  </div>
+</div>
+
+<!-- REGISTRAR PAGO -->
+<div id="tab-pagos" class="wrap hidden">
+  <div class="card pad">
+    <div class="search-row">
+      <div class="field"><label>Buscar unidad</label><input id="q" placeholder="Ej. A-101 o nombre del propietario"></div>
+      <button class="btn ghost" id="clearq">Limpiar</button>
+    </div>
+    <div class="hint" id="counthint"></div>
+    <div class="unitlist" id="unitlist"></div>
+  </div>
+  <div class="card hidden" id="detail" style="margin-top:16px;overflow:hidden">
+    <div class="detail-head">
+      <div class="id" id="dId">—</div>
+      <div style="flex:1"><h2 id="dName">—</h2><div class="meta" id="dMeta"></div></div>
+      <div class="badge debt" id="dDebt">—</div>
+    </div>
+    <div id="dBody"></div>
+    <div class="actionbar hidden" id="abar">
+      <div class="sum">Seleccionado: <b id="selSum">$0</b> <span id="selCount" style="color:#6a7382;font-weight:500"></span></div>
+      <button class="btn ok" id="markBtn" style="margin-left:auto" disabled>Marcar como pagados</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESIDENTES -->
+<div id="tab-residentes" class="wrap hidden">
+  <div class="card pad">
+    <div class="search-row">
+      <div class="field"><label>Buscar residente</label><input id="dq" placeholder="Nombre, clave, correo o teléfono"></div>
+      <button class="btn ghost" id="cleardq">Limpiar</button>
+    </div>
+    <div class="hint" id="dcount"></div>
+    <div class="dirlist" id="dirlist"></div>
+  </div>
+</div>
+
+<!-- INCIDENCIAS -->
+<div id="tab-incidencias" class="wrap hidden">
+  <div class="card pad">
+    <div class="cob-head">
+      <h2 style="margin:0;font-size:1.2rem">Incidencias</h2>
+      <div class="yearsel" id="incFilter">
+        <button data-f="todas" class="active">Todas</button>
+        <button data-f="pendiente">Pendientes</button>
+        <button data-f="en_proceso">En proceso</button>
+        <button data-f="resuelta">Resueltas</button>
+      </div>
+    </div>
+    <div class="hint" id="incCount"></div>
+    <div class="dirlist" id="incList"></div>
+  </div>
+</div>
+
+<!-- CONVENIOS -->
+<div id="tab-convenios" class="wrap hidden">
+  <div class="card pad">
+    <h2 style="margin:0 0 6px;font-size:1.2rem">Convenios de pago</h2>
+    <p class="hint" style="margin:0 0 14px">Acuerdos con condóminos deudores: monto reconocido y abono mensual.</p>
+    <details class="cv-new" style="margin-bottom:16px">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue)">+ Nuevo convenio</summary>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-top:12px" class="cvgrid">
+        <div><label>Unidad</label><select id="cvUnidad"></select></div>
+        <div><label>Monto total</label><input id="cvTotal" type="number" placeholder="12000"></div>
+        <div><label>Abono mensual</label><input id="cvAbono" type="number" placeholder="1000"></div>
+        <div><label>Día de pago</label><input id="cvDia" type="number" value="5" min="1" max="28"></div>
+        <div><label>Inicio</label><input id="cvInicio" type="date"></div>
+        <div><label>Notas</label><input id="cvNotas" placeholder="Opcional"></div>
+      </div>
+      <button class="btn" id="cvBtn" style="margin-top:12px">Guardar convenio</button>
+    </details>
+    <div class="hint" id="cvCount"></div>
+    <div class="dirlist" id="cvList"></div>
+  </div>
+</div>
+
+<!-- DESCUENTOS COMERCIALES -->
+<div id="tab-descuentos" class="wrap hidden">
+  <div class="card pad">
+    <h2 style="margin:0 0 6px;font-size:1.2rem">Descuentos comerciales</h2>
+    <p class="hint" style="margin:0 0 14px">Los convenios con negocios locales que ven los residentes en su app. Lo que subas aquí aparece de inmediato.</p>
+    <details class="dc-new" style="margin-bottom:16px">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue)">+ Nuevo descuento</summary>
+      <div style="display:grid;grid-template-columns:80px 1.5fr 1.5fr;gap:10px;margin-top:12px" class="cvgrid">
+        <div><label>Emoji</label><input id="dcIcono" placeholder="🍕" maxlength="4"></div>
+        <div><label>Negocio</label><input id="dcNombre" placeholder="Pizzería Tulum"></div>
+        <div><label>Descuento</label><input id="dcDesc" placeholder="2x1 los martes"></div>
+        <div style="grid-column:span 1"><label>Vence (opcional)</label><input id="dcFecha" type="date"></div>
+        <div style="grid-column:span 2"><label>Texto de vigencia (opcional)</label><input id="dcVig" placeholder="Permanente / 31 dic 2026"></div>
+      </div>
+      <button class="btn" id="dcBtn" style="margin-top:12px">Publicar descuento</button>
+    </details>
+    <div class="hint" id="dcCount"></div>
+    <div class="dirlist" id="dcList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL="https://nwqigjkmlkwyyblgqppm.supabase.co";
+const SB_KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
+const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+let CREDS={u:'',p:''};
+let UNITS=[], DIR=[], COB=[], CURRENT=null;
+let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false};
+let INC=[], CV=[], DC=[], incF='todas';
+let curYear=2026;
+const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
+
+async function rpc(fn,args){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body:JSON.stringify(args)});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function toast(m,err){const t=document.getElementById('toast');t.textContent=m;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',2600);}
+
+// ---------- LOGIN ----------
+async function doLogin(){
+  const u=document.getElementById('u').value.trim(), p=document.getElementById('p').value;
+  const msg=document.getElementById('loginMsg'), btn=document.getElementById('loginBtn');
+  if(!u||!p){msg.textContent='Escribe usuario y contraseña.';return;}
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>';msg.textContent='';
+  try{
+    const res=await rpc('pg_cobranza',{p_user:u,p_password:p});
+    if(!res||res.ok===false){msg.textContent='Usuario o contraseña incorrectos.';btn.disabled=false;btn.textContent='Entrar';return;}
+    CREDS={u,p};COB=res.meses||[];loaded.cobranza=true;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('bar').classList.remove('hidden');
+    document.getElementById('who').textContent=u;
+    showTab('cobranza');renderCobranza();
+  }catch(e){msg.textContent='No se pudo conectar. Revisa tu internet.';}
+  btn.disabled=false;btn.textContent='Entrar';
+}
+function logout(){location.reload();}
+
+// ---------- TABS ----------
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  ['cobranza','pagos','residentes','incidencias','convenios','descuentos'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  if(name==='cobranza'&&loaded.cobranza){reloadCobranza();}
+  if(name==='pagos'&&!loaded.pagos){loadUnits();}
+  if(name==='residentes'&&!loaded.residentes){loadDir();}
+  if(name==='incidencias'&&!loaded.incidencias){loadInc();}
+  if(name==='convenios'&&!loaded.convenios){loadCv();}
+  if(name==='descuentos'&&!loaded.descuentos){loadDc();}
+}
+
+// ---------- COBRANZA ----------
+async function reloadCobranza(){
+  try{const res=await rpc('pg_cobranza',CREDS);if(res&&res.ok!==false){COB=res.meses||[];renderCobranza();}}catch(e){}
+}
+function renderCobranza(){
+  const years=[...new Set(COB.map(m=>m.anio))].sort();
+  const ys=document.getElementById('yearsel');ys.innerHTML='';
+  years.forEach(y=>{const b=document.createElement('button');b.textContent=y;b.className=(y===curYear?'active':'');b.onclick=()=>{curYear=y;renderCobranza();};ys.appendChild(b);});
+  const rows=COB.filter(m=>m.anio===curYear);
+  const billed=rows.filter(m=>m.facturables>0);
+  const totIdeal=billed.reduce((a,m)=>a+m.ideal_monto,0);
+  const totCob=billed.reduce((a,m)=>a+Number(m.cobrado),0);
+  const pct=totIdeal?100*totCob/totIdeal:0;
+  document.getElementById('cobKpis').innerHTML=
+    `<div class="kpi"><div class="lbl">Ideal del año (meses facturados)</div><div class="val">${money(totIdeal)}</div></div>
+     <div class="kpi"><div class="lbl">Cobrado</div><div class="val">${money(totCob)}</div></div>
+     <div class="kpi"><div class="lbl">Recaudación</div><div class="val pct">${pct.toFixed(1)}%</div></div>`;
+  const t=document.getElementById('cobTable');t.innerHTML='';
+  rows.forEach(m=>{
+    const p=Number(m.pct_ideal||0);
+    const cls=p>=70?'hi':p>=45?'mid':'lo';
+    const billed=m.facturables>0;
+    const row=document.createElement('div');row.className='monthrow'+(billed?'':' notbilled');
+    row.innerHTML=`
+      <div class="mo">${MESES[m.mes]}<small>cuota ${money(m.cuota)}${billed?'':' · no facturado'}</small></div>
+      <div class="bar"><div class="fill ${cls}" style="width:${Math.min(p,100)}%"></div></div>
+      <div class="amt">${money(m.cobrado)}<small>de ${money(m.ideal_monto)}</small></div>
+      <div class="pc" style="color:var(--${cls==='hi'?'ok':cls==='mid'?'amber':'warn'})">${billed?p.toFixed(1)+'%':'—'}</div>`;
+    t.appendChild(row);
+  });
+}
+
+// ---------- REGISTRAR PAGO ----------
+async function loadUnits(){
+  try{const res=await rpc('pg_listar_unidades',CREDS);if(res&&res.ok!==false){UNITS=res.unidades||[];loaded.pagos=true;renderUnits('');}}catch(e){toast('No se pudo cargar unidades.',true);}
+}
+function renderUnits(filter){
+  const list=document.getElementById('unitlist'),f=(filter||'').trim().toLowerCase();
+  let items=UNITS;
+  if(f)items=UNITS.filter(u=>(u.ident||'').toLowerCase().includes(f)||(u.nombre_completo||'').toLowerCase().includes(f));
+  const conDeuda=UNITS.filter(u=>Number(u.adeudo)>0).length;
+  document.getElementById('counthint').textContent=`${UNITS.length} unidades · ${conDeuda} con adeudo`+(f?` · ${items.length} coinciden`:'');
+  list.innerHTML='';
+  items.slice(0,80).forEach(u=>{
+    const b=document.createElement('button');b.className='unit';const debt=Number(u.adeudo)>0;
+    b.innerHTML=`<span class="id">${u.ident}</span><span class="nm">${u.nombre_completo||''}</span>
+      <span class="badge ${debt?'debt':'clear'}">${debt?money(u.adeudo):'Al corriente ✓'}</span>`;
+    b.onclick=()=>openUnit(u);list.appendChild(b);
+  });
+  if(items.length>80){const p=document.createElement('div');p.className='hint';p.textContent='Mostrando 80. Escribe para afinar.';list.appendChild(p);}
+  if(items.length===0){const p=document.createElement('div');p.className='hint';p.textContent='Sin coincidencias.';list.appendChild(p);}
+}
+async function openUnit(u){
+  CURRENT=u.id_residente;
+  const d=document.getElementById('detail');d.classList.remove('hidden');
+  document.getElementById('dId').textContent=u.ident;
+  document.getElementById('dName').textContent=u.nombre_completo||'';
+  document.getElementById('dMeta').textContent='Cargando…';
+  document.getElementById('dBody').innerHTML='';document.getElementById('abar').classList.add('hidden');
+  d.scrollIntoView({behavior:'smooth',block:'start'});
+  try{const res=await rpc('pg_pendientes_unidad',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:u.id_residente});renderDetail(res);}
+  catch(e){document.getElementById('dMeta').textContent='Error al cargar.';}
+}
+function renderDetail(res){
+  const pend=res.pendientes||[],adeudo=Number(res.adeudo||0);
+  document.getElementById('dDebt').textContent=adeudo>0?money(adeudo):'Al corriente ✓';
+  document.getElementById('dDebt').className='badge '+(adeudo>0?'debt':'clear');
+  document.getElementById('dMeta').textContent=`Pagado histórico: ${money(res.pagados_total)} · Meses pendientes: ${pend.length}`;
+  const body=document.getElementById('dBody');body.innerHTML='';
+  if(pend.length===0){body.innerHTML='<div class="allclear">Esta unidad está al corriente. No hay meses pendientes.</div>';document.getElementById('abar').classList.add('hidden');return;}
+  const byYear={};pend.forEach(p=>{(byYear[p.anio]=byYear[p.anio]||[]).push(p);});
+  Object.keys(byYear).sort().forEach(yr=>{
+    const g=document.createElement('div');g.className='yeargroup';
+    g.innerHTML=`<h3><span class="yr">${yr}</span> <span style="color:#6a7382;font-weight:500;font-size:.85rem">${byYear[yr].length} meses</span> <button class="selall" data-yr="${yr}">Seleccionar año</button></h3>`;
+    const grid=document.createElement('div');grid.className='months';
+    byYear[yr].forEach(p=>{
+      const mesNum=new Date(p.fecha_vencimiento).getUTCMonth()+1,partial=Number(p.monto)<500;
+      const lbl=document.createElement('label');lbl.className='m';
+      lbl.innerHTML=`<input type="checkbox" value="${p.id_pago}" data-monto="${p.monto}"><span class="mo">${MESES[mesNum]}</span><span class="mt${partial?' partial':''}">${money(p.monto)}</span>`;
+      const cb=lbl.querySelector('input');
+      cb.addEventListener('change',onCheck);
+      cb.addEventListener('change',e=>lbl.classList.toggle('checked',e.target.checked));
+      grid.appendChild(lbl);
+    });
+    g.appendChild(grid);
+    g.querySelector('.selall').onclick=()=>{const boxes=g.querySelectorAll('input');const allOn=[...boxes].every(b=>b.checked);boxes.forEach(b=>{b.checked=!allOn;b.closest('.m').classList.toggle('checked',!allOn);});onCheck();};
+    body.appendChild(g);
+  });
+  document.getElementById('abar').classList.remove('hidden');onCheck();
+}
+function selectedBoxes(){return [...document.querySelectorAll('#dBody input:checked')];}
+function onCheck(){
+  const sel=selectedBoxes(),sum=sel.reduce((a,b)=>a+Number(b.dataset.monto),0);
+  document.getElementById('selSum').textContent=money(sum);
+  document.getElementById('selCount').textContent=sel.length?`(${sel.length} ${sel.length===1?'mes':'meses'})`:'';
+  document.getElementById('markBtn').disabled=sel.length===0;
+}
+async function markPaid(){
+  const sel=selectedBoxes();if(!sel.length)return;
+  const ids=sel.map(b=>Number(b.value)),btn=document.getElementById('markBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando…';
+  try{
+    const res=await rpc('pg_marcar_pagos',{p_user:CREDS.u,p_password:CREDS.p,p_ids:ids});
+    if(!res||res.ok===false){toast('No se pudo aplicar.',true);btn.disabled=false;btn.textContent='Marcar como pagados';return;}
+    toast(`${res.marcados} ${res.marcados===1?'mes marcado':'meses marcados'} como pagados`);
+    const u=UNITS.find(x=>x.id_residente===CURRENT);if(u)u.adeudo=res.adeudo;renderUnits(document.getElementById('q').value);
+    loaded.cobranza=false; // forzar recálculo al volver a cobranza
+    const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:CURRENT});renderDetail(fresh);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.textContent='Marcar como pagados';
+}
+
+// ---------- RESIDENTES ----------
+async function loadDir(){
+  try{const res=await rpc('pg_directorio',CREDS);if(res&&res.ok!==false){DIR=res.residentes||[];loaded.residentes=true;renderDir('');}}catch(e){toast('No se pudo cargar el directorio.',true);}
+}
+function renderDir(filter){
+  const list=document.getElementById('dirlist'),f=(filter||'').trim().toLowerCase();
+  let items=DIR;
+  if(f)items=DIR.filter(r=>[r.ident,r.nombre_completo,r.email,r.telefono,r.clave].some(v=>(v||'').toString().toLowerCase().includes(f)));
+  const conCorreo=DIR.filter(r=>r.email).length,conTel=DIR.filter(r=>r.telefono).length;
+  document.getElementById('dcount').textContent=`${DIR.length} residentes · ${conCorreo} con correo · ${conTel} con teléfono`+(f?` · ${items.length} coinciden`:'');
+  list.innerHTML='';
+  items.slice(0,120).forEach(r=>{
+    const debt=Number(r.adeudo)>0;
+    const telClean=(r.telefono||'').replace(/[^0-9+]/g,'');
+    const row=document.createElement('div');row.className='drow';
+    row.innerHTML=`
+      <div class="id">${r.ident}</div>
+      <div class="nm">${r.nombre_completo||''}<small>Clave: ${r.clave||'—'}</small></div>
+      <div class="contact">
+        ${r.email?`<a href="mailto:${r.email.split('/')[0].trim()}" title="${r.email}">✉ ${r.email.split('/')[0].trim()}</a>`:`<span class="empty">✉ sin correo</span>`}
+        ${r.telefono?`<a href="tel:${telClean}">✆ ${r.telefono}</a>`:`<span class="empty">✆ sin teléfono</span>`}
+      </div>
+      <div class="db"><span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente'}</span></div>`;
+    list.appendChild(row);
+  });
+  if(items.length>120){const p=document.createElement('div');p.className='hint';p.textContent='Mostrando 120. Escribe para afinar.';list.appendChild(p);}
+  if(items.length===0){const p=document.createElement('div');p.className='hint';p.textContent='Sin coincidencias.';list.appendChild(p);}
+}
+
+// ---------- INCIDENCIAS ----------
+async function loadInc(){
+  try{const res=await rpc('pg_incidencias',CREDS);if(res&&res.ok!==false){INC=res.incidencias||[];loaded.incidencias=true;renderInc();}}
+  catch(e){toast('No se pudieron cargar las incidencias.',true);}
+}
+const INC_LBL={pendiente:['Pendiente','warn'],en_proceso:['En proceso','amber'],resuelta:['Resuelta','ok']};
+function renderInc(){
+  const list=document.getElementById('incList');
+  let items=INC;
+  if(incF!=='todas')items=INC.filter(i=>i.estado===incF);
+  const pend=INC.filter(i=>i.estado==='pendiente').length,proc=INC.filter(i=>i.estado==='en_proceso').length;
+  document.getElementById('incCount').textContent=`${INC.length} incidencias · ${pend} pendientes · ${proc} en proceso`;
+  list.innerHTML='';
+  if(items.length===0){list.innerHTML='<div class="hint">No hay incidencias en este filtro.</div>';return;}
+  items.forEach(i=>{
+    const [lbl,color]=INC_LBL[i.estado]||[i.estado,'amber'];
+    const fecha=new Date(i.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    row.innerHTML=`
+      <div class="id">${i.ident||i.departamento||'—'}</div>
+      <div class="nm">${i.categoria||'Incidencia'} · <span style="font-weight:500">${i.nombre||''}</span>
+        <small>${fecha}${i.tiene_foto?' · 📷 con foto':''}</small>
+        <div style="font-weight:400;font-size:.85rem;color:#485061;margin-top:4px">${(i.descripcion||'').slice(0,220)}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge" style="background:var(--${color}bg,#eee);color:var(--${color})">${lbl}</span>
+        <select data-id="${i.id}" class="incSel" style="padding:8px 10px;font-size:.82rem;width:auto">
+          <option value="pendiente"${i.estado==='pendiente'?' selected':''}>Pendiente</option>
+          <option value="en_proceso"${i.estado==='en_proceso'?' selected':''}>En proceso</option>
+          <option value="resuelta"${i.estado==='resuelta'?' selected':''}>Resuelta</option>
+        </select>
+      </div>`;
+    row.querySelector('.incSel').addEventListener('change',async e=>{
+      const id=Number(e.target.dataset.id),estado=e.target.value;
+      e.target.disabled=true;
+      try{
+        const r=await rpc('pg_actualizar_incidencia',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_estado:estado});
+        if(r&&r.ok){toast('Incidencia actualizada');const it=INC.find(x=>x.id===id);if(it)it.estado=estado;renderInc();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+      e.target.disabled=false;
+    });
+    list.appendChild(row);
+  });
+}
+
+// ---------- CONVENIOS DE PAGO ----------
+async function loadCv(){
+  try{
+    if(!loaded.pagos)await loadUnits();
+    const res=await rpc('pg_convenios_pago',CREDS);
+    if(res&&res.ok!==false){CV=res.convenios||[];loaded.convenios=true;renderCv();fillCvUnits();}
+  }catch(e){toast('No se pudieron cargar los convenios.',true);}
+}
+function fillCvUnits(){
+  const sel=document.getElementById('cvUnidad');sel.innerHTML='';
+  UNITS.filter(u=>Number(u.adeudo)>0).forEach(u=>{
+    const o=document.createElement('option');o.value=u.id_residente;
+    o.textContent=`${u.ident} · ${(u.nombre_completo||'').slice(0,30)} · debe ${money(u.adeudo)}`;
+    sel.appendChild(o);
+  });
+}
+const CV_LBL={activo:['Activo','ok'],cumplido:['Cumplido','ok'],incumplido:['Incumplido','warn'],cancelado:['Cancelado','amber']};
+function renderCv(){
+  const list=document.getElementById('cvList');
+  const activos=CV.filter(c=>c.estado==='activo').length;
+  document.getElementById('cvCount').textContent=`${CV.length} convenios · ${activos} activos`;
+  list.innerHTML='';
+  if(CV.length===0){list.innerHTML='<div class="hint">Aún no hay convenios de pago. Crea el primero arriba.</div>';return;}
+  CV.forEach(c=>{
+    const [lbl,color]=CV_LBL[c.estado]||[c.estado,'amber'];
+    const ini=new Date(c.fecha_inicio+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    row.innerHTML=`
+      <div class="id">${c.ident||'—'}</div>
+      <div class="nm">${c.nombre||''}
+        <small>Desde ${ini} · día de pago ${c.dia_pago} · por ${c.creado_por||'—'}</small>
+        <div style="font-weight:500;font-size:.86rem;margin-top:4px">Total convenido: <b>${money(c.monto_total)}</b> · Abono: <b>${money(c.abono_mensual)}/mes</b> · Adeudo actual: <b style="color:${Number(c.adeudo_actual)>0?'var(--warn)':'var(--ok)'}">${money(c.adeudo_actual)}</b></div>
+        ${c.notas?`<div style="font-weight:400;font-size:.82rem;color:#6a7382;margin-top:2px">${c.notas}</div>`:''}
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge" style="background:var(--${color}bg,#eee);color:var(--${color})">${lbl}</span>
+        <select data-id="${c.id}" class="cvSel" style="padding:8px 10px;font-size:.82rem;width:auto">
+          <option value="activo"${c.estado==='activo'?' selected':''}>Activo</option>
+          <option value="cumplido"${c.estado==='cumplido'?' selected':''}>Cumplido</option>
+          <option value="incumplido"${c.estado==='incumplido'?' selected':''}>Incumplido</option>
+          <option value="cancelado"${c.estado==='cancelado'?' selected':''}>Cancelado</option>
+        </select>
+      </div>`;
+    row.querySelector('.cvSel').addEventListener('change',async e=>{
+      const id=Number(e.target.dataset.id),estado=e.target.value;
+      e.target.disabled=true;
+      try{
+        const r=await rpc('pg_actualizar_convenio_pago',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_estado:estado});
+        if(r&&r.ok){toast('Convenio actualizado');const it=CV.find(x=>x.id===id);if(it)it.estado=estado;renderCv();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+      e.target.disabled=false;
+    });
+    list.appendChild(row);
+  });
+}
+async function crearConvenio(){
+  const idr=Number(document.getElementById('cvUnidad').value);
+  const total=Number(document.getElementById('cvTotal').value);
+  const abono=Number(document.getElementById('cvAbono').value);
+  const dia=Number(document.getElementById('cvDia').value)||5;
+  const inicio=document.getElementById('cvInicio').value||null;
+  const notas=document.getElementById('cvNotas').value.trim()||null;
+  if(!idr||!total||!abono){toast('Elige unidad, monto total y abono.',true);return;}
+  const btn=document.getElementById('cvBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('pg_crear_convenio_pago',{p_user:CREDS.u,p_password:CREDS.p,p_id_residente:idr,p_monto_total:total,p_abono_mensual:abono,p_dia_pago:dia,p_fecha_inicio:inicio,p_notas:notas});
+    if(r&&r.ok){toast('Convenio guardado');document.getElementById('cvTotal').value='';document.getElementById('cvAbono').value='';document.getElementById('cvNotas').value='';
+      const res=await rpc('pg_convenios_pago',CREDS);if(res&&res.ok!==false){CV=res.convenios||[];renderCv();}}
+    else toast('No se pudo guardar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Guardar convenio';
+}
+
+// ---------- DESCUENTOS COMERCIALES ----------
+async function loadDc(){
+  try{const res=await rpc('pg_comercios',CREDS);if(res&&res.ok!==false){DC=res.comercios||[];loaded.descuentos=true;renderDc();}}
+  catch(e){toast('No se pudieron cargar los descuentos.',true);}
+}
+function renderDc(){
+  const list=document.getElementById('dcList');
+  const activos=DC.filter(c=>c.activo).length;
+  document.getElementById('dcCount').textContent=`${DC.length} descuentos · ${activos} visibles en la app`;
+  list.innerHTML='';
+  if(DC.length===0){list.innerHTML='<div class="hint">Aún no hay descuentos. Publica el primero arriba.</div>';return;}
+  DC.forEach(c=>{
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    if(!c.activo)row.style.opacity='.55';
+    row.innerHTML=`
+      <div style="font-size:1.8rem;text-align:center">${c.icono||'🤝'}</div>
+      <div class="nm">${c.nombre_negocio}
+        <small>Vigencia: ${c.vigencia||'—'}</small>
+        <div style="font-weight:500;font-size:.88rem;color:var(--blue);margin-top:2px">${c.descuento}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${c.activo?'clear':'debt'}">${c.activo?'Visible':'Oculto'}</span>
+        <button class="btn ghost dcToggle" data-id="${c.id}" data-act="${c.activo?'0':'1'}" style="padding:8px 12px;font-size:.8rem">${c.activo?'Ocultar':'Mostrar'}</button>
+      </div>`;
+    row.querySelector('.dcToggle').addEventListener('click',async e=>{
+      const id=Number(e.target.dataset.id),act=e.target.dataset.act==='1';
+      e.target.disabled=true;
+      try{
+        const r=await rpc('pg_actualizar_comercio',{p_user:CREDS.u,p_password:CREDS.p,p_id:id,p_icono:null,p_nombre:null,p_descuento:null,p_vigencia:null,p_vigencia_fecha:null,p_activo:act});
+        if(r&&r.ok){toast(act?'Descuento visible en la app':'Descuento oculto');const it=DC.find(x=>x.id===id);if(it)it.activo=act;renderDc();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+    });
+    list.appendChild(row);
+  });
+}
+async function crearDescuento(){
+  const icono=document.getElementById('dcIcono').value.trim();
+  const nombre=document.getElementById('dcNombre').value.trim();
+  const desc=document.getElementById('dcDesc').value.trim();
+  const fecha=document.getElementById('dcFecha').value||null;
+  const vig=document.getElementById('dcVig').value.trim()||null;
+  if(!nombre||!desc){toast('Escribe el negocio y el descuento.',true);return;}
+  const btn=document.getElementById('dcBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('pg_crear_comercio',{p_user:CREDS.u,p_password:CREDS.p,p_icono:icono,p_nombre:nombre,p_descuento:desc,p_vigencia:vig,p_vigencia_fecha:fecha});
+    if(r&&r.ok){toast('Descuento publicado');['dcIcono','dcNombre','dcDesc','dcVig','dcFecha'].forEach(i=>document.getElementById(i).value='');
+      const res=await rpc('pg_comercios',CREDS);if(res&&res.ok!==false){DC=res.comercios||[];renderDc();}}
+    else toast('No se pudo publicar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Publicar descuento';
+}
+
+// ---------- eventos ----------
+document.getElementById('loginBtn').onclick=doLogin;
+document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('logout').onclick=logout;
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+document.getElementById('q').addEventListener('input',e=>renderUnits(e.target.value));
+document.getElementById('clearq').onclick=()=>{document.getElementById('q').value='';renderUnits('');};
+document.getElementById('markBtn').onclick=markPaid;
+document.getElementById('dq').addEventListener('input',e=>renderDir(e.target.value));
+document.getElementById('cleardq').onclick=()=>{document.getElementById('dq').value='';renderDir('');};
+document.querySelectorAll('#incFilter button').forEach(b=>b.onclick=()=>{incF=b.dataset.f;document.querySelectorAll('#incFilter button').forEach(x=>x.classList.toggle('active',x===b));renderInc();});
+document.getElementById('cvBtn').onclick=crearConvenio;
+document.getElementById('dcBtn').onclick=crearDescuento;
+</script>
+</body>
+</html>
