@@ -270,7 +270,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             </div>
             <div class="tbl-scroll">
               <table class="tbl">
-                <thead><tr><th>Depto</th><th>Residente</th><th>Meses pendientes</th><th>Total adeudo</th><th>Último pago</th><th>Estado</th></tr></thead>
+                <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Meses pendientes</th><th>Total adeudo</th><th>Último pago</th><th>Estado</th></tr></thead>
                 <tbody id="tabla-cartera"></tbody>
               </table>
             </div>
@@ -328,7 +328,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           </div>
           <div class="tbl-scroll">
             <table class="tbl">
-              <thead><tr><th>Depto</th><th>Residente</th><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+              <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Estado</th></tr></thead>
               <tbody id="tabla-pagos-admin"></tbody>
             </table>
           </div>
@@ -505,7 +505,7 @@ async function adminLogin() {
 }
 
 function poblarFiltros() {
-  const edificios = [...new Set(allResidentes.map(r => r.lote).filter(Boolean))].sort();
+  const edificios = [...new Set(allResidentes.map(r => (r.num||'').trim()).filter(Boolean))].sort();
   ['morosos-edificio', 'res-edificio'].forEach(id => {
     const sel = document.getElementById(id);
     edificios.forEach(e => {
@@ -559,6 +559,10 @@ function calcularMetricas() {
   document.getElementById('ov-cartera').textContent = '$' + totalDeuda2026.toLocaleString();
   document.getElementById('ov-cartera-hist').textContent = 'Histórico: $' + totalDeudaHist.toLocaleString();
 
+  // Mapa id -> edificio (letra) para mostrarlo en todas las secciones
+  edifMap = {};
+  allResidentes.forEach(r => { edifMap[r.id_residente] = (r.num || '').trim(); });
+
   // Cobranza mensual (misma fuente que la pestaña Cobranza mensual)
   cargarCobranzaOverview();
 
@@ -588,10 +592,11 @@ function renderCartera(vista) {
     : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
 
   document.getElementById('tabla-cartera').innerHTML = data.length === 0
-    ? '<tr><td colspan="6" class="empty-row">✓ Sin adeudos registrados</td></tr>'
+    ? '<tr><td colspan="7" class="empty-row">✓ Sin adeudos registrados</td></tr>'
     : data.map(d => `
       <tr>
         <td style="font-weight:600">${d.res.departamento}</td>
+        <td><span class="badge blue">${(d.res.num||'').trim() || '—'}</span></td>
         <td>${d.res.nombre_completo}</td>
         <td>${vista === '2026' ? d.pends2026 + ' meses' : '—'}</td>
         <td style="font-weight:700;color:var(--coral)">$${(vista === '2026' ? d.deuda2026 : d.deudaHist).toLocaleString()}</td>
@@ -641,7 +646,7 @@ function renderMorosos(data) {
     : sorted.map(d => `
       <tr>
         <td style="font-weight:600">${d.res.departamento}</td>
-        <td><span class="badge blue">${d.res.lote || '—'}</span></td>
+        <td><span class="badge blue">${(d.res.num||'').trim() || '—'}</span></td>
         <td>${d.res.nombre_completo}</td>
         <td>${d.pends2026} meses</td>
         <td style="font-weight:700;color:var(--coral)">$${d.deuda2026.toLocaleString()}</td>
@@ -653,7 +658,7 @@ function renderMorosos(data) {
 function filtrarMorosos(q) {
   const edificio = document.getElementById('morosos-edificio').value;
   let f = allMorosos;
-  if (edificio !== 'todos') f = f.filter(d => d.res.lote === edificio);
+  if (edificio !== 'todos') f = f.filter(d => (d.res.num||'').trim() === edificio);
   if (q) f = f.filter(d =>
     d.res.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
     d.res.departamento.includes(q)
@@ -673,6 +678,7 @@ function filtrarPagosMes() {
   document.getElementById('tabla-pagos-admin').innerHTML = f.map(p => `
     <tr>
       <td style="font-weight:600">${p.departamento}</td>
+      <td><span class="badge blue">${edifMap[p.id_residente] || '—'}</span></td>
       <td style="font-size:12px">${p.nombre}</td>
       <td style="font-size:12px">${p.concepto}</td>
       <td style="font-weight:600;color:var(--green)">$${p.monto}</td>
@@ -692,7 +698,7 @@ function renderResidentes(data) {
     return `<tr>
       <td style="color:var(--muted)">${i + 1}</td>
       <td style="font-weight:600">${r.departamento}</td>
-      <td><span class="badge blue">${r.lote || '—'}</span></td>
+      <td><span class="badge blue">${(r.num||'').trim() || '—'}</span></td>
       <td>${r.nombre_completo}</td>
       <td>${estado}</td>
     </tr>`;
@@ -702,7 +708,7 @@ function renderResidentes(data) {
 function filtrarResidentes(q) {
   const edificio = document.getElementById('res-edificio').value;
   let f = allResidentes;
-  if (edificio !== 'todos') f = f.filter(r => r.lote === edificio);
+  if (edificio !== 'todos') f = f.filter(r => (r.num||'').trim() === edificio);
   if (q) f = f.filter(r =>
     r.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
     r.departamento.includes(q)
@@ -756,7 +762,7 @@ function renderIncidenciasAdmin() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
         <div>
           <span style="font-weight:700;color:var(--ink)">${i.categoria || 'Otro'}</span>
-          <span style="color:var(--muted);font-size:12px"> · Depto ${i.departamento || '—'} · ${i.nombre || ''}</span>
+          <span style="color:var(--muted);font-size:12px"> · Edificio ${edifMap[i.id_residente] || '—'} · Depto ${i.departamento || '—'} · ${i.nombre || ''}</span>
         </div>
         ${badge(est)}
       </div>
@@ -872,7 +878,7 @@ function renderLlamadasAdmin() {
     return `
     <div style="border:1px solid var(--border);border-left:3px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
-        <div><span style="font-weight:700;color:var(--ink)">${(l.motivo||'General').replace(/</g,'&lt;')}</span><span style="color:var(--muted);font-size:12px"> · Depto ${l.departamento||'—'}</span></div>
+        <div><span style="font-weight:700;color:var(--ink)">${(l.motivo||'General').replace(/</g,'&lt;')}</span><span style="color:var(--muted);font-size:12px"> · Edificio ${edifMap[l.id_residente] || '—'} · Depto ${l.departamento||'—'}</span></div>
         ${badge(est)}
       </div>
       <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(l.descripcion||'').replace(/</g,'&lt;')}</div>
@@ -1010,6 +1016,7 @@ function go(id, el) {
 
 // ===== COBRANZA MENSUAL =====
 let cmData = [], cmYear = 2026, cmLoaded = false;
+let edifMap = {};
 
 async function cargarCobranzaOverview() {
   try {
