@@ -785,8 +785,9 @@ function renderLl(){
     const activa=l.estado==='Activa';
     const fecha=new Date(l.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
     const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    const uL=UNITS.find(x=>x.id_residente===l.id_residente);
     row.innerHTML=`
-      <div class="id">${l.departamento||'—'}</div>
+      <div class="id">${uL?uL.ident:(l.departamento||'—')}</div>
       <div class="nm">${l.motivo||'General'}
         <small>${fecha}</small>
         <div style="font-weight:400;font-size:.85rem;color:#485061;margin-top:4px">${(l.descripcion||'').slice(0,220)}</div>
