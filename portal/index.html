@@ -192,6 +192,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Comunidad
       </button>
+      <button class="nav-item" onclick="go('misdatos',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mis datos
+      </button>
       <button class="nav-item" onclick="go('convenios',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
         Convenios
@@ -401,6 +405,37 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       </div>
 
       <!-- CONVENIOS -->
+      <div class="page" id="page-misdatos">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px;max-width:640px">
+          <h2 style="margin:0 0 4px;font-size:19px;color:var(--ink)">Mis datos de contacto</h2>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 20px">Revisa que tu correo y teléfono estén correctos. Los usamos para enviarte tus comprobantes de pago, estados de cuenta y avisos importantes.</p>
+
+          <div style="background:#F7F9FC;border-radius:14px;padding:18px;margin-bottom:20px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Propietario</div><div id="md-nombre" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
+              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Clave de acceso</div><div id="md-clave" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
+              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Edificio</div><div id="md-edificio" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
+              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Departamento</div><div id="md-depto" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:14px">Si algún dato de tu unidad es incorrecto, avísale a la administración.</div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">Correo electrónico</label>
+            <input id="md-email" type="email" placeholder="tucorreo@ejemplo.com" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
+            <div style="font-size:11px;color:var(--muted);margin-top:5px">Aquí te llegan tus comprobantes de pago.</div>
+          </div>
+          <div style="margin-bottom:18px">
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">Teléfono / WhatsApp</label>
+            <input id="md-tel" type="tel" placeholder="55 1234 5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
+          </div>
+
+          <div id="md-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:14px"></div>
+          <button id="md-btn" onclick="guardarMisDatos()" style="background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Confirmar mis datos</button>
+          <div id="md-conf" style="font-size:12px;color:var(--muted);margin-top:12px"></div>
+        </div>
+      </div>
+
       <div class="page" id="page-convenios">
         <div style="margin-bottom:6px">
           <div style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.02em">Convenios para residentes</div>
@@ -541,12 +576,7 @@ async function iniciarSesionPago(clave, password) {
 /* ============================================================
    EDITABLE — Convenios. Agrega o quita objetos de esta lista.
    ============================================================ */
-const CONVENIOS_ACTIVOS = [
-  { icono: '🍽️', nombreNegocio: 'Restaurante La Palapa', descuento: '15% en alimentos',            vigencia: '31 dic 2026' },
-  { icono: '💆', nombreNegocio: 'Spa Maya Wellness',      descuento: '20% en masajes',              vigencia: '30 sep 2026' },
-  { icono: '🏋️', nombreNegocio: 'Gimnasio Tulum Fit',     descuento: '1 mes gratis al inscribirse', vigencia: '31 dic 2026' },
-  { icono: '💊', nombreNegocio: 'Farmacia del Centro',    descuento: '10% en medicamentos',         vigencia: 'Permanente'  },
-];
+let CONVENIOS_ACTIVOS = [];
 
 /* ============================================================
    EDITABLE — WhatsApp de soporte (botón en "Pagar ahora").
@@ -567,7 +597,7 @@ function renderConvenios() {
          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(12,19,32,.10)'"
          onmouseout="this.style.transform='none';this.style.boxShadow='0 1px 2px rgba(12,19,32,.04)'">
       <div style="width:54px;height:54px;border-radius:15px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;font-size:27px;margin-bottom:16px">${c.icono || '🏷️'}</div>
-      <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25">${c.nombreNegocio}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25">${c.nombre_negocio || c.nombreNegocio}</div>
       <div style="display:inline-block;margin-top:10px;background:#EEF3FF;color:var(--blue);font-size:13px;font-weight:700;padding:5px 13px;border-radius:100px">${c.descuento}</div>
       <div style="font-size:12px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:6px">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -576,8 +606,67 @@ function renderConvenios() {
     </div>`).join('');
 }
 
-function initComunidad() {
+async function cargarConvenios() {
+  try {
+    const r = await fetch(`${URL}/rpc/convenios_publicos`, { method:'POST', headers:H, body:'{}' });
+    const d = await r.json();
+    if (d && d.ok) { CONVENIOS_ACTIVOS = d.convenios || []; }
+  } catch(e) {}
   renderConvenios();
+}
+
+async function cargarMisDatos() {
+  try {
+    const r = await fetch(`${URL}/rpc/mis_datos`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
+    const d = await r.json();
+    if (!d || !d.ok) return;
+    const x = d.datos;
+    document.getElementById('md-nombre').textContent = x.nombre || '—';
+    document.getElementById('md-clave').textContent = x.clave || '—';
+    document.getElementById('md-edificio').textContent = x.edificio || '—';
+    document.getElementById('md-depto').textContent = x.departamento || '—';
+    document.getElementById('md-email').value = x.email || '';
+    document.getElementById('md-tel').value = x.telefono || '';
+    const c = document.getElementById('md-conf');
+    c.textContent = x.datos_confirmados_at
+      ? 'Última confirmación: ' + new Date(x.datos_confirmados_at).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})
+      : 'Aún no has confirmado tus datos.';
+  } catch(e) {}
+}
+
+async function guardarMisDatos() {
+  const email = document.getElementById('md-email').value.trim();
+  const tel = document.getElementById('md-tel').value.trim();
+  const btn = document.getElementById('md-btn');
+  const msg = document.getElementById('md-msg');
+  msg.style.display = 'none';
+  if (email && !email.includes('@')) {
+    msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
+    msg.textContent='Escribe un correo válido.'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_mis_datos`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_email: email, p_telefono: tel }) });
+    const d = await r.json();
+    if (d && d.ok) {
+      msg.style.display='block'; msg.style.background='#E7F5EC'; msg.style.color='#1B7A3D';
+      msg.textContent='¡Listo! Tus datos quedaron confirmados y actualizados.';
+      document.getElementById('md-conf').textContent = 'Última confirmación: ' + d.confirmado;
+    } else {
+      msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
+      msg.textContent='No se pudo guardar. Inténtalo de nuevo.';
+    }
+  } catch(e) {
+    msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
+    msg.textContent='Error de conexión.';
+  }
+  btn.disabled = false; btn.textContent = 'Confirmar mis datos';
+}
+
+function initComunidad() {
+  cargarConvenios();
   const wa = document.getElementById('wa-soporte-pago');
   if (wa) wa.href = `https://wa.me/${SOPORTE_NUMERO}?text=${encodeURIComponent(SOPORTE_TEXTO)}`;
 }
@@ -630,6 +719,7 @@ async function doLogin() {
     renderLlamadas();
     renderAvisoLlamadas();
     renderComunidad();
+    cargarMisDatos();
 
   } catch(e) {
     err.style.display = 'block';
@@ -945,7 +1035,7 @@ function go(id, el) {
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('portal').classList.remove('menu-abierto');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', incidencias:'Incidencias' };
+  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', misdatos:'Mis datos', incidencias:'Incidencias' };
   document.getElementById('topbar-title').textContent = t[id] || id;
 }
 
