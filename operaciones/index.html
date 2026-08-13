@@ -152,8 +152,20 @@
 <div id="tab-pagos" class="wrap hidden">
   <div class="card pad">
     <div class="search-row">
-      <div class="field"><label>Buscar unidad</label><input id="q" placeholder="Ej. A-101 o nombre del propietario"></div>
-      <button class="btn ghost" id="clearq">Limpiar</button>
+      <div class="field" style="min-width:180px"><label>Edificio</label><select id="fEdif"><option value="">Todos</option></select></div>
+      <div class="field" style="min-width:150px"><label>Depto</label><select id="fDepto"><option value="">Todos</option></select></div>
+      <div class="field" style="min-width:200px"><label>Ordenar por</label>
+        <select id="fOrden">
+          <option value="ident">Unidad (A-Z)</option>
+          <option value="menor">Adeudo: menor a mayor</option>
+          <option value="mayor">Adeudo: mayor a menor</option>
+          <option value="nombre">Nombre (A-Z)</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-row" style="margin-top:10px">
+      <div class="field"><label>Buscar por nombre o unidad</label><input id="q" placeholder="Ej. A-101 o nombre del propietario"></div>
+      <button class="btn ghost" id="clearq">Limpiar filtros</button>
     </div>
     <div class="hint" id="counthint"></div>
     <div class="unitlist" id="unitlist"></div>
@@ -177,6 +189,8 @@
         <option>Efectivo</option>
         <option>Mercado Pago</option>
       </select>
+      <input id="rbMail" type="email" placeholder="correo del residente (opcional)" style="width:240px;padding:9px 12px;font-size:.84rem">
+      <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin:0"><input type="checkbox" id="rbEnviar" checked style="width:16px;height:16px;accent-color:var(--blue)">Enviar por correo</label>
       <button class="btn" id="rbBtn" style="padding:10px 16px;font-size:.86rem">Emitir comprobante</button>
       <button class="btn ghost" id="rbNo" style="padding:10px 14px;font-size:.86rem">Ahora no</button>
     </div>
@@ -363,14 +377,32 @@ function renderCobranza(){
 
 // ---------- REGISTRAR PAGO ----------
 async function loadUnits(){
-  try{const res=await rpc('pg_listar_unidades',CREDS);if(res&&res.ok!==false){UNITS=res.unidades||[];loaded.pagos=true;renderUnits('');}}catch(e){toast('No se pudo cargar unidades.',true);}
+  try{const res=await rpc('pg_listar_unidades',CREDS);if(res&&res.ok!==false){UNITS=res.unidades||[];loaded.pagos=true;llenarFiltros();renderUnits('');}}catch(e){toast('No se pudo cargar unidades.',true);}
+}
+function llenarFiltros(){
+  const edifs=[...new Set(UNITS.map(u=>(u.num||'').trim()).filter(Boolean))].sort();
+  const deptos=[...new Set(UNITS.map(u=>(u.departamento||'').trim()).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));
+  const fe=document.getElementById('fEdif'), fd=document.getElementById('fDepto');
+  fe.innerHTML='<option value="">Todos los edificios</option>'+edifs.map(e=>`<option value="${e}">${e}</option>`).join('');
+  fd.innerHTML='<option value="">Todos los deptos</option>'+deptos.map(d=>`<option value="${d}">${d}</option>`).join('');
 }
 function renderUnits(filter){
   const list=document.getElementById('unitlist'),f=(filter||'').trim().toLowerCase();
-  let items=UNITS;
-  if(f)items=UNITS.filter(u=>(u.ident||'').toLowerCase().includes(f)||(u.nombre_completo||'').toLowerCase().includes(f));
+  const fe=(document.getElementById('fEdif')||{}).value||'';
+  const fd=(document.getElementById('fDepto')||{}).value||'';
+  const fo=(document.getElementById('fOrden')||{}).value||'ident';
+  let items=UNITS.slice();
+  if(fe)items=items.filter(u=>(u.num||'').trim()===fe);
+  if(fd)items=items.filter(u=>(u.departamento||'').trim()===fd);
+  if(f)items=items.filter(u=>(u.ident||'').toLowerCase().includes(f)||(u.nombre_completo||'').toLowerCase().includes(f));
+  if(fo==='menor')items.sort((a,b)=>Number(a.adeudo)-Number(b.adeudo));
+  else if(fo==='mayor')items.sort((a,b)=>Number(b.adeudo)-Number(a.adeudo));
+  else if(fo==='nombre')items.sort((a,b)=>(a.nombre_completo||'').localeCompare(b.nombre_completo||''));
+  else items.sort((a,b)=>(a.ident||'').localeCompare(b.ident||'',undefined,{numeric:true}));
   const conDeuda=UNITS.filter(u=>Number(u.adeudo)>0).length;
-  document.getElementById('counthint').textContent=`${UNITS.length} unidades · ${conDeuda} con adeudo`+(f?` · ${items.length} coinciden`:'');
+  const sumaFiltrada=items.reduce((a,u)=>a+Number(u.adeudo||0),0);
+  const filtrando=fe||fd||f;
+  document.getElementById('counthint').textContent=`${UNITS.length} unidades · ${conDeuda} con adeudo`+(filtrando?` · ${items.length} coinciden · adeudo filtrado ${money(sumaFiltrada)}`:'');
   list.innerHTML='';
   items.slice(0,80).forEach(u=>{
     const b=document.createElement('button');b.className='unit';const debt=Number(u.adeudo)>0;
@@ -383,6 +415,7 @@ function renderUnits(filter){
 }
 async function openUnit(u){
   CURRENT=u.id_residente;
+  if(!loaded.residentes){loadDir();}
   const d=document.getElementById('detail');d.classList.remove('hidden');
   document.getElementById('dId').textContent=u.ident;
   document.getElementById('dName').textContent=u.nombre_completo||'';
@@ -450,6 +483,8 @@ function ofrecerRecibo(idr, conceptos){
   RECIBO_PEND={idr, conceptos, total:conceptos.reduce((a,c)=>a+c.m,0)};
   const bar=document.getElementById('reciboBar');
   document.getElementById('rbTotal').textContent=money(RECIBO_PEND.total);
+  const dir=(DIR.find(x=>x.id_residente===idr)||{}).email||'';
+  document.getElementById('rbMail').value=(dir||'').split('/')[0].trim();
   bar.classList.remove('hidden');
 }
 async function emitirRecibo(){
@@ -459,12 +494,31 @@ async function emitirRecibo(){
   try{
     const conceptosCap=RECIBO_PEND.conceptos.map(x=>({c:'Mantenimiento '+x.c, m:x.m}));
     const res=await rpc('pg_emitir_recibo',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:RECIBO_PEND.idr,p_conceptos:conceptosCap,p_total:RECIBO_PEND.total,p_forma_pago:forma});
-    if(res&&res.ok){abrirRecibo(res.folio,res.nombre,res.ident,res.fecha,conceptosCap,RECIBO_PEND.total,forma);
-      document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;}
+    if(res&&res.ok){
+      abrirRecibo(res.folio,res.nombre,res.ident,res.fecha,conceptosCap,RECIBO_PEND.total,forma);
+      const quiere=document.getElementById('rbEnviar').checked;
+      const correo=document.getElementById('rbMail').value.trim()||((res.email||'').split('/')[0].trim());
+      document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;
+      if(quiere&&correo){enviarReciboCorreo(res.folio,correo);}
+      else if(quiere&&!correo){toast('Sin correo registrado: el comprobante no se envió.',true);}
+    }
     else toast('No se pudo emitir el comprobante.',true);
   }catch(e){toast('Error de conexión.',true);}
   btn.disabled=false;btn.textContent='Emitir comprobante';
 }
+async function enviarReciboCorreo(folio,correo){
+  try{
+    const r=await fetch(`${SB_URL}/functions/v1/enviar-recibo`,{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,folio:folio,email_destino:correo})
+    });
+    const d=await r.json();
+    if(d&&d.ok){toast('Comprobante #'+folio+' enviado a '+d.enviado_a);}
+    else if(d&&d.error==='sin correo'){toast('Sin correo registrado: no se envió.',true);}
+    else{toast('El comprobante se emitió pero el correo no salió.',true);}
+  }catch(e){toast('El comprobante se emitió pero el correo no salió.',true);}
+}
+
 function abrirRecibo(folio,nombre,ident,fecha,conceptos,total,forma){
   const filas=conceptos.map(x=>`<tr style="border-bottom:1px solid #F3F4F6"><td style="padding:14px 0;color:#374151">${x.c}</td><td style="padding:14px 0;text-align:right;font-weight:500;color:#374151">$${Number(x.m).toLocaleString('es-MX',{minimumFractionDigits:2})}</td></tr>`).join('');
   const tot='$'+Number(total).toLocaleString('es-MX',{minimumFractionDigits:2});
@@ -830,7 +884,8 @@ document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')d
 document.getElementById('logout').onclick=logout;
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
 document.getElementById('q').addEventListener('input',e=>renderUnits(e.target.value));
-document.getElementById('clearq').onclick=()=>{document.getElementById('q').value='';renderUnits('');};
+document.getElementById('clearq').onclick=()=>{document.getElementById('q').value='';document.getElementById('fEdif').value='';document.getElementById('fDepto').value='';document.getElementById('fOrden').value='ident';renderUnits('');};
+['fEdif','fDepto','fOrden'].forEach(id=>document.getElementById(id).addEventListener('change',()=>renderUnits(document.getElementById('q').value)));
 document.getElementById('markBtn').onclick=markPaid;
 document.getElementById('rbBtn').onclick=emitirRecibo;
 document.getElementById('rbNo').onclick=()=>{document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;};
