@@ -225,6 +225,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="content">
 
       <!-- DASHBOARD -->
+      <div id="banner-aviso" style="display:none;margin-bottom:18px;border-radius:14px;padding:16px 18px;font-size:14px"></div>
+
       <div class="page active" id="page-dashboard">
         <div id="dash-loading" class="loading">⏳ Cargando tu información...</div>
         <div id="dash-content" class="hidden">
@@ -615,6 +617,29 @@ async function cargarConvenios() {
   renderConvenios();
 }
 
+async function cargarAviso() {
+  try {
+    const r = await fetch(`${URL}/rpc/aviso_activo`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
+    const d = await r.json();
+    const b = document.getElementById('banner-aviso');
+    if (!b || !d || !d.ok || !d.aviso) return;
+    const estilos = {
+      info:    ['#EEF3FF', '#1847CC', 'ℹ️'],
+      alerta:  ['#FBF1DF', '#B87503', '⚠️'],
+      urgente: ['#FBE9EC', '#B00020', '🔔']
+    };
+    const [bg, col, ico] = estilos[d.aviso.tipo] || estilos.info;
+    b.style.background = bg; b.style.color = col; b.style.border = '1px solid ' + col + '33';
+    b.innerHTML = `<div style="display:flex;gap:11px;align-items:flex-start">
+        <div style="font-size:19px;line-height:1.1">${ico}</div>
+        <div>${d.aviso.titulo ? `<div style="font-weight:700;margin-bottom:3px">${d.aviso.titulo}</div>` : ''}
+          <div style="font-weight:500;line-height:1.5">${d.aviso.mensaje}</div></div>
+      </div>`;
+    b.style.display = 'block';
+  } catch(e) {}
+}
+
 async function cargarMisDatos() {
   try {
     const r = await fetch(`${URL}/rpc/mis_datos`, { method:'POST', headers:H,
@@ -720,6 +745,7 @@ async function doLogin() {
     renderAvisoLlamadas();
     renderComunidad();
     cargarMisDatos();
+    cargarAviso();
 
   } catch(e) {
     err.style.display = 'block';
