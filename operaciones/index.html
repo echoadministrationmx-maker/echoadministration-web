@@ -119,10 +119,16 @@
     <button class="tab" data-tab="incidencias">Incidencias</button>
     <button class="tab" data-tab="llamadas">Llamadas</button>
     <button class="tab" data-tab="avisos">Avisos</button>
+    <button class="tab" data-tab="rentas">Rentas</button>
     <button class="tab" data-tab="convenios">Convenios</button>
     <button class="tab" data-tab="descuentos">Descuentos</button>
   </div>
-  <div class="who"><span id="who"></span><button class="logout" id="logout">Salir</button></div>
+  <div class="who" style="gap:8px">
+    <select id="condoSel" style="width:auto;padding:6px 9px;font-size:.8rem;background:#ffffff18;color:#fff;border:1px solid #ffffff33;border-radius:7px"></select>
+    <span style="font-size:.76rem;opacity:.75">Mes:</span>
+    <select id="mesCorte" style="width:auto;padding:6px 9px;font-size:.8rem;background:#ffffff18;color:#fff;border:1px solid #ffffff33;border-radius:7px"></select>
+    <span id="who" style="opacity:.6"></span><button class="logout" id="logout">Salir</button>
+  </div>
 </div>
 
 <!-- LOGIN -->
@@ -203,6 +209,23 @@
   <div class="card pad">
     <div class="search-row">
       <div class="field"><label>Buscar residente</label><input id="dq" placeholder="Nombre, clave, correo o teléfono"></div>
+      <div class="field" style="min-width:210px"><label>Ordenar por</label>
+        <select id="dOrden">
+          <option value="ident">Unidad (A-Z)</option>
+          <option value="mayor">Deuda: mayor a menor</option>
+          <option value="menor">Deuda: menor a mayor</option>
+          <option value="nombre">Nombre (A-Z)</option>
+        </select>
+      </div>
+      <div class="field" style="min-width:170px"><label>Mostrar</label>
+        <select id="dFiltro">
+          <option value="">Todos</option>
+          <option value="deben">Solo con adeudo</option>
+          <option value="alcorriente">Solo al corriente</option>
+          <option value="sintel">Sin teléfono</option>
+          <option value="sinmail">Sin correo</option>
+        </select>
+      </div>
       <button class="btn ghost" id="cleardq">Limpiar</button>
     </div>
     <div class="hint" id="dcount"></div>
@@ -317,6 +340,26 @@
   </div>
 </div>
 
+<!-- RENTAS -->
+<div id="tab-rentas" class="wrap hidden">
+  <div class="card pad" id="solRentaCard" style="margin-bottom:16px;display:none">
+    <h2 style="margin:0 0 6px;font-size:1.05rem">Solicitudes de alta al programa de rentas</h2>
+    <div class="dirlist" id="solList"></div>
+  </div>
+  <div class="card pad">
+    <h2 style="margin:0 0 6px;font-size:1.2rem">Rentas vacacionales</h2>
+    <p class="hint" style="margin:0 0 14px">Unidades en el programa. Las reservas de Airbnb y Booking se sincronizan por calendario (iCal).</p>
+    <div class="search-row" style="margin-bottom:12px">
+      <div class="field"><label>Activar unidad en el programa</label><select id="rtUnidad"></select></div>
+      <button class="btn" id="rtActivar">Activar</button>
+      <button class="btn ghost" id="rtSync">⟳ Sincronizar</button>
+    </div>
+    <div class="hint" id="rtCount"></div>
+    <div class="dirlist" id="rtList"></div>
+  </div>
+  <div class="card pad hidden" id="rtDetalle" style="margin-top:16px"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -326,8 +369,10 @@ const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto
 const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
-let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false,avisos:false};
+let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false,avisos:false,rentas:false};
 let INC=[], CV=[], DC=[], LL=[], AV=[], incF='todas';
+let RT={unidades:[],reservas:[],solicitudes:[]}, CONDO=1, RT_SEL=null;
+let CORTE={anio:2026,mes:8};
 let curYear=2026;
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 
@@ -353,7 +398,7 @@ async function doLogin(){
     document.getElementById('login').classList.add('hidden');
     document.getElementById('bar').classList.remove('hidden');
     document.getElementById('who').textContent=u;
-    showTab('cobranza');renderCobranza();
+    showTab('cobranza');renderCobranza();cargarConfig();cargarCondominios();
   }catch(e){msg.textContent='No se pudo conectar. Revisa tu internet.';}
   btn.disabled=false;btn.textContent='Entrar';
 }
@@ -362,7 +407,7 @@ function logout(){location.reload();}
 // ---------- TABS ----------
 function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
-  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas','avisos'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas','avisos','rentas'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
   if(name==='cobranza'&&loaded.cobranza){reloadCobranza();}
   if(name==='pagos'&&!loaded.pagos){loadUnits();}
   if(name==='residentes'&&!loaded.residentes){loadDir();}
@@ -371,6 +416,7 @@ function showTab(name){
   if(name==='descuentos'&&!loaded.descuentos){loadDc();}
   if(name==='llamadas'&&!loaded.llamadas){loadLl();}
   if(name==='avisos'&&!loaded.avisos){loadAv();}
+  if(name==='rentas'&&!loaded.rentas){loadRt();}
 }
 
 // ---------- COBRANZA ----------
@@ -432,7 +478,7 @@ function renderUnits(filter){
   const conDeuda=UNITS.filter(u=>Number(u.adeudo)>0).length;
   const sumaFiltrada=items.reduce((a,u)=>a+Number(u.adeudo||0),0);
   const filtrando=fe||fd||f;
-  document.getElementById('counthint').textContent=`${UNITS.length} unidades · ${conDeuda} con adeudo`+(filtrando?` · ${items.length} coinciden · adeudo filtrado ${money(sumaFiltrada)}`:'');
+  document.getElementById('counthint').textContent=`${UNITS.length} unidades · ${conDeuda} con adeudo vencido (hasta ${MESES_CORTE[CORTE.mes]} ${CORTE.anio})`+(filtrando?` · ${items.length} coinciden · ${money(sumaFiltrada)}`:'');
   list.innerHTML='';
   items.slice(0,80).forEach(u=>{
     const b=document.createElement('button');b.className='unit';const debt=Number(u.adeudo)>0;
@@ -621,31 +667,94 @@ async function loadDir(){
 }
 function renderDir(filter){
   const list=document.getElementById('dirlist'),f=(filter||'').trim().toLowerCase();
-  let items=DIR;
-  if(f)items=DIR.filter(r=>[r.ident,r.nombre_completo,r.email,r.telefono,r.clave].some(v=>(v||'').toString().toLowerCase().includes(f)));
+  const ord=(document.getElementById('dOrden')||{}).value||'ident';
+  const filt=(document.getElementById('dFiltro')||{}).value||'';
+  let items=DIR.slice();
+  if(f)items=items.filter(r=>[r.ident,r.nombre_completo,r.email,r.telefono,r.clave].some(v=>(v||'').toString().toLowerCase().includes(f)));
+  if(filt==='deben')items=items.filter(r=>Number(r.adeudo)>0);
+  else if(filt==='alcorriente')items=items.filter(r=>Number(r.adeudo)===0);
+  else if(filt==='sintel')items=items.filter(r=>!r.telefono);
+  else if(filt==='sinmail')items=items.filter(r=>!r.email);
+  if(ord==='mayor')items.sort((a,b)=>Number(b.adeudo)-Number(a.adeudo));
+  else if(ord==='menor')items.sort((a,b)=>Number(a.adeudo)-Number(b.adeudo));
+  else if(ord==='nombre')items.sort((a,b)=>(a.nombre_completo||'').localeCompare(b.nombre_completo||''));
+  else items.sort((a,b)=>(a.ident||'').localeCompare(b.ident||'',undefined,{numeric:true}));
   const conCorreo=DIR.filter(r=>r.email).length,conTel=DIR.filter(r=>r.telefono).length;
-  document.getElementById('dcount').textContent=`${DIR.length} residentes · ${conCorreo} con correo · ${conTel} con teléfono`+(f?` · ${items.length} coinciden`:'');
+  const suma=items.reduce((a,r)=>a+Number(r.adeudo||0),0);
+  document.getElementById('dcount').textContent=`${DIR.length} residentes · ${conCorreo} con correo · ${conTel} con teléfono · mostrando ${items.length} · adeudo ${money(suma)}`;
   list.innerHTML='';
   items.slice(0,120).forEach(r=>{
     const debt=Number(r.adeudo)>0;
-    const telClean=(r.telefono||'').replace(/[^0-9+]/g,'');
+    const telClean=(r.telefono||'').replace(/[^0-9]/g,'');
+    const meses=(r.meses_debe||[]);
+    const resumen=meses.length?meses.slice(0,3).map(c=>c.replace('Cuota ','')).join(' · ')+(meses.length>3?` +${meses.length-3} más`:''):'';
     const row=document.createElement('div');row.className='drow';
     row.innerHTML=`
       <div class="id">${r.ident}</div>
-      <div class="nm">${r.nombre_completo||''}<small>Clave: ${r.clave||'—'}</small></div>
+      <div class="nm">${r.nombre_completo||''}<small>Clave: ${r.clave||'—'}</small>
+        ${debt?`<div class="mesesDebe" style="font-size:.76rem;color:var(--warn);margin-top:4px;font-weight:500">${meses.length} ${meses.length===1?'mes':'meses'}: ${resumen}</div>
+        ${meses.length>3?'<button class="verMeses" style="background:none;border:0;color:var(--blue);font-weight:600;font-size:.75rem;cursor:pointer;padding:1px 0">Ver todos</button>':''}`:''}
+      </div>
       <div class="contact" data-view>
         ${r.email?`<a href="mailto:${r.email.split('/')[0].trim()}" title="${r.email}">✉ ${r.email.split('/')[0].trim()}</a>`:`<span class="empty">✉ sin correo</span>`}
         ${r.telefono?`<a href="tel:${telClean}">✆ ${r.telefono}</a>`:`<span class="empty">✆ sin teléfono</span>`}
       </div>
       <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
         <span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente'}</span>
-        <button class="btn ghost editC" style="padding:7px 12px;font-size:.78rem">✎ Editar</button>
+        <div style="display:flex;gap:5px">
+          ${telClean?`<button class="btn waBtn" style="padding:7px 10px;font-size:.75rem;background:#25D366">WhatsApp</button>`:''}
+          <button class="btn ghost editC" style="padding:7px 10px;font-size:.75rem">✎</button>
+        </div>
       </div>`;
+    const vm=row.querySelector('.verMeses');
+    if(vm)vm.addEventListener('click',()=>{
+      const d=row.querySelector('.mesesDebe');
+      const abierto=vm.textContent==='Ver menos';
+      d.textContent=abierto?`${meses.length} meses: ${resumen}`:`${meses.length} meses: `+meses.map(c=>c.replace('Cuota ','')).join(' · ');
+      vm.textContent=abierto?'Ver todos':'Ver menos';
+    });
+    const wa=row.querySelector('.waBtn');
+    if(wa)wa.addEventListener('click',()=>abrirWhatsApp(r,telClean,meses));
     row.querySelector('.editC').addEventListener('click',()=>editContact(row,r));
     list.appendChild(row);
   });
   if(items.length>120){const p=document.createElement('div');p.className='hint';p.textContent='Mostrando 120. Escribe para afinar.';list.appendChild(p);}
   if(items.length===0){const p=document.createElement('div');p.className='hint';p.textContent='Sin coincidencias.';list.appendChild(p);}
+}
+
+function abrirWhatsApp(r, tel, meses){
+  let num=(tel||'').replace(/[^0-9]/g,'');
+  if(num.length===10)num='52'+num;
+  if(num.startsWith('521'))num='52'+num.slice(3);
+  const nombre=(r.nombre_completo||'').split(' ')[0];
+  const lista=(meses||[]).map(c=>c.replace('Cuota ','')).join(', ');
+  const deuda=money(r.adeudo);
+  let msg;
+  if(Number(r.adeudo)>0){
+    msg=`Hola ${nombre}, le escribimos de la administración de Manzana 80, Aldea Tulum.\n\n`
+      +`Le compartimos un recordatorio de su estado de cuenta de la unidad ${r.ident}:\n`
+      +`• Meses pendientes: ${lista}\n• Total: ${deuda}\n\n`
+      +`Puede pagar en línea desde su portal: echoadministration.com/portal\n`
+      +`o por transferencia a la CLABE 012694001253016969 (BBVA, A.C. Manzana 80).\n\n`
+      +`Si ya realizó su pago o desea un convenio, con gusto lo revisamos. Gracias.`;
+  } else {
+    msg=`Hola ${nombre}, le escribimos de la administración de Manzana 80, Aldea Tulum, respecto a su unidad ${r.ident}.`;
+  }
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank','noopener');
+  registrarLlamadaWA(r, lista);
+}
+
+async function registrarLlamadaWA(r, lista){
+  try{
+    const desc=Number(r.adeudo)>0
+      ? `Recordatorio de cobranza enviado por WhatsApp al ${r.telefono}. Meses pendientes: ${lista}. Adeudo: ${money(r.adeudo)}.`
+      : `Contacto por WhatsApp al ${r.telefono}.`;
+    const res=await rpc('crear_llamada_atencion',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:r.id_residente,p_motivo:'Cobranza por WhatsApp',p_descripcion:desc});
+    if(res&&res.ok){
+      toast('WhatsApp abierto · registrado en Llamadas');
+      loaded.llamadas=false;
+    }
+  }catch(e){}
 }
 
 function editContact(row,r){
@@ -952,6 +1061,239 @@ async function crearLlamada(){
   btn.disabled=false;btn.textContent='Registrar llamada';
 }
 
+// ---------- CONDOMINIOS ----------
+async function cargarCondominios(){
+  try{
+    const c=await rpc('pg_condominios',CREDS);
+    if(c&&c.ok){
+      const sel=document.getElementById('condoSel');
+      sel.innerHTML=(c.condominios||[]).map(x=>`<option value="${x.id}">${x.nombre}</option>`).join('');
+      if((c.condominios||[]).length)CONDO=Number(c.condominios[0].id);
+      if((c.condominios||[]).length<2)sel.style.display='none';
+    }
+  }catch(e){}
+}
+function cambiarCondo(){
+  CONDO=Number(document.getElementById('condoSel').value);
+  loaded.rentas=false;RT_SEL=null;
+  document.getElementById('rtDetalle').classList.add('hidden');
+  const act=document.querySelector('.tab.active');
+  if(act&&act.dataset.tab==='rentas')loadRt();
+  toast('Condominio cambiado');
+}
+
+// ---------- RENTAS ----------
+async function loadRt(){
+  try{
+    if(!loaded.pagos)await loadUnits();
+    const res=await rpc('pg_rentas',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:CONDO});
+    if(res&&res.ok!==false){RT=res;loaded.rentas=true;renderRt();llenarRtUnidades();}
+  }catch(e){toast('No se pudieron cargar las rentas.',true);}
+}
+function llenarRtUnidades(){
+  const sel=document.getElementById('rtUnidad');
+  const yaActivas=new Set((RT.unidades||[]).map(u=>u.identificador));
+  sel.innerHTML=UNITS.filter(u=>!yaActivas.has(u.ident)).map(u=>`<option value="${u.ident}">${u.ident} · ${(u.nombre_completo||'').slice(0,28)}</option>`).join('');
+}
+function renderRt(){
+  // solicitudes pendientes
+  const sols=RT.solicitudes||[];
+  const card=document.getElementById('solRentaCard');
+  card.style.display=sols.length?'block':'none';
+  if(sols.length){
+    document.getElementById('solList').innerHTML=sols.map(s=>`
+      <div class="drow" style="grid-template-columns:64px 1fr auto">
+        <div class="id">${s.ident}</div>
+        <div class="nm">${s.nombre_completo}<small>${new Date(s.created_at).toLocaleDateString('es-MX')} · ${s.plataformas||'sin plataforma'}</small>
+          ${s.comentarios?`<div style="font-size:.82rem;color:#485061;margin-top:3px">${s.comentarios}</div>`:''}</div>
+        <div class="db" style="display:flex;gap:6px">
+          <button class="btn solOk" data-id="${s.id}" style="padding:8px 12px;font-size:.78rem">Aprobar</button>
+          <button class="btn ghost solNo" data-id="${s.id}" style="padding:8px 12px;font-size:.78rem">Rechazar</button>
+        </div>
+      </div>`).join('');
+    document.querySelectorAll('.solOk,.solNo').forEach(b=>b.onclick=async()=>{
+      const ap=b.classList.contains('solOk');
+      b.disabled=true;
+      try{
+        const r=await rpc('pg_resolver_solicitud_renta',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:Number(b.dataset.id),p_aprobar:ap});
+        if(r&&r.ok){toast(ap?'Solicitud aprobada':'Solicitud rechazada');loaded.rentas=false;loadRt();}
+      }catch(e){toast('Error.',true);}
+    });
+  }
+  // unidades activas
+  const list=document.getElementById('rtList');
+  const us=RT.unidades||[];
+  const ingreso=us.reduce((a,u)=>a+Number(u.ingreso_mes||0),0);
+  const gastos=us.reduce((a,u)=>a+Number(u.gastos_mes||0),0);
+  document.getElementById('rtCount').textContent=`${us.length} unidades en renta · ingresos del mes ${money(ingreso)} · gastos ${money(gastos)}`;
+  list.innerHTML='';
+  if(us.length===0){list.innerHTML='<div class="hint">Aún no hay unidades en el programa. Activa la primera arriba.</div>';return;}
+  us.forEach(u=>{
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    const sync=[u.ical_airbnb?'Airbnb':null,u.ical_booking?'Booking':null].filter(Boolean).join(' + ')||'sin sincronizar';
+    row.innerHTML=`
+      <div class="id">${u.identificador}</div>
+      <div class="nm">${u.nombre_completo||'—'}
+        <small>${sync} · comisión ${u.comision_pct}% · ${u.reservas_futuras} reserva(s) próxima(s)</small>
+        <div style="font-size:.84rem;margin-top:3px">Mes: <b style="color:var(--ok)">${money(u.ingreso_mes)}</b> ingresos · <b style="color:var(--warn)">${money(u.gastos_mes)}</b> gastos</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <button class="btn rtVer" data-u="${u.unidad_id}" style="padding:8px 12px;font-size:.78rem">Ver calendario</button>
+        <button class="btn ghost rtOff" data-u="${u.unidad_id}" style="padding:7px 11px;font-size:.75rem">Quitar</button>
+      </div>`;
+    row.querySelector('.rtVer').onclick=()=>verUnidadRenta(u);
+    row.querySelector('.rtOff').onclick=async()=>{
+      const r=await rpc('pg_activar_renta',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_unidad:Number(u.unidad_id),p_activa:false});
+      if(r&&r.ok){toast('Unidad retirada del programa');loaded.rentas=false;loadRt();}
+    };
+    list.appendChild(row);
+  });
+}
+function verUnidadRenta(u){
+  RT_SEL=u;
+  const d=document.getElementById('rtDetalle');d.classList.remove('hidden');
+  const res=(RT.reservas||[]).filter(r=>Number(r.unidad_id)===Number(u.unidad_id)&&r.estado!=='cancelada');
+  const icalEcho=`${SB_URL}/functions/v1/sync-rentas?export=${u.unidad_id}`;
+  d.innerHTML=`
+    <h3 style="margin:0 0 4px;font-size:1.05rem">${u.identificador} · ${u.nombre_completo||''}</h3>
+    <p class="hint" style="margin:0 0 14px">Calendario y movimientos de la unidad.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="cvgrid">
+      <div><label>Liga iCal de Airbnb</label><input id="icAir" value="${u.ical_airbnb||''}" placeholder="https://www.airbnb.mx/calendar/ical/..."></div>
+      <div><label>Liga iCal de Booking</label><input id="icBook" value="${u.ical_booking||''}" placeholder="https://admin.booking.com/hotel/ical..."></div>
+      <div><label>Comisión Echo (%)</label><input id="icCom" type="number" value="${u.comision_pct}"></div>
+      <div><label>Tarifa de limpieza</label><input id="icLim" type="number" value="${u.tarifa_limpieza}"></div>
+    </div>
+    <button class="btn" id="icGuardar" style="margin-top:10px">Guardar configuración</button>
+    <div style="margin-top:10px;background:var(--silver);border-radius:10px;padding:11px 13px;font-size:.8rem">
+      <b>Calendario de Echo para pegar en Airbnb/Booking:</b><br>
+      <span style="word-break:break-all;color:var(--blue)">${icalEcho}</span>
+    </div>
+
+    <h4 style="margin:20px 0 8px;font-size:.95rem">Registrar reserva</h4>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px" class="cvgrid">
+      <div><label>Huésped</label><input id="rvHuesped" placeholder="Nombre"></div>
+      <div><label>Check-in</label><input id="rvIn" type="date"></div>
+      <div><label>Check-out</label><input id="rvOut" type="date"></div>
+      <div><label>Monto total</label><input id="rvMonto" type="number" placeholder="0"></div>
+    </div>
+    <button class="btn" id="rvBtn" style="margin-top:10px">Agregar reserva</button>
+
+    <h4 style="margin:20px 0 8px;font-size:.95rem">Registrar gasto</h4>
+    <div style="display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px" class="cvgrid">
+      <div><label>Tipo</label><select id="gtTipo"><option value="operativo">Operativo</option><option value="servicio">Servicio (luz, agua, internet)</option><option value="mantenimiento">Mantenimiento</option><option value="comision">Comisión</option></select></div>
+      <div><label>Concepto</label><input id="gtConcepto" placeholder="Ej. Limpieza post check-out"></div>
+      <div><label>Monto</label><input id="gtMonto" type="number" placeholder="0"></div>
+    </div>
+    <button class="btn" id="gtBtn" style="margin-top:10px">Agregar gasto</button>
+
+    <h4 style="margin:22px 0 8px;font-size:.95rem">Reservas (${res.length})</h4>
+    <div class="dirlist">${res.length?res.map(r=>{
+      const ori={airbnb:['#FFE8EC','#D7263D'],booking:['#E6EEFF','#003580'],manual:['#EEF3FF','#1847CC']}[r.origen]||['#F1F3F7','#485061'];
+      return `<div class="drow" style="grid-template-columns:1fr auto">
+        <div class="nm">${r.huesped||(r.estado==='bloqueo'?'No disponible':'Reserva')}
+          <small>${r.checkin} → ${r.checkout} · ${r.noches} noche(s)</small></div>
+        <div class="db" style="display:flex;gap:8px;align-items:center">
+          <span class="badge" style="background:${ori[0]};color:${ori[1]}">${r.origen}</span>
+          <b>${money(r.monto_total)}</b>
+          <button class="btn ghost rvDel" data-id="${r.id}" style="padding:6px 10px;font-size:.72rem">✕</button>
+        </div></div>`;}).join(''):'<div class="hint">Sin reservas registradas.</div>'}</div>`;
+
+  document.getElementById('icGuardar').onclick=async()=>{
+    const r=await rpc('pg_activar_renta',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_unidad:Number(u.unidad_id),p_activa:true,
+      p_ical_airbnb:document.getElementById('icAir').value.trim(),p_ical_booking:document.getElementById('icBook').value.trim(),
+      p_comision:Number(document.getElementById('icCom').value)||20,p_limpieza:Number(document.getElementById('icLim').value)||0});
+    if(r&&r.ok){toast('Configuración guardada');loaded.rentas=false;loadRt();}
+  };
+  document.getElementById('rvBtn').onclick=async()=>{
+    const h=document.getElementById('rvHuesped').value.trim();
+    const ci=document.getElementById('rvIn').value, co=document.getElementById('rvOut').value;
+    if(!ci||!co){toast('Pon las fechas.',true);return;}
+    const r=await rpc('pg_crear_reserva',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_unidad:Number(u.unidad_id),p_huesped:h,p_checkin:ci,p_checkout:co,p_monto:Number(document.getElementById('rvMonto').value)||0,p_origen:'manual',p_notas:null});
+    if(r&&r.ok){toast('Reserva registrada');loaded.rentas=false;await loadRt();const nu=(RT.unidades||[]).find(x=>Number(x.unidad_id)===Number(u.unidad_id));if(nu)verUnidadRenta(nu);}
+    else toast(r&&r.error==='empalme'?'Esas fechas ya están ocupadas.':'No se pudo registrar.',true);
+  };
+  document.getElementById('gtBtn').onclick=async()=>{
+    const c=document.getElementById('gtConcepto').value.trim();
+    const m=Number(document.getElementById('gtMonto').value)||0;
+    if(!c||!m){toast('Pon concepto y monto.',true);return;}
+    const r=await rpc('pg_gasto_renta',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_unidad:Number(u.unidad_id),p_tipo:document.getElementById('gtTipo').value,p_concepto:c,p_monto:m,p_fecha:null});
+    if(r&&r.ok){toast('Gasto registrado');document.getElementById('gtConcepto').value='';document.getElementById('gtMonto').value='';loaded.rentas=false;loadRt();}
+  };
+  document.querySelectorAll('.rvDel').forEach(b=>b.onclick=async()=>{
+    const r=await rpc('pg_cancelar_reserva',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:Number(b.dataset.id)});
+    if(r&&r.ok){toast('Reserva cancelada');loaded.rentas=false;await loadRt();const nu=(RT.unidades||[]).find(x=>Number(x.unidad_id)===Number(u.unidad_id));if(nu)verUnidadRenta(nu);}
+  });
+  d.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function activarUnidadRenta(){
+  const ident=document.getElementById('rtUnidad').value;
+  const u=UNITS.find(x=>x.ident===ident);
+  if(!u){toast('Elige una unidad.',true);return;}
+  const res=await rpc('pg_rentas',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:CONDO});
+  // buscar unidad_id vía identificador en la respuesta general
+  const btn=document.getElementById('rtActivar');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/rpc/pg_activar_renta`,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,p_unidad:await unidadIdDe(ident),p_activa:true})});
+    const d=await r.json();
+    if(d&&d.ok){toast(ident+' activada en el programa de rentas');loaded.rentas=false;loadRt();}
+    else toast('No se pudo activar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Activar';
+}
+async function unidadIdDe(ident){
+  const r=await fetch(`${SB_URL}/rest/v1/unidades?identificador=eq.${encodeURIComponent(ident)}&select=id`,{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  const d=await r.json().catch(()=>[]);
+  return (d&&d[0]&&d[0].id)||null;
+}
+async function syncRentas(){
+  const b=document.getElementById('rtSync');b.disabled=true;b.innerHTML='<span class="spin"></span> Sincronizando…';
+  try{
+    const r=await fetch(`${SB_URL}/functions/v1/sync-rentas`,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password})});
+    const d=await r.json();
+    if(d&&d.ok){toast(`Sincronizado: ${d.nuevas} nuevas, ${d.actualizadas} actualizadas`);loaded.rentas=false;loadRt();}
+    else toast('No se pudo sincronizar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  b.disabled=false;b.textContent='⟳ Sincronizar';
+}
+
+// ---------- MES EN CURSO ----------
+const MESES_CORTE=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+async function cargarConfig(){
+  try{
+    const c=await rpc('pg_config',CREDS);
+    if(c&&c.ok){CORTE={anio:c.anio,mes:c.mes};}
+  }catch(e){}
+  const sel=document.getElementById('mesCorte');
+  let html='';
+  for(let y=2026;y<=2027;y++){
+    for(let m=1;m<=12;m++){
+      const val=y+'-'+m;
+      html+=`<option value="${val}"${(y===CORTE.anio&&m===CORTE.mes)?' selected':''}>${MESES_CORTE[m]} ${y}</option>`;
+    }
+  }
+  sel.innerHTML=html;
+}
+async function cambiarCorte(){
+  const [y,m]=document.getElementById('mesCorte').value.split('-').map(Number);
+  try{
+    const r=await rpc('pg_set_mes_corte',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_anio:y,p_mes:m});
+    if(r&&r.ok){
+      CORTE={anio:y,mes:m};
+      toast('Mes en curso: '+MESES_CORTE[m]+' '+y+'. Adeudos recalculados.');
+      loaded.pagos=false;loaded.residentes=false;
+      UNITS=[];DIR=[];
+      const act=document.querySelector('.tab.active');
+      if(act&&act.dataset.tab==='pagos')loadUnits();
+      if(act&&act.dataset.tab==='residentes')loadDir();
+    } else toast('No se pudo cambiar el mes.',true);
+  }catch(e){toast('Error de conexión.',true);}
+}
+
 // ---------- AVISOS ----------
 async function loadAv(){
   try{const res=await rpc('pg_avisos',CREDS);if(res&&res.ok!==false){AV=res.avisos||[];loaded.avisos=true;renderAv();}}
@@ -1019,12 +1361,17 @@ document.getElementById('markBtn').onclick=markPaid;
 document.getElementById('rbBtn').onclick=emitirRecibo;
 document.getElementById('rbNo').onclick=()=>{document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;};
 document.getElementById('dq').addEventListener('input',e=>renderDir(e.target.value));
-document.getElementById('cleardq').onclick=()=>{document.getElementById('dq').value='';renderDir('');};
+document.getElementById('cleardq').onclick=()=>{document.getElementById('dq').value='';document.getElementById('dOrden').value='ident';document.getElementById('dFiltro').value='';renderDir('');};
+['dOrden','dFiltro'].forEach(id=>document.getElementById(id).addEventListener('change',()=>renderDir(document.getElementById('dq').value)));
 document.querySelectorAll('#incFilter button').forEach(b=>b.onclick=()=>{incF=b.dataset.f;document.querySelectorAll('#incFilter button').forEach(x=>x.classList.toggle('active',x===b));renderInc();});
 document.getElementById('cvBtn').onclick=crearConvenio;
 document.getElementById('dcBtn').onclick=crearDescuento;
 document.getElementById('llBtn').onclick=crearLlamada;
 document.getElementById('avBtn').onclick=crearAviso;
+document.getElementById('mesCorte').addEventListener('change',cambiarCorte);
+document.getElementById('condoSel').addEventListener('change',cambiarCondo);
+document.getElementById('rtActivar').onclick=activarUnidadRenta;
+document.getElementById('rtSync').onclick=syncRentas;
 </script>
 </body>
 </html>
