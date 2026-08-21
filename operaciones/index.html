@@ -94,7 +94,7 @@
   .allclear{padding:30px 20px;text-align:center;color:var(--ok);font-weight:600}
 
   /* Residentes */
-  .dirlist{display:grid;gap:8px;margin-top:14px}
+  .dirlist{display:grid;gap:10px;margin-top:14px}
   .drow{display:grid;grid-template-columns:64px 1.4fr 1.6fr 96px;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--mid);border-radius:12px;background:#fff}
   @media(max-width:720px){.drow{grid-template-columns:56px 1fr;grid-auto-flow:row}.drow .contact{grid-column:1/-1}.drow .db{grid-column:1/-1;text-align:left}}
   .drow .id{font-family:'Bricolage Grotesque';font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:4px 8px;font-size:.78rem;text-align:center}
@@ -119,6 +119,7 @@
     <button class="tab" data-tab="incidencias">Incidencias</button>
     <button class="tab" data-tab="llamadas">Llamadas</button>
     <button class="tab" data-tab="avisos">Avisos</button>
+    <button class="tab" data-tab="gastos">Gastos e IVA</button>
     <button class="tab" data-tab="rentas">Rentas</button>
     <button class="tab" data-tab="convenios">Convenios</button>
     <button class="tab" data-tab="descuentos">Descuentos</button>
@@ -224,6 +225,7 @@
           <option value="alcorriente">Solo al corriente</option>
           <option value="sintel">Sin teléfono</option>
           <option value="sinmail">Sin correo</option>
+          <option value="sinchip">Sin chip</option>
         </select>
       </div>
       <button class="btn ghost" id="cleardq">Limpiar</button>
@@ -360,6 +362,56 @@
   <div class="card pad hidden" id="rtDetalle" style="margin-top:16px"></div>
 </div>
 
+<!-- GASTOS E IVA -->
+<div id="tab-gastos" class="wrap hidden">
+  <div class="card pad">
+    <div class="cob-head">
+      <h2 style="margin:0;font-size:1.2rem">Gastos y control de IVA</h2>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+        <select id="gaMes" style="width:auto;padding:9px 12px;font-size:.86rem"></select>
+      </div>
+    </div>
+    <div class="kpis" id="gaKpis"></div>
+
+    <details class="ga-new" style="margin:18px 0">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue)">+ Registrar gasto</summary>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px" class="cvgrid">
+        <div><label>Fecha</label><input id="gaFecha" type="date"></div>
+        <div><label>Proveedor</label><input id="gaProv" placeholder="Ej. Aqua Química SA"></div>
+        <div><label>Categoría</label>
+          <select id="gaCat">
+            <option value="alberca">Alberca / químicos</option>
+            <option value="jardineria">Jardinería</option>
+            <option value="limpieza">Limpieza</option>
+            <option value="mantenimiento">Mantenimiento</option>
+            <option value="servicios">Servicios (CFE, CAPA)</option>
+            <option value="nomina">Nómina / personal</option>
+            <option value="administrativo">Administrativo</option>
+            <option value="operativo">Otro operativo</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1"><label>Concepto</label><input id="gaConcepto" placeholder="Ej. Cloro y pastillas para alberca"></div>
+        <div><label>Subtotal</label><input id="gaSub" type="number" step="0.01" placeholder="1000.00"></div>
+        <div><label>IVA</label><input id="gaIva" type="number" step="0.01" placeholder="160.00"></div>
+        <div><label>Total</label><input id="gaTotal" readonly style="background:var(--silver);font-weight:700"></div>
+        <div><label>Forma de pago</label>
+          <select id="gaForma"><option>Transferencia</option><option>Efectivo</option><option>Tarjeta</option><option>Caja chica</option></select>
+        </div>
+        <div><label>¿Ya tienes factura?</label>
+          <select id="gaFact"><option value="no">No — pendiente</option><option value="si">Sí — facturado</option></select>
+        </div>
+        <div><label>UUID / folio CFDI (opcional)</label><input id="gaUuid" placeholder="Si ya lo tienes"></div>
+      </div>
+      <button class="btn" id="gaBtn" style="margin-top:12px">Guardar gasto</button>
+      <div class="hint">Tip: escribe el subtotal y el IVA se calcula solo al 16%. Puedes editarlo si el proveedor maneja otra tasa.</div>
+    </details>
+
+    <div id="gaCats" style="margin-bottom:14px"></div>
+    <div class="hint" id="gaCount"></div>
+    <div class="dirlist" id="gaList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -370,7 +422,7 @@ const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'
 let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
 let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false,avisos:false,rentas:false};
-let INC=[], CV=[], DC=[], LL=[], AV=[], incF='todas';
+let INC=[], CV=[], DC=[], LL=[], AV=[], GA=null, incF='todas';
 let RT={unidades:[],reservas:[],solicitudes:[]}, CONDO=1, RT_SEL=null;
 let CORTE={anio:2026,mes:8};
 let curYear=2026;
@@ -416,6 +468,7 @@ function showTab(name){
   if(name==='descuentos'&&!loaded.descuentos){loadDc();}
   if(name==='llamadas'&&!loaded.llamadas){loadLl();}
   if(name==='avisos'&&!loaded.avisos){loadAv();}
+  if(name==='gastos'&&!loaded.gastos){initGastos();}
   if(name==='rentas'&&!loaded.rentas){loadRt();}
 }
 
@@ -675,48 +728,55 @@ function renderDir(filter){
   else if(filt==='alcorriente')items=items.filter(r=>Number(r.adeudo)===0);
   else if(filt==='sintel')items=items.filter(r=>!r.telefono);
   else if(filt==='sinmail')items=items.filter(r=>!r.email);
+  else if(filt==='sinchip')items=items.filter(r=>!r.chip);
   if(ord==='mayor')items.sort((a,b)=>Number(b.adeudo)-Number(a.adeudo));
   else if(ord==='menor')items.sort((a,b)=>Number(a.adeudo)-Number(b.adeudo));
   else if(ord==='nombre')items.sort((a,b)=>(a.nombre_completo||'').localeCompare(b.nombre_completo||''));
   else items.sort((a,b)=>(a.ident||'').localeCompare(b.ident||'',undefined,{numeric:true}));
-  const conCorreo=DIR.filter(r=>r.email).length,conTel=DIR.filter(r=>r.telefono).length;
+  const conCorreo=DIR.filter(r=>r.email).length,conTel=DIR.filter(r=>r.telefono).length,conChip=DIR.filter(r=>r.chip).length;
   const suma=items.reduce((a,r)=>a+Number(r.adeudo||0),0);
-  document.getElementById('dcount').textContent=`${DIR.length} residentes · ${conCorreo} con correo · ${conTel} con teléfono · mostrando ${items.length} · adeudo ${money(suma)}`;
+  document.getElementById('dcount').textContent=`${DIR.length} residentes · ${conCorreo} correo · ${conTel} teléfono · ${conChip} chip · mostrando ${items.length} · adeudo ${money(suma)}`;
   list.innerHTML='';
   items.slice(0,120).forEach(r=>{
     const debt=Number(r.adeudo)>0;
     const telClean=(r.telefono||'').replace(/[^0-9]/g,'');
     const meses=(r.meses_debe||[]);
-    const resumen=meses.length?meses.slice(0,3).map(c=>c.replace('Cuota ','')).join(' · ')+(meses.length>3?` +${meses.length-3} más`:''):'';
-    const row=document.createElement('div');row.className='drow';
-    row.innerHTML=`
-      <div class="id">${r.ident}</div>
-      <div class="nm">${r.nombre_completo||''}<small>Clave: ${r.clave||'—'}</small>
-        ${debt?`<div class="mesesDebe" style="font-size:.76rem;color:var(--warn);margin-top:4px;font-weight:500">${meses.length} ${meses.length===1?'mes':'meses'}: ${resumen}</div>
-        ${meses.length>3?'<button class="verMeses" style="background:none;border:0;color:var(--blue);font-weight:600;font-size:.75rem;cursor:pointer;padding:1px 0">Ver todos</button>':''}`:''}
+    const mail=(r.email||'').split('/')[0].trim();
+    const card=document.createElement('div');
+    card.style.cssText='background:#fff;border:1px solid var(--mid);border-radius:14px;padding:15px 17px';
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:11px">
+        <span style="font-family:'Bricolage Grotesque';font-weight:800;background:var(--ink);color:#fff;border-radius:9px;padding:6px 11px;font-size:.86rem">${r.ident}</span>
+        <span style="font-weight:700;font-size:.98rem;flex:1;min-width:170px">${r.nombre_completo||''}</span>
+        <span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente ✓'}</span>
       </div>
-      <div class="contact" data-view>
-        ${r.email?`<a href="mailto:${r.email.split('/')[0].trim()}" title="${r.email}">✉ ${r.email.split('/')[0].trim()}</a>`:`<span class="empty">✉ sin correo</span>`}
-        ${r.telefono?`<a href="tel:${telClean}">✆ ${r.telefono}</a>`:`<span class="empty">✆ sin teléfono</span>`}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:7px 18px" data-view>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Edificio</span><span style="font-weight:600">${r.edificio||'—'}</span></div>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Depto</span><span style="font-weight:600">${r.departamento||'—'}</span></div>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Clave</span><span style="font-weight:600">${r.clave||'—'}</span></div>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Chip</span><span style="font-weight:600;${r.chip?'':'color:#c3cad6'}">${r.chip||'sin registrar'}</span></div>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Correo</span>${mail?`<a href="mailto:${mail}" style="color:var(--blue);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.email}">${mail}</a>`:'<span style="color:#c3cad6">sin correo</span>'}</div>
+        <div style="display:flex;gap:8px;font-size:.85rem"><span style="width:74px;color:#94a0b0;font-weight:600;flex:none">Teléfono</span>${r.telefono?`<a href="tel:${telClean}" style="color:var(--blue);text-decoration:none">${r.telefono}</a>`:'<span style="color:#c3cad6">sin teléfono</span>'}</div>
       </div>
-      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-        <span class="badge ${debt?'debt':'clear'}">${debt?money(r.adeudo):'Al corriente'}</span>
-        <div style="display:flex;gap:5px">
-          ${telClean?`<button class="btn waBtn" style="padding:7px 10px;font-size:.75rem;background:#25D366">WhatsApp</button>`:''}
-          <button class="btn ghost editC" style="padding:7px 10px;font-size:.75rem">✎</button>
-        </div>
-      </div>`;
-    const vm=row.querySelector('.verMeses');
+      ${debt?`<div style="margin-top:11px;padding-top:10px;border-top:1px dashed var(--mid)">
+        <div style="font-size:.78rem;color:#94a0b0;font-weight:600;margin-bottom:5px">MESES PENDIENTES (${meses.length})</div>
+        <div class="mesesWrap" style="display:flex;flex-wrap:wrap;gap:5px">
+          ${meses.slice(0,6).map(c=>`<span style="background:var(--warnbg);color:var(--warn);border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:600">${c.replace('Cuota ','')}</span>`).join('')}
+          ${meses.length>6?`<button class="verMeses" style="background:none;border:0;color:var(--blue);font-weight:700;font-size:.76rem;cursor:pointer">+${meses.length-6} más</button>`:''}
+        </div></div>`:''}
+      <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+        ${telClean?`<button class="btn waBtn" style="padding:8px 14px;font-size:.8rem;background:#25D366">💬 WhatsApp</button>`:''}
+        <button class="btn ghost editC" style="padding:8px 14px;font-size:.8rem">✎ Editar datos</button>
+      </div>
+      <div class="editZone"></div>`;
+    const vm=card.querySelector('.verMeses');
     if(vm)vm.addEventListener('click',()=>{
-      const d=row.querySelector('.mesesDebe');
-      const abierto=vm.textContent==='Ver menos';
-      d.textContent=abierto?`${meses.length} meses: ${resumen}`:`${meses.length} meses: `+meses.map(c=>c.replace('Cuota ','')).join(' · ');
-      vm.textContent=abierto?'Ver todos':'Ver menos';
+      card.querySelector('.mesesWrap').innerHTML=meses.map(c=>`<span style="background:var(--warnbg);color:var(--warn);border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:600">${c.replace('Cuota ','')}</span>`).join('');
     });
-    const wa=row.querySelector('.waBtn');
+    const wa=card.querySelector('.waBtn');
     if(wa)wa.addEventListener('click',()=>abrirWhatsApp(r,telClean,meses));
-    row.querySelector('.editC').addEventListener('click',()=>editContact(row,r));
-    list.appendChild(row);
+    card.querySelector('.editC').addEventListener('click',()=>editContact(card,r));
+    list.appendChild(card);
   });
   if(items.length>120){const p=document.createElement('div');p.className='hint';p.textContent='Mostrando 120. Escribe para afinar.';list.appendChild(p);}
   if(items.length===0){const p=document.createElement('div');p.className='hint';p.textContent='Sin coincidencias.';list.appendChild(p);}
@@ -757,23 +817,27 @@ async function registrarLlamadaWA(r, lista){
   }catch(e){}
 }
 
-function editContact(row,r){
-  const view=row.querySelector('[data-view]');
-  view.innerHTML=`
-    <input class="ecMail" type="email" placeholder="correo@ejemplo.com" value="${(r.email||'').replace(/"/g,'&quot;')}" style="padding:8px 10px;font-size:.84rem;margin-bottom:4px">
-    <input class="ecTel" type="tel" placeholder="55 1234 5678" value="${(r.telefono||'').replace(/"/g,'&quot;')}" style="padding:8px 10px;font-size:.84rem">
-    <div style="display:flex;gap:6px;margin-top:6px">
-      <button class="btn ecSave" style="padding:7px 12px;font-size:.78rem">Guardar</button>
-      <button class="btn ghost ecCancel" style="padding:7px 12px;font-size:.78rem">Cancelar</button>
+function editContact(card,r){
+  const zone=card.querySelector('.editZone');
+  if(zone.innerHTML){zone.innerHTML='';return;}
+  zone.innerHTML=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--mid);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+      <div><label>Correo electrónico</label><input class="ecMail" type="email" value="${(r.email||'').replace(/"/g,'&quot;')}" placeholder="correo@ejemplo.com"></div>
+      <div><label>Teléfono / WhatsApp</label><input class="ecTel" type="tel" value="${(r.telefono||'').replace(/"/g,'&quot;')}" placeholder="55 1234 5678"></div>
+      <div><label>Número de chip</label><input class="ecChip" value="${(r.chip||'').replace(/"/g,'&quot;')}" placeholder="Ej. 0012345"></div>
+    </div>
+    <div style="display:flex;gap:7px;margin-top:10px">
+      <button class="btn ecSave" style="padding:9px 16px;font-size:.82rem">Guardar</button>
+      <button class="btn ghost ecCancel" style="padding:9px 16px;font-size:.82rem">Cancelar</button>
     </div>`;
-  view.querySelector('.ecCancel').onclick=()=>renderDir(document.getElementById('dq').value);
-  view.querySelector('.ecSave').onclick=async()=>{
-    const email=view.querySelector('.ecMail').value.trim();
-    const tel=view.querySelector('.ecTel').value.trim();
-    const btn=view.querySelector('.ecSave');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  zone.querySelector('.ecCancel').onclick=()=>{zone.innerHTML='';};
+  zone.querySelector('.ecSave').onclick=async()=>{
+    const email=zone.querySelector('.ecMail').value.trim();
+    const tel=zone.querySelector('.ecTel').value.trim();
+    const chip=zone.querySelector('.ecChip').value.trim();
+    const btn=zone.querySelector('.ecSave');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
     try{
-      const res=await rpc('pg_actualizar_contacto',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:r.id_residente,p_email:email,p_telefono:tel});
-      if(res&&res.ok){toast('Contacto actualizado');r.email=email||null;r.telefono=tel||null;renderDir(document.getElementById('dq').value);}
+      const res=await rpc('pg_actualizar_contacto',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:r.id_residente,p_email:email,p_telefono:tel,p_chip:chip});
+      if(res&&res.ok){toast('Datos actualizados');r.email=email||null;r.telefono=tel||null;r.chip=chip||null;renderDir(document.getElementById('dq').value);}
       else{toast('No se pudo guardar.',true);btn.disabled=false;btn.textContent='Guardar';}
     }catch(e){toast('Error de conexión.',true);btn.disabled=false;btn.textContent='Guardar';}
   };
@@ -1349,6 +1413,112 @@ async function crearAviso(){
   btn.disabled=false;btn.textContent='Publicar aviso';
 }
 
+// ---------- GASTOS E IVA ----------
+const CAT_LBL={alberca:'Alberca / químicos',jardineria:'Jardinería',limpieza:'Limpieza',mantenimiento:'Mantenimiento',servicios:'Servicios (CFE, CAPA)',nomina:'Nómina / personal',administrativo:'Administrativo',operativo:'Otro operativo'};
+function initGastos(){
+  const sel=document.getElementById('gaMes');
+  let html='';
+  for(let y=2026;y>=2025;y--) for(let m=12;m>=1;m--){
+    const sel2=(y===CORTE.anio&&m===CORTE.mes)?' selected':'';
+    html+=`<option value="${y}-${m}"${sel2}>${MESES_CORTE[m]} ${y}</option>`;
+  }
+  sel.innerHTML=html;
+  document.getElementById('gaFecha').value=new Date().toISOString().slice(0,10);
+  loaded.gastos=true;
+  loadGa();
+}
+async function loadGa(){
+  const [y,m]=document.getElementById('gaMes').value.split('-').map(Number);
+  try{
+    const res=await rpc('pg_gastos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:1,p_anio:y,p_mes:m});
+    if(res&&res.ok!==false){GA=res;renderGa();}
+  }catch(e){toast('No se pudieron cargar los gastos.',true);}
+}
+function renderGa(){
+  const r=GA.resumen||{}, gastos=GA.gastos||[];
+  const ing=Number(GA.ingresos_mes||0), tot=Number(r.total_gastos||0);
+  document.getElementById('gaKpis').innerHTML=`
+    <div class="kpi"><div class="lbl">Ingresos del mes</div><div class="val" style="color:var(--ok)">${money(ing)}</div></div>
+    <div class="kpi"><div class="lbl">Gastos del mes</div><div class="val" style="color:var(--warn)">${money(tot)}</div></div>
+    <div class="kpi"><div class="lbl">Resultado</div><div class="val" style="color:${ing-tot>=0?'var(--ok)':'var(--warn)'}">${money(ing-tot)}</div></div>`;
+  const iva=Number(r.iva_acreditable||0), sinF=Number(r.sin_factura||0);
+  document.getElementById('gaCats').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:12px">
+      <div style="background:#EEF3FF;border-radius:12px;padding:13px 15px">
+        <div style="font-size:.76rem;color:var(--blue);font-weight:700;text-transform:uppercase">IVA acreditable</div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:1.35rem">${money(iva)}</div>
+        <div style="font-size:.74rem;color:#6a7382">solo de gastos facturados</div></div>
+      <div style="background:${sinF>0?'#FBE9EC':'#E7F5EC'};border-radius:12px;padding:13px 15px">
+        <div style="font-size:.76rem;color:${sinF>0?'var(--warn)':'var(--ok)'};font-weight:700;text-transform:uppercase">Sin factura</div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:1.35rem">${money(sinF)}</div>
+        <div style="font-size:.74rem;color:#6a7382">${r.cuenta_pendientes||0} gasto(s) por facturar</div></div>
+      <div style="background:var(--silver);border-radius:12px;padding:13px 15px">
+        <div style="font-size:.76rem;color:#485061;font-weight:700;text-transform:uppercase">Facturado</div>
+        <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:1.35rem">${r.cuenta_facturados||0}</div>
+        <div style="font-size:.74rem;color:#6a7382">de ${gastos.length} gastos</div></div>
+    </div>
+    ${(GA.por_categoria||[]).length?'<div style="display:flex;gap:7px;flex-wrap:wrap">'+GA.por_categoria.map(c=>`<span style="background:#fff;border:1px solid var(--mid);border-radius:999px;padding:5px 12px;font-size:.8rem"><b>${CAT_LBL[c.categoria]||c.categoria}</b> · ${money(c.total)}</span>`).join('')+'</div>':''}`;
+  document.getElementById('gaCount').textContent=`${gastos.length} gastos registrados en ${MESES_CORTE[GA.mes]} ${GA.anio}`;
+  const list=document.getElementById('gaList');list.innerHTML='';
+  if(gastos.length===0){list.innerHTML='<div class="hint">Sin gastos este mes. Registra el primero arriba.</div>';return;}
+  gastos.forEach(g=>{
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='1fr auto';
+    row.innerHTML=`
+      <div class="nm">${g.concepto}
+        <small>${new Date(g.fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'})} · ${CAT_LBL[g.categoria]||g.categoria}${g.proveedor?' · '+g.proveedor:''} · ${g.forma_pago}</small>
+        <div style="font-size:.84rem;margin-top:4px">Subtotal ${money(g.subtotal)} + IVA ${money(g.iva)} = <b>${money(g.total)}</b>${g.uuid_cfdi?` · <span style="color:#6a7382;font-size:.76rem">CFDI ${g.uuid_cfdi}</span>`:''}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${g.facturado?'clear':'debt'}">${g.facturado?'Facturado ✓':'Sin factura'}</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn ghost gaF" data-id="${g.id}" data-f="${g.facturado?'0':'1'}" style="padding:7px 11px;font-size:.76rem">${g.facturado?'Quitar':'Marcar facturado'}</button>
+          <button class="btn ghost gaDel" data-id="${g.id}" style="padding:7px 10px;font-size:.76rem;color:var(--warn)">✕</button>
+        </div>
+      </div>`;
+    row.querySelector('.gaF').addEventListener('click',async e=>{
+      const id=Number(e.target.dataset.id),f=e.target.dataset.f==='1';
+      let uuid=null;
+      if(f){uuid=prompt('UUID o folio de la factura (opcional, puedes dejarlo vacío):')||null;}
+      e.target.disabled=true;
+      try{
+        const r2=await rpc('pg_marcar_facturado',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_facturado:f,p_uuid:uuid});
+        if(r2&&r2.ok){toast(f?'Marcado como facturado':'Marcado como pendiente');loadGa();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+    });
+    row.querySelector('.gaDel').addEventListener('click',async e=>{
+      if(!confirm('¿Borrar este gasto?'))return;
+      try{
+        const r2=await rpc('pg_borrar_gasto',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:Number(e.target.dataset.id)});
+        if(r2&&r2.ok){toast('Gasto borrado');loadGa();}
+      }catch(err){toast('Error de conexión.',true);}
+    });
+    list.appendChild(row);
+  });
+}
+async function crearGasto(){
+  const fecha=document.getElementById('gaFecha').value||null;
+  const prov=document.getElementById('gaProv').value.trim();
+  const concepto=document.getElementById('gaConcepto').value.trim();
+  const cat=document.getElementById('gaCat').value;
+  const sub=Number(document.getElementById('gaSub').value);
+  const iva=Number(document.getElementById('gaIva').value)||0;
+  const forma=document.getElementById('gaForma').value;
+  const fact=document.getElementById('gaFact').value==='si';
+  const uuid=document.getElementById('gaUuid').value.trim();
+  if(!concepto||!sub){toast('Escribe el concepto y el subtotal.',true);return;}
+  const btn=document.getElementById('gaBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('pg_crear_gasto',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:1,p_fecha:fecha,
+      p_proveedor:prov,p_concepto:concepto,p_categoria:cat,p_subtotal:sub,p_iva:iva,p_facturado:fact,p_uuid:uuid,p_forma:forma,p_notas:null});
+    if(r&&r.ok){toast('Gasto registrado');
+      ['gaProv','gaConcepto','gaSub','gaIva','gaTotal','gaUuid'].forEach(i=>document.getElementById(i).value='');
+      loadGa();}
+    else toast('No se pudo guardar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Guardar gasto';
+}
+
 // ---------- eventos ----------
 document.getElementById('loginBtn').onclick=doLogin;
 document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -1369,6 +1539,17 @@ document.getElementById('dcBtn').onclick=crearDescuento;
 document.getElementById('llBtn').onclick=crearLlamada;
 document.getElementById('avBtn').onclick=crearAviso;
 document.getElementById('mesCorte').addEventListener('change',cambiarCorte);
+document.getElementById('gaBtn').onclick=crearGasto;
+document.getElementById('gaMes').addEventListener('change',loadGa);
+document.getElementById('gaSub').addEventListener('input',e=>{
+  const v=Number(e.target.value)||0;
+  document.getElementById('gaIva').value=(v*0.16).toFixed(2);
+  document.getElementById('gaTotal').value=money(v*1.16);
+});
+document.getElementById('gaIva').addEventListener('input',()=>{
+  const sv=Number(document.getElementById('gaSub').value)||0, iv=Number(document.getElementById('gaIva').value)||0;
+  document.getElementById('gaTotal').value=money(sv+iv);
+});
 document.getElementById('condoSel').addEventListener('change',cambiarCondo);
 document.getElementById('rtActivar').onclick=activarUnidadRenta;
 document.getElementById('rtSync').onclick=syncRentas;
