@@ -118,6 +118,7 @@
     <button class="tab" data-tab="residentes">Residentes</button>
     <button class="tab" data-tab="incidencias">Incidencias</button>
     <button class="tab" data-tab="llamadas">Llamadas</button>
+    <button class="tab" data-tab="avisos">Avisos</button>
     <button class="tab" data-tab="convenios">Convenios</button>
     <button class="tab" data-tab="descuentos">Descuentos</button>
   </div>
@@ -288,6 +289,34 @@
   </div>
 </div>
 
+<!-- AVISOS / BANNER -->
+<div id="tab-avisos" class="wrap hidden">
+  <div class="card pad">
+    <h2 style="margin:0 0 6px;font-size:1.2rem">Avisos en el portal</h2>
+    <p class="hint" style="margin:0 0 14px">Publica un banner que aparece al entrar al portal. Puedes dirigirlo solo a quienes tienen adeudo o a todos los residentes.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="cvgrid">
+      <div><label>Título (opcional)</label><input id="avTitulo" placeholder="Recordatorio de pago"></div>
+      <div><label>Dirigido a</label>
+        <select id="avDirigido">
+          <option value="deudores">Solo residentes con adeudo</option>
+          <option value="todos">Todos los residentes</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1"><label>Mensaje</label><input id="avMensaje" placeholder="Ej. Regulariza tu cuota antes del día 5 para evitar recargos."></div>
+      <div><label>Tipo</label>
+        <select id="avTipo">
+          <option value="info">Informativo (azul)</option>
+          <option value="alerta">Alerta (ámbar)</option>
+          <option value="urgente">Urgente (rojo)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="avBtn" style="margin-top:12px">Publicar aviso</button>
+    <div class="hint" id="avCount" style="margin-top:16px"></div>
+    <div class="dirlist" id="avList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -297,8 +326,8 @@ const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto
 const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
-let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false};
-let INC=[], CV=[], DC=[], LL=[], incF='todas';
+let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false,avisos:false};
+let INC=[], CV=[], DC=[], LL=[], AV=[], incF='todas';
 let curYear=2026;
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 
@@ -333,7 +362,7 @@ function logout(){location.reload();}
 // ---------- TABS ----------
 function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
-  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas','avisos'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
   if(name==='cobranza'&&loaded.cobranza){reloadCobranza();}
   if(name==='pagos'&&!loaded.pagos){loadUnits();}
   if(name==='residentes'&&!loaded.residentes){loadDir();}
@@ -341,6 +370,7 @@ function showTab(name){
   if(name==='convenios'&&!loaded.convenios){loadCv();}
   if(name==='descuentos'&&!loaded.descuentos){loadDc();}
   if(name==='llamadas'&&!loaded.llamadas){loadLl();}
+  if(name==='avisos'&&!loaded.avisos){loadAv();}
 }
 
 // ---------- COBRANZA ----------
@@ -658,11 +688,17 @@ function renderInc(){
     const [lbl,color]=INC_LBL[i.estado]||[i.estado,'amber'];
     const fecha=new Date(i.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
     const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='64px 1fr auto';
+    const desc=(i.descripcion||'');
+    const corta=desc.length>200;
     row.innerHTML=`
       <div class="id">${i.ident||i.departamento||'—'}</div>
       <div class="nm">${i.categoria||'Incidencia'} · <span style="font-weight:500">${i.nombre||''}</span>
-        <small>${fecha}${i.tiene_foto?' · 📷 con foto':''}</small>
-        <div style="font-weight:400;font-size:.85rem;color:#485061;margin-top:4px">${(i.descripcion||'').slice(0,220)}</div>
+        <small>${fecha}${i.tiene_foto?' · 📷 con foto':''}${i.telefono?' · '+i.telefono:''}</small>
+        <div class="incDesc" style="font-weight:400;font-size:.85rem;color:#485061;margin-top:4px;white-space:pre-wrap">${corta?desc.slice(0,200)+'…':desc}</div>
+        ${corta?'<button class="incMas" style="background:none;border:0;color:var(--blue);font-weight:600;font-size:.8rem;cursor:pointer;padding:2px 0">Ver completa</button>':''}
+        ${i.respuesta?`<div style="margin-top:8px;background:#EEF3FF;border-radius:8px;padding:9px 11px;font-size:.82rem"><b style="color:var(--blue)">Respuesta:</b> ${i.respuesta}<div style="color:#6a7382;font-size:.74rem;margin-top:3px">por ${i.respondido_por||'—'} · ${i.respondido_at?new Date(i.respondido_at).toLocaleDateString('es-MX'):''}</div></div>`:''}
+        <button class="incResp" style="background:none;border:0;color:var(--blue);font-weight:600;font-size:.8rem;cursor:pointer;padding:4px 0">${i.respuesta?'Editar respuesta':'✎ Responder'}</button>
+        <div class="incForm"></div>
       </div>
       <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
         <span class="badge" style="background:var(--${color}bg,#eee);color:var(--${color})">${lbl}</span>
@@ -672,6 +708,44 @@ function renderInc(){
           <option value="resuelta"${i.estado==='resuelta'?' selected':''}>Resuelta</option>
         </select>
       </div>`;
+    const btnMas=row.querySelector('.incMas');
+    if(btnMas)btnMas.addEventListener('click',()=>{
+      const d=row.querySelector('.incDesc');
+      const abierto=btnMas.textContent==='Ver menos';
+      d.textContent=abierto?desc.slice(0,200)+'…':desc;
+      btnMas.textContent=abierto?'Ver completa':'Ver menos';
+      if(!abierto&&i.foto){
+        if(!row.querySelector('.incFoto')){
+          const im=document.createElement('img');im.className='incFoto';im.src=i.foto;
+          im.style.cssText='max-width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--mid)';
+          d.after(im);
+        }
+      }else{const f=row.querySelector('.incFoto');if(f)f.remove();}
+    });
+    row.querySelector('.incResp').addEventListener('click',()=>{
+      const cont=row.querySelector('.incForm');
+      if(cont.innerHTML){cont.innerHTML='';return;}
+      cont.innerHTML=`<div style="margin-top:8px">
+        <textarea class="rTxt" rows="3" placeholder="Escribe la respuesta para el residente…" style="width:100%;padding:10px 12px;border:1px solid var(--mid);border-radius:10px;font-family:inherit;font-size:.86rem">${i.respuesta||''}</textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap">
+          <select class="rEst" style="width:auto;padding:8px 10px;font-size:.82rem">
+            <option value="">Dejar estado igual</option>
+            <option value="en_proceso">Marcar en proceso</option>
+            <option value="resuelta">Marcar resuelta</option>
+          </select>
+          <button class="btn rGuardar" style="padding:8px 14px;font-size:.82rem">Guardar respuesta</button>
+        </div></div>`;
+      cont.querySelector('.rGuardar').onclick=async()=>{
+        const txt=cont.querySelector('.rTxt').value.trim();
+        const est=cont.querySelector('.rEst').value;
+        const b=cont.querySelector('.rGuardar');b.disabled=true;b.innerHTML='<span class="spin"></span>';
+        try{
+          const r=await rpc('pg_responder_incidencia',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:i.id,p_respuesta:txt,p_estado:est||null});
+          if(r&&r.ok){toast('Respuesta guardada');i.respuesta=txt;i.respondido_por=CREDS.p_user;i.respondido_at=new Date().toISOString();if(est)i.estado=est;renderInc();}
+          else{toast('No se pudo guardar.',true);b.disabled=false;b.textContent='Guardar respuesta';}
+        }catch(e){toast('Error de conexión.',true);b.disabled=false;b.textContent='Guardar respuesta';}
+      };
+    });
     row.querySelector('.incSel').addEventListener('change',async e=>{
       const id=Number(e.target.dataset.id),estado=e.target.value;
       e.target.disabled=true;
@@ -878,6 +952,61 @@ async function crearLlamada(){
   btn.disabled=false;btn.textContent='Registrar llamada';
 }
 
+// ---------- AVISOS ----------
+async function loadAv(){
+  try{const res=await rpc('pg_avisos',CREDS);if(res&&res.ok!==false){AV=res.avisos||[];loaded.avisos=true;renderAv();}}
+  catch(e){toast('No se pudieron cargar los avisos.',true);}
+}
+const AV_COLOR={info:['#EEF3FF','var(--blue)'],alerta:['#FBF1DF','var(--amber)'],urgente:['#FBE9EC','var(--warn)']};
+function renderAv(){
+  const list=document.getElementById('avList');
+  const act=AV.filter(a=>a.activo).length;
+  document.getElementById('avCount').textContent=`${AV.length} avisos · ${act} publicado(s)`;
+  list.innerHTML='';
+  if(AV.length===0){list.innerHTML='<div class="hint">Aún no hay avisos. Publica el primero arriba.</div>';return;}
+  AV.forEach(a=>{
+    const [bg,col]=AV_COLOR[a.tipo]||AV_COLOR.info;
+    const fecha=new Date(a.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='1fr auto';
+    if(!a.activo)row.style.opacity='.55';
+    row.innerHTML=`
+      <div class="nm">${a.titulo||'Aviso'}
+        <small>${fecha} · ${a.dirigido_a==='todos'?'Todos los residentes':'Solo con adeudo'} · por ${a.creado_por||'—'}</small>
+        <div style="background:${bg};color:${col};border-radius:8px;padding:9px 11px;margin-top:6px;font-size:.86rem;font-weight:500">${a.mensaje}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${a.activo?'clear':'debt'}">${a.activo?'Publicado':'Oculto'}</span>
+        <button class="btn ghost avT" data-id="${a.id}" data-act="${a.activo?'0':'1'}" style="padding:8px 12px;font-size:.8rem">${a.activo?'Quitar':'Publicar'}</button>
+      </div>`;
+    row.querySelector('.avT').addEventListener('click',async e=>{
+      const id=Number(e.target.dataset.id),activo=e.target.dataset.act==='1';
+      e.target.disabled=true;
+      try{
+        const r=await rpc('pg_activar_aviso',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:id,p_activo:activo});
+        if(r&&r.ok){toast(activo?'Aviso publicado':'Aviso retirado');const it=AV.find(x=>x.id===id);if(it)it.activo=activo;renderAv();}
+        else toast('No se pudo actualizar.',true);
+      }catch(err){toast('Error de conexión.',true);}
+    });
+    list.appendChild(row);
+  });
+}
+async function crearAviso(){
+  const titulo=document.getElementById('avTitulo').value.trim();
+  const mensaje=document.getElementById('avMensaje').value.trim();
+  const tipo=document.getElementById('avTipo').value;
+  const dirigido=document.getElementById('avDirigido').value;
+  if(!mensaje){toast('Escribe el mensaje del aviso.',true);return;}
+  const btn=document.getElementById('avBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('pg_crear_aviso',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_titulo:titulo,p_mensaje:mensaje,p_tipo:tipo,p_dirigido_a:dirigido});
+    if(r&&r.ok){toast('Aviso publicado en el portal');
+      document.getElementById('avTitulo').value='';document.getElementById('avMensaje').value='';
+      const res=await rpc('pg_avisos',CREDS);if(res&&res.ok!==false){AV=res.avisos||[];renderAv();}}
+    else toast('No se pudo publicar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Publicar aviso';
+}
+
 // ---------- eventos ----------
 document.getElementById('loginBtn').onclick=doLogin;
 document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -895,6 +1024,7 @@ document.querySelectorAll('#incFilter button').forEach(b=>b.onclick=()=>{incF=b.
 document.getElementById('cvBtn').onclick=crearConvenio;
 document.getElementById('dcBtn').onclick=crearDescuento;
 document.getElementById('llBtn').onclick=crearLlamada;
+document.getElementById('avBtn').onclick=crearAviso;
 </script>
 </body>
 </html>
