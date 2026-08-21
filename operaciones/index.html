@@ -190,7 +190,7 @@
       <button class="btn ok" id="markBtn" style="margin-left:auto" disabled>Marcar como pagados</button>
     </div>
     <div class="hidden" id="reciboBar" style="background:#EFF6FF;border-top:1px solid var(--mid);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="font-weight:600;font-size:.9rem">Pago aplicado por <b id="rbTotal">$0</b> · ¿Emitir comprobante?</span>
+      <span id="rbLabel" style="font-weight:600;font-size:.9rem">Pago aplicado por <b id="rbTotal">$0</b> · ¿Emitir comprobante?</span>
       <select id="rbForma" style="width:auto;padding:9px 12px;font-size:.86rem">
         <option>Transferencia</option>
         <option>Dep. en efectivo</option>
@@ -198,7 +198,7 @@
         <option>Mercado Pago</option>
       </select>
       <input id="rbMail" type="email" placeholder="correo del residente (opcional)" style="width:240px;padding:9px 12px;font-size:.84rem">
-      <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin:0"><input type="checkbox" id="rbEnviar" checked style="width:16px;height:16px;accent-color:var(--blue)">Enviar por correo</label>
+      <label id="rbEnviarWrap" style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin:0"><input type="checkbox" id="rbEnviar" checked style="width:16px;height:16px;accent-color:var(--blue)">Enviar por correo</label>
       <button class="btn" id="rbBtn" style="padding:10px 16px;font-size:.86rem">Emitir comprobante</button>
       <button class="btn ghost" id="rbNo" style="padding:10px 14px;font-size:.86rem">Ahora no</button>
     </div>
@@ -414,7 +414,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { markPaidAndSendReceipt } from './receipt-flow.mjs';
+
 const SB_URL="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const SB_KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -593,17 +595,33 @@ async function markPaid(){
   const sel=selectedBoxes();if(!sel.length)return;
   const ids=sel.map(b=>Number(b.value)),btn=document.getElementById('markBtn');
   const conceptos=sel.map(b=>({c:b.closest('.m').querySelector('.mo').textContent.trim(),m:Number(b.dataset.monto)}));
-  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando…';
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando y enviando…';
   try{
-    const res=await rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:ids});
-    if(!res||res.ok===false){toast('No se pudo aplicar.',true);btn.disabled=false;btn.textContent='Marcar como pagados';return;}
-    toast(`${res.marcados} ${res.marcados===1?'mes marcado':'meses marcados'} como pagados`);
+    const outcome=await markPaidAndSendReceipt({
+      paymentIds:ids,
+      residentId:CURRENT,
+      concepts:conceptos,
+      markPayments:(paymentIds)=>rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:paymentIds}),
+      issueReceipt:({residentId,concepts,total,paymentMethod})=>rpc('pg_emitir_recibo',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:residentId,p_conceptos:concepts,p_total:total,p_forma_pago:paymentMethod}),
+      sendReceipt:({folio,email})=>enviarReciboCorreo(folio,email)
+    });
+    if(!outcome.ok&&outcome.stage==='payment'){toast('No se pudo aplicar.',true);return;}
+    const res=outcome.marked;
     const u=UNITS.find(x=>x.id_residente===CURRENT);if(u)u.adeudo=res.adeudo;renderUnits(document.getElementById('q').value);
     loaded.cobranza=false; // forzar recálculo al volver a cobranza
-    ofrecerRecibo(CURRENT, conceptos);
+    if(outcome.receipt&&outcome.receipt.ok!==false){
+      const conceptosCap=conceptos.map(x=>({c:'Mantenimiento '+x.c,m:x.m}));
+      mostrarReciboEmitido(outcome.receipt,conceptosCap,conceptosCap.reduce((a,c)=>a+c.m,0),'Transferencia',outcome.email);
+      if(outcome.email.ok)toast(`Pago aplicado y comprobante #${outcome.receipt.folio} enviado a ${outcome.email.enviado_a}`);
+      else if(outcome.email.reason==='missing_email')toast('Pago aplicado. El residente no tiene correo registrado.',true);
+      else toast('Pago aplicado y comprobante emitido, pero el correo no salió.',true);
+    }else{
+      ofrecerRecibo(CURRENT,conceptos);
+      toast('Pago aplicado, pero no se pudo emitir el comprobante automático.',true);
+    }
     const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:CURRENT});renderDetail(fresh);
   }catch(e){toast('Error de conexión.',true);}
-  btn.textContent='Marcar como pagados';
+  finally{btn.disabled=false;btn.textContent='Marcar como pagados';}
 }
 
 // ---------- COMPROBANTE (diseño Canva) ----------
@@ -611,13 +629,31 @@ let RECIBO_PEND=null;
 function ofrecerRecibo(idr, conceptos){
   RECIBO_PEND={idr, conceptos, total:conceptos.reduce((a,c)=>a+c.m,0)};
   const bar=document.getElementById('reciboBar');
+  document.getElementById('rbLabel').innerHTML='Pago aplicado por <b id="rbTotal">'+money(RECIBO_PEND.total)+'</b> · ¿Emitir comprobante?';
   document.getElementById('rbTotal').textContent=money(RECIBO_PEND.total);
   const dir=(DIR.find(x=>x.id_residente===idr)||{}).email||'';
   document.getElementById('rbMail').value=(dir||'').split('/')[0].trim();
+  document.getElementById('rbForma').style.display='';document.getElementById('rbMail').style.display='';
+  document.getElementById('rbEnviarWrap').style.display='flex';document.getElementById('rbNo').style.display='';
+  document.getElementById('rbBtn').textContent='Emitir comprobante';
   bar.classList.remove('hidden');
+}
+function mostrarReciboEmitido(recibo,conceptos,total,forma,email){
+  RECIBO_PEND={emitido:true,recibo,conceptos,total,forma};
+  const destino=email&&email.ok?` · enviado a ${email.enviado_a}`:' · correo pendiente';
+  document.getElementById('rbLabel').innerHTML=`Comprobante <b>#${recibo.folio}</b> emitido${destino}`;
+  document.getElementById('rbForma').style.display='none';document.getElementById('rbMail').style.display='none';
+  document.getElementById('rbEnviarWrap').style.display='none';document.getElementById('rbNo').style.display='none';
+  document.getElementById('rbBtn').textContent='Ver / imprimir';
+  document.getElementById('reciboBar').classList.remove('hidden');
 }
 async function emitirRecibo(){
   if(!RECIBO_PEND)return;
+  if(RECIBO_PEND.emitido){
+    const r=RECIBO_PEND.recibo;
+    abrirRecibo(r.folio,r.nombre,r.ident,r.fecha,RECIBO_PEND.conceptos,RECIBO_PEND.total,RECIBO_PEND.forma);
+    return;
+  }
   const forma=document.getElementById('rbForma').value;
   const btn=document.getElementById('rbBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   try{
@@ -628,7 +664,11 @@ async function emitirRecibo(){
       const quiere=document.getElementById('rbEnviar').checked;
       const correo=document.getElementById('rbMail').value.trim()||((res.email||'').split('/')[0].trim());
       document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;
-      if(quiere&&correo){enviarReciboCorreo(res.folio,correo);}
+      if(quiere&&correo){
+        const envio=await enviarReciboCorreo(res.folio,correo);
+        if(envio.ok)toast('Comprobante #'+res.folio+' enviado a '+envio.enviado_a);
+        else toast('El comprobante se emitió pero el correo no salió.',true);
+      }
       else if(quiere&&!correo){toast('Sin correo registrado: el comprobante no se envió.',true);}
     }
     else toast('No se pudo emitir el comprobante.',true);
@@ -636,16 +676,12 @@ async function emitirRecibo(){
   btn.disabled=false;btn.textContent='Emitir comprobante';
 }
 async function enviarReciboCorreo(folio,correo){
-  try{
-    const r=await fetch(`${SB_URL}/functions/v1/enviar-recibo`,{
-      method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-      body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,folio:folio,email_destino:correo})
-    });
-    const d=await r.json();
-    if(d&&d.ok){toast('Comprobante #'+folio+' enviado a '+d.enviado_a);}
-    else if(d&&d.error==='sin correo'){toast('Sin correo registrado: no se envió.',true);}
-    else{toast('El comprobante se emitió pero el correo no salió.',true);}
-  }catch(e){toast('El comprobante se emitió pero el correo no salió.',true);}
+  const r=await fetch(`${SB_URL}/functions/v1/enviar-recibo`,{
+    method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,folio:folio,email_destino:correo})
+  });
+  const d=await r.json();
+  return d&&d.ok?d:{ok:false,error:d&&d.error};
 }
 
 function abrirRecibo(folio,nombre,ident,fecha,conceptos,total,forma){
@@ -704,7 +740,7 @@ footer .m{font-weight:600;color:#2563EB;margin:8px 0 0}
     </div>
     <footer>
       <p class="q">"Juntarse es el principio, mantenerse juntos el progreso, trabajar en equipo el éxito"</p>
-      <p class="m">ALDEAMZ80@GMAIL.COM</p>
+      <p class="m">RECIBOS@ECHOADMINISTRATION.COM</p>
     </footer>
   </div>
 </div>
