@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { markPaidAndSendReceipt } from "./receipt-flow.mjs";
+
+test("the clean /operaciones URL loads its module from the operations directory", async () => {
+  const html = await readFile(new URL("./index.html", import.meta.url), "utf8");
+
+  assert.match(
+    html,
+    /from ['"]\/operaciones\/receipt-flow\.mjs['"];/,
+    "a relative module path resolves to /receipt-flow.mjs at the clean production URL",
+  );
+});
 
 test("marking a payment automatically creates and emails its receipt", async () => {
   const calls = [];
