@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Control Alberca · Echo Administración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1847CC;--ink:#0C1320;--accent:#7BA8FF;--silver:#F2F4F8;--mid:#E0E6F5;
+    --ok:#1B7A3D;--okbg:#E7F5EC;--warn:#B00020;--warnbg:#FBE9EC;--amber:#B87503;--amberbg:#FBF1DF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--silver);color:var(--ink);font-family:'DM Sans',system-ui,sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.big{font-family:'Bricolage Grotesque','DM Sans',sans-serif;letter-spacing:-.01em}
+  .bar{background:var(--ink);color:#fff;padding:13px 16px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:30}
+  .logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--accent));display:grid;place-items:center;font-weight:800;font-family:'Bricolage Grotesque';flex:none}
+  .bar .t{font-weight:700;font-size:1rem;line-height:1.15}
+  .bar .t small{display:block;font-weight:400;font-size:.72rem;opacity:.6}
+  .bar .out{margin-left:auto;background:none;border:0;color:#fff9;font-family:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+  .wrap{max-width:760px;margin:0 auto;padding:14px 14px 90px}
+  .card{background:#fff;border:1px solid var(--mid);border-radius:16px;padding:17px;margin-bottom:13px}
+  label{font-size:.8rem;font-weight:700;color:#485061;display:block;margin-bottom:6px}
+  input,select,textarea{width:100%;padding:14px;border:1px solid var(--mid);border-radius:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+  .btn{appearance:none;border:0;border-radius:12px;padding:15px 20px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;background:var(--blue);color:#fff;width:100%}
+  .btn:disabled{opacity:.45}
+  .btn.g{background:var(--ok)} .btn.sm{padding:10px 14px;font-size:.85rem;width:auto}
+  .btn.ghost{background:var(--silver);color:var(--ink);border:1px solid var(--mid)}
+  .hidden{display:none!important}
+  #login{max-width:380px;margin:9vh auto;padding:0 16px}
+  .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--mid);display:flex;z-index:40}
+  .tab{flex:1;border:0;background:none;font-family:inherit;padding:11px 4px 13px;cursor:pointer;color:#94a0b0;font-weight:600;font-size:.72rem;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tab .ic{font-size:1.3rem;line-height:1}
+  .tab.active{color:var(--blue)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px}
+  .kpi{background:#fff;border:1px solid var(--mid);border-radius:13px;padding:11px 8px;text-align:center}
+  .kpi .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:1.4rem}
+  .kpi .l{font-size:.66rem;color:#6a7382;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+  .res{border:2px solid var(--mid);border-radius:14px;padding:14px;margin-bottom:9px;cursor:pointer;background:#fff}
+  .res:active{border-color:var(--accent)}
+  .res .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .id{font-family:'Bricolage Grotesque';font-weight:800;background:var(--ink);color:#fff;border-radius:9px;padding:6px 11px;font-size:.9rem}
+  .nm{font-weight:700;flex:1;min-width:140px;font-size:.95rem}
+  .badge{font-size:.74rem;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .b-ok{background:var(--okbg);color:var(--ok)} .b-warn{background:var(--warnbg);color:var(--warn)} .b-amb{background:var(--amberbg);color:var(--amber)}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-top:9px;font-size:.83rem}
+  .meta b{color:#94a0b0;font-weight:600}
+  .row{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--silver)}
+  .row:last-child{border-bottom:0}
+  .hora{font-family:'Bricolage Grotesque';font-weight:800;font-size:.95rem;min-width:62px}
+  .toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:14px 20px;border-radius:13px;font-weight:700;font-size:.9rem;opacity:0;transition:.25s;z-index:60;max-width:90%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--warn)} .toast.ok{background:var(--ok)}
+  .modal{position:fixed;inset:0;background:#0c1320cc;display:none;align-items:flex-end;z-index:70}
+  .modal.on{display:flex}
+  .sheet{background:#fff;width:100%;border-radius:20px 20px 0 0;padding:20px;max-height:90vh;overflow:auto}
+  .cnt{display:flex;align-items:center;gap:14px;justify-content:center;margin:12px 0}
+  .cnt button{width:56px;height:56px;border-radius:50%;border:2px solid var(--mid);background:#fff;font-size:1.6rem;font-family:inherit;font-weight:700;cursor:pointer;color:var(--blue)}
+  .cnt .n{font-family:'Bricolage Grotesque';font-weight:800;font-size:2.6rem;min-width:70px;text-align:center}
+  .spin{display:inline-block;width:17px;height:17px;border:2px solid #ffffff70;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .inc{border-left:4px solid var(--amber);background:#fff;border-radius:11px;padding:13px;margin-bottom:9px;border:1px solid var(--mid);border-left:4px solid var(--amber)}
+  .empty{text-align:center;padding:34px 18px;color:#6a7382}
+  .empty .e{font-size:2.4rem}
+</style>
+</head>
+<body>
+
+<div class="bar hidden" id="bar">
+  <div class="logo">E</div>
+  <div class="t">Control Alberca<small id="quien"></small></div>
+  <button class="out" id="salir">Salir</button>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="card" style="text-align:center;padding:26px">
+    <div class="logo" style="width:46px;height:46px;font-size:1.3rem;margin:0 auto 14px">E</div>
+    <h1 style="font-size:1.35rem;margin:0 0 3px">Control de Alberca</h1>
+    <p style="color:#6a7382;font-size:.88rem;margin:0 0 20px">Manzana 80 · Aldea Tulum</p>
+    <div style="text-align:left"><label>Usuario</label><input id="u" autocomplete="username" placeholder="alberca"></div>
+    <div style="text-align:left;margin-top:12px"><label>Contraseña</label><input id="p" type="password" autocomplete="current-password"></div>
+    <button class="btn" id="entrar" style="margin-top:18px">Entrar</button>
+    <div id="lmsg" style="font-size:.84rem;color:var(--warn);margin-top:11px;font-weight:600"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="wrap hidden">
+
+  <!-- REGISTRAR -->
+  <div id="v-registrar">
+    <div class="card">
+      <label>Buscar por depto, nombre o chip</label>
+      <input id="q" placeholder="Ej. A-101, Leslie, 0012345" autocomplete="off">
+      <div id="hint" style="font-size:.8rem;color:#6a7382;margin-top:9px">Escribe al menos 2 caracteres.</div>
+    </div>
+    <div id="resultados"></div>
+  </div>
+
+  <!-- BITÁCORA -->
+  <div id="v-bitacora" class="hidden">
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <h3 style="margin:0 0 4px;font-size:1.02rem">Movimientos de hoy</h3>
+      <p style="color:#6a7382;font-size:.8rem;margin:0 0 10px" id="fechaHoy"></p>
+      <div id="lista"></div>
+    </div>
+  </div>
+
+  <!-- INCIDENCIAS -->
+  <div id="v-incidencias" class="hidden">
+    <div class="card">
+      <h3 style="margin:0 0 4px;font-size:1.02rem">Mis incidencias</h3>
+      <p style="color:#6a7382;font-size:.8rem;margin:0 0 10px">Reportes asignados a alberca. Actualiza el estado cuando los atiendas.</p>
+      <div id="incs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs hidden" id="tabs">
+  <button class="tab active" data-v="registrar"><span class="ic">➕</span>Registrar</button>
+  <button class="tab" data-v="bitacora"><span class="ic">📋</span>Bitácora</button>
+  <button class="tab" data-v="incidencias"><span class="ic">🔧</span>Incidencias<span id="incBadge"></span></button>
+</div>
+
+<!-- MODAL ENTRADA -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div id="mHead"></div>
+    <div style="margin-top:16px">
+      <label style="text-align:center">¿Cuántos invitados trae?</label>
+      <div class="cnt">
+        <button id="menos">−</button>
+        <div class="n" id="numInv">0</div>
+        <button id="mas">+</button>
+      </div>
+      <div style="text-align:center;font-size:.82rem;color:#6a7382" id="totalPers"></div>
+    </div>
+    <div style="margin-top:14px"><label>Nota (opcional)</label><input id="mNota" placeholder="Ej. trae mascota, usa asador"></div>
+    <button class="btn g" id="mGuardar" style="margin-top:16px">Registrar entrada</button>
+    <button class="btn ghost" id="mCancelar" style="margin-top:9px">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL="https://nwqigjkmlkwyyblgqppm.supabase.co";
+const SB_KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
+let CRED={p_user:'',p_password:''}, SEL=null, INVITADOS=0, TAB=null;
+
+async function rpc(fn,args){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+    body:JSON.stringify(args)});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function toast(m,tipo){const t=document.getElementById('toast');t.textContent=m;t.className='toast show'+(tipo?' '+tipo:'');setTimeout(()=>t.className='toast',2800);}
+const hora=s=>new Date(s).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+
+// ---------- LOGIN ----------
+async function entrar(){
+  const u=document.getElementById('u').value.trim(), p=document.getElementById('p').value;
+  const m=document.getElementById('lmsg'), b=document.getElementById('entrar');
+  if(!u||!p){m.textContent='Escribe usuario y contraseña.';return;}
+  b.disabled=true;b.innerHTML='<span class="spin"></span>';m.textContent='';
+  try{
+    const d=await rpc('login_vigilante',{p_user:u,p_password:p});
+    if(!d||!d.ok){m.textContent='Usuario o contraseña incorrectos.';b.disabled=false;b.textContent='Entrar';return;}
+    CRED={p_user:u,p_password:p};
+    document.getElementById('quien').textContent=d.nombre;
+    document.getElementById('login').classList.add('hidden');
+    ['bar','app','tabs'].forEach(i=>document.getElementById(i).classList.remove('hidden'));
+    document.getElementById('fechaHoy').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+    ver('registrar'); cargarTablero();
+    document.getElementById('q').focus();
+  }catch(e){m.textContent='Sin conexión. Revisa el internet.';}
+  b.disabled=false;b.textContent='Entrar';
+}
+
+function ver(v){
+  TAB=v;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  ['registrar','bitacora','incidencias'].forEach(x=>document.getElementById('v-'+x).classList.toggle('hidden',x!==v));
+  if(v!=='registrar')cargarTablero();
+}
+
+// ---------- BUSCAR ----------
+let timer=null;
+function buscar(){
+  clearTimeout(timer);
+  const q=document.getElementById('q').value.trim();
+  if(q.length<2){document.getElementById('resultados').innerHTML='';document.getElementById('hint').textContent='Escribe al menos 2 caracteres.';return;}
+  document.getElementById('hint').textContent='Buscando…';
+  timer=setTimeout(async()=>{
+    try{
+      const d=await rpc('vig_buscar',{p_user:CRED.p_user,p_password:CRED.p_password,p_q:q});
+      const arr=(d&&d.unidades)||[];
+      document.getElementById('hint').textContent=arr.length?`${arr.length} resultado(s) · toca para registrar`:'Sin resultados.';
+      document.getElementById('resultados').innerHTML=arr.map((r,i)=>tarjeta(r,i)).join('');
+      arr.forEach((r,i)=>{const el=document.getElementById('r'+i); if(el)el.onclick=()=>abrir(r);});
+    }catch(e){document.getElementById('hint').textContent='Error de conexión.';}
+  },320);
+}
+
+function estadoPago(r){
+  if(Number(r.meses_vencidos)>3) return ['b-warn','Adeudo importante'];
+  if(Number(r.meses_vencidos)>0) return ['b-amb',r.meses_vencidos+' mes(es) pendiente(s)'];
+  if(r.debe_mes_actual) return ['b-amb','Cuota del mes por pagar'];
+  return ['b-ok','Al corriente ✓'];
+}
+
+function tarjeta(r,i){
+  const [cls,txt]=estadoPago(r);
+  const inq=(r.inquilinos||[]);
+  return `<div class="res" id="r${i}">
+    <div class="top">
+      <span class="id">${r.ident}</span>
+      <span class="nm">${r.nombre_completo||''}</span>
+      <span class="badge ${cls}">${txt}</span>
+    </div>
+    <div class="meta">
+      <div><b>Chip:</b> ${r.chip||'sin registrar'}</div>
+      <div><b>Edificio:</b> ${r.edificio} · ${r.departamento}</div>
+      ${r.rentando?`<div style="grid-column:1/-1;color:var(--blue);font-weight:600">🏠 Rentado${inq.length?': '+inq.map(x=>x.nombre).join(', '):''}</div>`:''}
+    </div>
+  </div>`;
+}
+
+// ---------- MODAL ----------
+function abrir(r){
+  SEL=r; INVITADOS=0;
+  const [cls,txt]=estadoPago(r);
+  const aviso = (Number(r.meses_vencidos)>0 || r.debe_mes_actual)
+    ? `<div style="background:var(--amberbg);color:var(--amber);border-radius:11px;padding:12px;margin-top:11px;font-size:.86rem;font-weight:600">
+         Recuérdale amablemente que tiene su cuota de mantenimiento pendiente y que puede pagar en el portal.</div>` : '';
+  document.getElementById('mHead').innerHTML=`
+    <div class="top" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="id">${r.ident}</span>
+      <span class="nm">${r.nombre_completo||''}</span>
+      <span class="badge ${cls}">${txt}</span>
+    </div>
+    <div class="meta"><div><b>Chip:</b> ${r.chip||'sin registrar'}</div><div><b>Depto:</b> ${r.departamento}</div></div>
+    ${aviso}`;
+  pintarCont();
+  document.getElementById('mNota').value='';
+  document.getElementById('modal').classList.add('on');
+}
+function pintarCont(){
+  document.getElementById('numInv').textContent=INVITADOS;
+  document.getElementById('totalPers').textContent=`Entran ${1+INVITADOS} persona(s) en total`;
+}
+async function guardarEntrada(){
+  if(!SEL)return;
+  const b=document.getElementById('mGuardar');b.disabled=true;b.innerHTML='<span class="spin"></span>';
+  try{
+    const d=await rpc('vig_registrar_acceso',{p_user:CRED.p_user,p_password:CRED.p_password,
+      p_id_residente:SEL.id_residente,p_invitados:INVITADOS,p_notas:document.getElementById('mNota').value.trim()});
+    if(d&&d.ok){
+      toast(`Entrada registrada · ${SEL.ident} (${1+INVITADOS} pers.)`,'ok');
+      document.getElementById('modal').classList.remove('on');
+      document.getElementById('q').value='';document.getElementById('resultados').innerHTML='';
+      document.getElementById('hint').textContent='Escribe al menos 2 caracteres.';
+      cargarTablero();
+    } else toast('No se pudo registrar.','err');
+  }catch(e){toast('Error de conexión.','err');}
+  b.disabled=false;b.textContent='Registrar entrada';
+}
+
+// ---------- TABLERO ----------
+async function cargarTablero(){
+  try{
+    const d=await rpc('vig_tablero',CRED);
+    if(!d||!d.ok)return;
+    const r=d.resumen||{}, acc=d.accesos||[], inc=d.incidencias||[];
+    document.getElementById('kpis').innerHTML=`
+      <div class="kpi"><div class="v">${r.visitas||0}</div><div class="l">Visitas</div></div>
+      <div class="kpi"><div class="v">${r.personas||0}</div><div class="l">Personas</div></div>
+      <div class="kpi"><div class="v">${r.invitados||0}</div><div class="l">Invitados</div></div>
+      <div class="kpi"><div class="v" style="color:var(--blue)">${r.dentro||0}</div><div class="l">Dentro</div></div>`;
+    document.getElementById('lista').innerHTML = acc.length ? acc.map(a=>`
+      <div class="row">
+        <div class="hora">${hora(a.hora_entrada)}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.92rem">${a.ident} · ${1+a.invitados} pers.</div>
+          <div style="font-size:.78rem;color:#6a7382">${a.nombre||''}${a.notas?' · '+a.notas:''}</div>
+        </div>
+        ${a.hora_salida
+          ? `<span class="badge b-ok">Salió ${hora(a.hora_salida)}</span>`
+          : `<button class="btn sm ghost" onclick="marcarSalida(${a.id})">Salida</button>`}
+      </div>`).join('') : '<div class="empty"><div class="e">🏊</div><div style="font-weight:700;margin-top:6px">Sin movimientos hoy</div><div style="font-size:.86rem">Registra la primera entrada.</div></div>';
+
+    const badge=document.getElementById('incBadge');
+    badge.innerHTML = inc.length ? `<span style="background:var(--warn);color:#fff;border-radius:999px;padding:1px 6px;font-size:.62rem;position:absolute;transform:translate(14px,-30px)">${inc.length}</span>` : '';
+    document.getElementById('incs').innerHTML = inc.length ? inc.map(i=>`
+      <div class="inc">
+        <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+          <b style="font-size:.92rem">${i.categoria||'Incidencia'}</b>
+          <span class="badge ${i.estado==='pendiente'?'b-warn':'b-amb'}">${i.estado==='en_proceso'?'En proceso':'Pendiente'}</span>
+          <span style="font-size:.76rem;color:#6a7382;margin-left:auto">${new Date(i.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short'})}${i.departamento?' · Depto '+i.departamento:''}</span>
+        </div>
+        <div style="font-size:.87rem;color:#485061;margin-top:6px">${i.descripcion||''}</div>
+        ${i.respuesta?`<div style="font-size:.78rem;color:#6a7382;margin-top:5px">Notas: ${i.respuesta}</div>`:''}
+        <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn sm ghost" onclick="actInc(${i.id},'en_proceso')">Estoy atendiendo</button>
+          <button class="btn sm g" onclick="actInc(${i.id},'resuelta')">Resuelta</button>
+        </div>
+      </div>`).join('') : '<div class="empty"><div class="e">✅</div><div style="font-weight:700;margin-top:6px">Sin incidencias pendientes</div></div>';
+  }catch(e){}
+}
+
+async function marcarSalida(id){
+  try{const d=await rpc('vig_salida',{p_user:CRED.p_user,p_password:CRED.p_password,p_id:id});
+    if(d&&d.ok){toast('Salida registrada','ok');cargarTablero();}}catch(e){toast('Error de conexión.','err');}
+}
+
+async function actInc(id,estado){
+  let nota=null;
+  if(estado==='resuelta'){nota=prompt('¿Qué se hizo? (opcional)')||null;}
+  try{
+    const d=await rpc('vig_actualizar_incidencia',{p_user:CRED.p_user,p_password:CRED.p_password,p_id:id,p_estado:estado,p_nota:nota});
+    if(d&&d.ok){toast(estado==='resuelta'?'Marcada como resuelta':'Marcada en proceso','ok');cargarTablero();}
+    else toast('No se pudo actualizar.','err');
+  }catch(e){toast('Error de conexión.','err');}
+}
+
+// ---------- eventos ----------
+document.getElementById('entrar').onclick=entrar;
+document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+document.getElementById('salir').onclick=()=>location.reload();
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>ver(t.dataset.v));
+document.getElementById('q').addEventListener('input',buscar);
+document.getElementById('mas').onclick=()=>{INVITADOS++;pintarCont();};
+document.getElementById('menos').onclick=()=>{if(INVITADOS>0)INVITADOS--;pintarCont();};
+document.getElementById('mGuardar').onclick=guardarEntrada;
+document.getElementById('mCancelar').onclick=()=>document.getElementById('modal').classList.remove('on');
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')document.getElementById('modal').classList.remove('on');});
+setInterval(()=>{if(TAB&&TAB!=='registrar')cargarTablero();},60000);
+</script>
+</body>
+</html>
