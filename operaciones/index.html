@@ -19,11 +19,14 @@
   .topbar{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20;flex-wrap:wrap}
   .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--accent));display:grid;place-items:center;font-weight:800;font-family:'Bricolage Grotesque'}
   .brand{font-weight:700;font-size:1.02rem}
-  .tabs{display:flex;gap:4px;margin-left:8px}
+  .tabs{display:flex;gap:4px;margin-left:8px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;flex:none}
   .tab{background:none;border:0;color:#ffffffaa;font-family:inherit;font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:8px;cursor:pointer}
   .tab.active{background:#ffffff18;color:#fff}
   .tab:hover{color:#fff}
-  .who{margin-left:auto;opacity:.6;font-size:.8rem;display:flex;gap:12px;align-items:center}
+  .who{margin-left:auto;opacity:.85;font-size:.8rem;display:flex;gap:10px;align-items:center;flex:none}
+  @media(max-width:820px){.topbar{gap:8px}.who{width:100%;margin-left:0;order:3;justify-content:flex-end}.tabs{order:4;width:100%;margin-left:0;padding-bottom:2px}}
   .logout{color:#fff9;background:none;border:0;cursor:pointer;font-family:inherit;font-size:.8rem;text-decoration:underline}
   .wrap{max-width:1000px;margin:0 auto;padding:20px}
   .card{background:#fff;border:1px solid var(--mid);border-radius:16px;box-shadow:var(--shadow)}
@@ -190,15 +193,15 @@
       <button class="btn ok" id="markBtn" style="margin-left:auto" disabled>Marcar como pagados</button>
     </div>
     <div class="hidden" id="reciboBar" style="background:#EFF6FF;border-top:1px solid var(--mid);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <span id="rbLabel" style="font-weight:600;font-size:.9rem">Pago aplicado por <b id="rbTotal">$0</b> · ¿Emitir comprobante?</span>
+      <span style="font-weight:600;font-size:.9rem">Pago aplicado por <b id="rbTotal">$0</b> · ¿Emitir comprobante?</span>
       <select id="rbForma" style="width:auto;padding:9px 12px;font-size:.86rem">
         <option>Transferencia</option>
         <option>Dep. en efectivo</option>
         <option>Efectivo</option>
         <option>Mercado Pago</option>
       </select>
-      <input id="rbMail" type="email" placeholder="correo del residente (opcional)" style="width:240px;padding:9px 12px;font-size:.84rem">
-      <label id="rbEnviarWrap" style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin:0"><input type="checkbox" id="rbEnviar" checked style="width:16px;height:16px;accent-color:var(--blue)">Enviar por correo</label>
+      <input id="rbMail" type="email" placeholder="correo del residente" style="width:250px;padding:9px 12px;font-size:.84rem"><span id="rbAviso" style="font-size:.76rem;color:var(--warn);font-weight:600;width:100%"></span>
+      <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin:0"><input type="checkbox" id="rbEnviar" checked style="width:16px;height:16px;accent-color:var(--blue)">Enviar por correo</label>
       <button class="btn" id="rbBtn" style="padding:10px 16px;font-size:.86rem">Emitir comprobante</button>
       <button class="btn ghost" id="rbNo" style="padding:10px 14px;font-size:.86rem">Ahora no</button>
     </div>
@@ -367,9 +370,7 @@
   <div class="card pad">
     <div class="cob-head">
       <h2 style="margin:0;font-size:1.2rem">Gastos y control de IVA</h2>
-      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
-        <select id="gaMes" style="width:auto;padding:9px 12px;font-size:.86rem"></select>
-      </div>
+      <div class="hint" style="margin:0 0 0 auto">Periodo: <b id="gaPeriodo" style="color:var(--ink)"></b> · cámbialo en el selector de arriba</div>
     </div>
     <div class="kpis" id="gaKpis"></div>
 
@@ -414,9 +415,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { markPaidAndSendReceipt } from '/operaciones/receipt-flow.mjs';
-
+<script>
 const SB_URL="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const SB_KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -557,8 +556,10 @@ async function openUnit(u){
   try{const res=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:u.id_residente});renderDetail(res);}
   catch(e){document.getElementById('dMeta').textContent='Error al cargar.';}
 }
+let UNIT_MAIL='';
 function renderDetail(res){
   const pend=res.pendientes||[],adeudo=Number(res.adeudo||0);
+  if(res.email!==undefined)UNIT_MAIL=(res.email||'').split('/')[0].trim();
   document.getElementById('dDebt').textContent=adeudo>0?money(adeudo):'Al corriente ✓';
   document.getElementById('dDebt').className='badge '+(adeudo>0?'debt':'clear');
   document.getElementById('dMeta').textContent=`Pagado histórico: ${money(res.pagados_total)} · Meses pendientes: ${pend.length}`;
@@ -572,7 +573,7 @@ function renderDetail(res){
     byYear[yr].forEach(p=>{
       const mesNum=new Date(p.fecha_vencimiento).getUTCMonth()+1,partial=Number(p.monto)<500;
       const lbl=document.createElement('label');lbl.className='m';
-      lbl.innerHTML=`<input type="checkbox" value="${p.id_pago}" data-monto="${p.monto}"><span class="mo">${MESES[mesNum]}</span><span class="mt${partial?' partial':''}">${money(p.monto)}</span>`;
+      lbl.innerHTML=`<input type="checkbox" value="${p.id_pago}" data-monto="${p.monto}" data-concepto="${(p.concepto||'').replace(/"/g,'&quot;')}"><span class="mo">${MESES[mesNum]} <span style="color:#94a0b0;font-weight:400">${p.anio}</span></span><span class="mt${partial?' partial':''}">${money(p.monto)}</span>`;
       const cb=lbl.querySelector('input');
       cb.addEventListener('change',onCheck);
       cb.addEventListener('change',e=>lbl.classList.toggle('checked',e.target.checked));
@@ -594,34 +595,18 @@ function onCheck(){
 async function markPaid(){
   const sel=selectedBoxes();if(!sel.length)return;
   const ids=sel.map(b=>Number(b.value)),btn=document.getElementById('markBtn');
-  const conceptos=sel.map(b=>({c:b.closest('.m').querySelector('.mo').textContent.trim(),m:Number(b.dataset.monto)}));
-  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando y enviando…';
+  const conceptos=sel.map(b=>({c:(b.dataset.concepto||b.closest('.m').querySelector('.mo').textContent.trim()),m:Number(b.dataset.monto)}));
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Aplicando…';
   try{
-    const outcome=await markPaidAndSendReceipt({
-      paymentIds:ids,
-      residentId:CURRENT,
-      concepts:conceptos,
-      markPayments:(paymentIds)=>rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:paymentIds}),
-      issueReceipt:({residentId,concepts,total,paymentMethod})=>rpc('pg_emitir_recibo',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:residentId,p_conceptos:concepts,p_total:total,p_forma_pago:paymentMethod}),
-      sendReceipt:({folio,email})=>enviarReciboCorreo(folio,email)
-    });
-    if(!outcome.ok&&outcome.stage==='payment'){toast('No se pudo aplicar.',true);return;}
-    const res=outcome.marked;
+    const res=await rpc('pg_marcar_pagos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_ids:ids});
+    if(!res||res.ok===false){toast('No se pudo aplicar.',true);btn.disabled=false;btn.textContent='Marcar como pagados';return;}
+    toast(`${res.marcados} ${res.marcados===1?'mes marcado':'meses marcados'} como pagados`);
     const u=UNITS.find(x=>x.id_residente===CURRENT);if(u)u.adeudo=res.adeudo;renderUnits(document.getElementById('q').value);
     loaded.cobranza=false; // forzar recálculo al volver a cobranza
-    if(outcome.receipt&&outcome.receipt.ok!==false){
-      const conceptosCap=conceptos.map(x=>({c:'Mantenimiento '+x.c,m:x.m}));
-      mostrarReciboEmitido(outcome.receipt,conceptosCap,conceptosCap.reduce((a,c)=>a+c.m,0),'Transferencia',outcome.email);
-      if(outcome.email.ok)toast(`Pago aplicado y comprobante #${outcome.receipt.folio} enviado a ${outcome.email.enviado_a}`);
-      else if(outcome.email.reason==='missing_email')toast('Pago aplicado. El residente no tiene correo registrado.',true);
-      else toast('Pago aplicado y comprobante emitido, pero el correo no salió.',true);
-    }else{
-      ofrecerRecibo(CURRENT,conceptos);
-      toast('Pago aplicado, pero no se pudo emitir el comprobante automático.',true);
-    }
+    ofrecerRecibo(CURRENT, conceptos);
     const fresh=await rpc('pg_pendientes_unidad',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:CURRENT});renderDetail(fresh);
   }catch(e){toast('Error de conexión.',true);}
-  finally{btn.disabled=false;btn.textContent='Marcar como pagados';}
+  btn.textContent='Marcar como pagados';
 }
 
 // ---------- COMPROBANTE (diseño Canva) ----------
@@ -629,46 +614,25 @@ let RECIBO_PEND=null;
 function ofrecerRecibo(idr, conceptos){
   RECIBO_PEND={idr, conceptos, total:conceptos.reduce((a,c)=>a+c.m,0)};
   const bar=document.getElementById('reciboBar');
-  document.getElementById('rbLabel').innerHTML='Pago aplicado por <b id="rbTotal">'+money(RECIBO_PEND.total)+'</b> · ¿Emitir comprobante?';
   document.getElementById('rbTotal').textContent=money(RECIBO_PEND.total);
-  const dir=(DIR.find(x=>x.id_residente===idr)||{}).email||'';
-  document.getElementById('rbMail').value=(dir||'').split('/')[0].trim();
-  document.getElementById('rbForma').style.display='';document.getElementById('rbMail').style.display='';
-  document.getElementById('rbEnviarWrap').style.display='flex';document.getElementById('rbNo').style.display='';
-  document.getElementById('rbBtn').textContent='Emitir comprobante';
+  const dir=UNIT_MAIL||((DIR.find(x=>x.id_residente===idr)||{}).email||'').split('/')[0].trim();
+  document.getElementById('rbMail').value=dir;
+  document.getElementById('rbAviso').textContent = dir ? '' : 'Este residente no tiene correo registrado — escríbelo aquí o edítalo en Residentes.';
   bar.classList.remove('hidden');
-}
-function mostrarReciboEmitido(recibo,conceptos,total,forma,email){
-  RECIBO_PEND={emitido:true,recibo,conceptos,total,forma};
-  const destino=email&&email.ok?` · enviado a ${email.enviado_a}`:' · correo pendiente';
-  document.getElementById('rbLabel').innerHTML=`Comprobante <b>#${recibo.folio}</b> emitido${destino}`;
-  document.getElementById('rbForma').style.display='none';document.getElementById('rbMail').style.display='none';
-  document.getElementById('rbEnviarWrap').style.display='none';document.getElementById('rbNo').style.display='none';
-  document.getElementById('rbBtn').textContent='Ver / imprimir';
-  document.getElementById('reciboBar').classList.remove('hidden');
 }
 async function emitirRecibo(){
   if(!RECIBO_PEND)return;
-  if(RECIBO_PEND.emitido){
-    const r=RECIBO_PEND.recibo;
-    abrirRecibo(r.folio,r.nombre,r.ident,r.fecha,RECIBO_PEND.conceptos,RECIBO_PEND.total,RECIBO_PEND.forma);
-    return;
-  }
   const forma=document.getElementById('rbForma').value;
   const btn=document.getElementById('rbBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   try{
-    const conceptosCap=RECIBO_PEND.conceptos.map(x=>({c:'Mantenimiento '+x.c, m:x.m}));
+    const conceptosCap=RECIBO_PEND.conceptos.map(x=>({c:String(x.c).replace(/^Cuota /i,'Mantenimiento '), m:x.m}));
     const res=await rpc('pg_emitir_recibo',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id_residente:RECIBO_PEND.idr,p_conceptos:conceptosCap,p_total:RECIBO_PEND.total,p_forma_pago:forma});
     if(res&&res.ok){
       abrirRecibo(res.folio,res.nombre,res.ident,res.fecha,conceptosCap,RECIBO_PEND.total,forma);
       const quiere=document.getElementById('rbEnviar').checked;
       const correo=document.getElementById('rbMail').value.trim()||((res.email||'').split('/')[0].trim());
       document.getElementById('reciboBar').classList.add('hidden');RECIBO_PEND=null;
-      if(quiere&&correo){
-        const envio=await enviarReciboCorreo(res.folio,correo);
-        if(envio.ok)toast('Comprobante #'+res.folio+' enviado a '+envio.enviado_a);
-        else toast('El comprobante se emitió pero el correo no salió.',true);
-      }
+      if(quiere&&correo){enviarReciboCorreo(res.folio,correo);}
       else if(quiere&&!correo){toast('Sin correo registrado: el comprobante no se envió.',true);}
     }
     else toast('No se pudo emitir el comprobante.',true);
@@ -676,12 +640,16 @@ async function emitirRecibo(){
   btn.disabled=false;btn.textContent='Emitir comprobante';
 }
 async function enviarReciboCorreo(folio,correo){
-  const r=await fetch(`${SB_URL}/functions/v1/enviar-recibo`,{
-    method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
-    body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,folio:folio,email_destino:correo})
-  });
-  const d=await r.json();
-  return d&&d.ok?d:{ok:false,error:d&&d.error};
+  try{
+    const r=await fetch(`${SB_URL}/functions/v1/enviar-recibo`,{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({p_user:CREDS.p_user,p_password:CREDS.p_password,folio:folio,email_destino:correo})
+    });
+    const d=await r.json();
+    if(d&&d.ok){toast('Comprobante #'+folio+' enviado a '+d.enviado_a);}
+    else if(d&&d.error==='sin correo'){toast('Sin correo registrado: no se envió.',true);}
+    else{toast('El comprobante se emitió pero el correo no salió.',true);}
+  }catch(e){toast('El comprobante se emitió pero el correo no salió.',true);}
 }
 
 function abrirRecibo(folio,nombre,ident,fecha,conceptos,total,forma){
@@ -740,7 +708,7 @@ footer .m{font-weight:600;color:#2563EB;margin:8px 0 0}
     </div>
     <footer>
       <p class="q">"Juntarse es el principio, mantenerse juntos el progreso, trabajar en equipo el éxito"</p>
-      <p class="m">RECIBOS@ECHOADMINISTRATION.COM</p>
+      <p class="m">ALDEAMZ80@GMAIL.COM</p>
     </footer>
   </div>
 </div>
@@ -1390,6 +1358,7 @@ async function cambiarCorte(){
       const act=document.querySelector('.tab.active');
       if(act&&act.dataset.tab==='pagos')loadUnits();
       if(act&&act.dataset.tab==='residentes')loadDir();
+      if(loaded.gastos)loadGa();
     } else toast('No se pudo cambiar el mes.',true);
   }catch(e){toast('Error de conexión.',true);}
 }
@@ -1452,19 +1421,13 @@ async function crearAviso(){
 // ---------- GASTOS E IVA ----------
 const CAT_LBL={alberca:'Alberca / químicos',jardineria:'Jardinería',limpieza:'Limpieza',mantenimiento:'Mantenimiento',servicios:'Servicios (CFE, CAPA)',nomina:'Nómina / personal',administrativo:'Administrativo',operativo:'Otro operativo'};
 function initGastos(){
-  const sel=document.getElementById('gaMes');
-  let html='';
-  for(let y=2026;y>=2025;y--) for(let m=12;m>=1;m--){
-    const sel2=(y===CORTE.anio&&m===CORTE.mes)?' selected':'';
-    html+=`<option value="${y}-${m}"${sel2}>${MESES_CORTE[m]} ${y}</option>`;
-  }
-  sel.innerHTML=html;
   document.getElementById('gaFecha').value=new Date().toISOString().slice(0,10);
   loaded.gastos=true;
   loadGa();
 }
 async function loadGa(){
-  const [y,m]=document.getElementById('gaMes').value.split('-').map(Number);
+  const y=CORTE.anio, m=CORTE.mes;
+  document.getElementById('gaPeriodo').textContent=MESES_CORTE[m]+' '+y;
   try{
     const res=await rpc('pg_gastos',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:1,p_anio:y,p_mes:m});
     if(res&&res.ok!==false){GA=res;renderGa();}
@@ -1496,7 +1459,14 @@ function renderGa(){
     ${(GA.por_categoria||[]).length?'<div style="display:flex;gap:7px;flex-wrap:wrap">'+GA.por_categoria.map(c=>`<span style="background:#fff;border:1px solid var(--mid);border-radius:999px;padding:5px 12px;font-size:.8rem"><b>${CAT_LBL[c.categoria]||c.categoria}</b> · ${money(c.total)}</span>`).join('')+'</div>':''}`;
   document.getElementById('gaCount').textContent=`${gastos.length} gastos registrados en ${MESES_CORTE[GA.mes]} ${GA.anio}`;
   const list=document.getElementById('gaList');list.innerHTML='';
-  if(gastos.length===0){list.innerHTML='<div class="hint">Sin gastos este mes. Registra el primero arriba.</div>';return;}
+  if(gastos.length===0){
+    list.innerHTML=`<div style="text-align:center;padding:34px 20px;background:var(--silver);border-radius:14px">
+      <div style="font-size:2rem">🧾</div>
+      <div style="font-weight:700;margin-top:6px">Aún no hay gastos en ${MESES_CORTE[GA.mes]} ${GA.anio}</div>
+      <div style="color:#6a7382;font-size:.86rem;margin:5px 0 14px">Registra las compras de alberca, jardinería, servicios y nómina. El IVA se calcula solo.</div>
+      <button class="btn" onclick="document.querySelector('.ga-new').open=true;document.getElementById('gaConcepto').focus();">+ Registrar el primer gasto</button>
+    </div>`;
+    return;}
   gastos.forEach(g=>{
     const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='1fr auto';
     row.innerHTML=`
@@ -1576,7 +1546,7 @@ document.getElementById('llBtn').onclick=crearLlamada;
 document.getElementById('avBtn').onclick=crearAviso;
 document.getElementById('mesCorte').addEventListener('change',cambiarCorte);
 document.getElementById('gaBtn').onclick=crearGasto;
-document.getElementById('gaMes').addEventListener('change',loadGa);
+
 document.getElementById('gaSub').addEventListener('input',e=>{
   const v=Number(e.target.value)||0;
   document.getElementById('gaIva').value=(v*0.16).toFixed(2);
