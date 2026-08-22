@@ -196,6 +196,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Mi renta
       </button>
+      <button class="nav-item" onclick="go('inquilinos',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Mis inquilinos
+      </button>
       <button class="nav-item" onclick="go('misrentas',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Mis rentas
@@ -233,6 +237,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="content">
 
       <!-- DASHBOARD -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="refrescarPortal()" id="btnRefreshPortal" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">↻ Actualizar</button>
+      </div>
       <div id="banner-aviso" style="display:none;margin-bottom:18px;border-radius:14px;padding:16px 18px;font-size:14px"></div>
 
       <div class="page active" id="page-dashboard">
@@ -417,6 +424,37 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <!-- CONVENIOS -->
       <div class="page" id="page-mirenta">
         <div id="renta-cont" style="max-width:760px"><div style="color:var(--muted);font-size:13px">Cargando…</div></div>
+      </div>
+
+      <div class="page" id="page-inquilinos">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px;max-width:760px">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <h2 style="margin:0 0 3px;font-size:18px;color:var(--ink)">¿Tu departamento está rentado?</h2>
+              <p style="margin:0;color:var(--muted);font-size:13px">Mantener esto al día nos permite atender emergencias, controlar accesos y avisarle a quien realmente vive ahí.</p>
+            </div>
+            <label style="display:flex;align-items:center;gap:9px;cursor:pointer;background:#F7F9FC;border-radius:10px;padding:11px 15px;font-weight:600;font-size:14px">
+              <input type="checkbox" id="inqRentando" onchange="cambiarRentando()" style="width:19px;height:19px;accent-color:var(--blue)">
+              Sí, está rentado
+            </label>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;max-width:760px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+            <h3 style="margin:0;font-size:17px;color:var(--ink)">Personas que habitan tu unidad</h3>
+            <button onclick="nuevoInquilino()" style="background:var(--blue);color:#fff;border:0;border-radius:9px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">+ Agregar</button>
+          </div>
+          <p style="color:var(--muted);font-size:12px;margin:0 0 16px">Puedes darles acceso al portal para que vean avisos, eventos y descuentos. Nunca verán tus adeudos ni tus datos financieros.</p>
+          <div id="inqForm"></div>
+          <div id="inqLista"></div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;max-width:760px;margin-top:16px">
+          <h3 style="margin:0 0 4px;font-size:17px;color:var(--ink)">Recibos de servicios</h3>
+          <p style="color:var(--muted);font-size:12px;margin:0 0 14px">Luz y agua de tu unidad, cargados por la administración.</p>
+          <div id="inqServicios"></div>
+        </div>
       </div>
 
       <div class="page" id="page-misrentas">
@@ -934,6 +972,149 @@ function renderCalendario() {
   document.getElementById('mr-cal').innerHTML = html + '</div>';
 }
 
+async function refrescarPortal() {
+  const b = document.getElementById('btnRefreshPortal');
+  if (b) { b.disabled = true; b.textContent = 'Actualizando…'; }
+  try {
+    const r = await fetch(`${URL}/rpc/login_residente`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
+    const d = await r.json();
+    if (d && d.ok) {
+      if (typeof residente !== 'undefined' && d.residente) residente = d.residente;
+      if (d.pagos) pagos = d.pagos;
+      if (typeof pintarDatos === 'function') pintarDatos();
+      if (typeof renderIncidencias === 'function') renderIncidencias();
+      if (typeof renderLlamadas === 'function') renderLlamadas();
+      if (typeof renderAvisoLlamadas === 'function') renderAvisoLlamadas();
+    }
+    await cargarConvenios();
+    await cargarMisDatos();
+    await cargarAviso();
+    await cargarMisRentas();
+    await cargarInquilinos();
+    if (typeof cargarMiRenta === 'function') await cargarMiRenta();
+  } catch(e) {}
+  if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
+}
+
+// ===== MIS INQUILINOS =====
+let INQ=null;
+const TIPO_INQ={largo_plazo:'Renta larga',vacacional:'Vacacional'};
+const SERV_ICO={luz:'⚡',agua:'💧',gas:'🔥',internet:'🌐'};
+
+async function cargarInquilinos(){
+  try{
+    const r=await fetch(`${URL}/rpc/mis_inquilinos`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
+    const d=await r.json();
+    if(!d||!d.ok)return;
+    INQ=d;
+    document.getElementById('inqRentando').checked=!!d.rentando;
+    renderInquilinos();
+  }catch(e){}
+}
+
+function renderInquilinos(){
+  const lista=INQ.inquilinos||[];
+  document.getElementById('inqLista').innerHTML = lista.length ? lista.map(i=>`
+    <div style="border:1px solid var(--border);border-radius:13px;padding:15px;margin-bottom:10px;${i.activo?'':'opacity:.55'}">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div style="font-weight:700;font-size:15px;color:var(--ink)">${i.nombre_completo}</div>
+        <span style="background:${i.activo?'#E7F5EC':'#F1F3F7'};color:${i.activo?'#1B7A3D':'#6B7280'};border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700">${i.activo?'Habitando':'Salió'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 16px;margin-top:9px;font-size:13px;color:var(--body)">
+        <div>${TIPO_INQ[i.tipo]||i.tipo}${i.personas?' · '+i.personas+' personas':''}</div>
+        ${i.telefono?`<div>✆ ${i.telefono}</div>`:''}
+        ${i.email?`<div>✉ ${i.email}</div>`:''}
+        ${i.fecha_inicio?`<div>Desde ${new Date(i.fecha_inicio+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'})}${i.fecha_fin?' al '+new Date(i.fecha_fin+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):''}</div>`:''}
+        ${i.vehiculo?`<div>🚗 ${i.vehiculo}</div>`:''}
+        ${i.tiene_acceso?`<div style="color:var(--blue);font-weight:600">Acceso al portal: ${i.clave}</div>`:'<div style="color:var(--muted)">Sin acceso al portal</div>'}
+      </div>
+      <div style="display:flex;gap:7px;margin-top:11px">
+        <button onclick="editarInquilino(${i.id})" style="background:#F7F9FC;border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
+        <button onclick="bajaInquilino(${i.id},${i.activo?'false':'true'})" style="background:#F7F9FC;border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">${i.activo?'Marcar salida':'Reactivar'}</button>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Aún no has registrado a nadie. Si rentas tu depa, agrégalo aquí.</div>';
+
+  const serv=INQ.servicios||[];
+  document.getElementById('inqServicios').innerHTML = serv.length ? serv.map(x=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F1F3F7;flex-wrap:wrap">
+      <div><div style="font-weight:600;font-size:14px">${SERV_ICO[x.tipo]||'📄'} ${x.tipo.charAt(0).toUpperCase()+x.tipo.slice(1)} · ${x.periodo}</div>
+        <div style="font-size:12px;color:var(--muted)">${x.consumo?x.consumo+' · ':''}${x.fecha_vencimiento?'Vence '+new Date(x.fecha_vencimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'}):''}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-weight:700">$${Number(x.monto).toLocaleString('es-MX')}</span>
+        <span style="background:${x.pagado?'#E7F5EC':'#FBE9EC'};color:${x.pagado?'#1B7A3D':'#B00020'};border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700">${x.pagado?'Pagado':'Pendiente'}</span>
+        ${x.archivo_url?`<a href="${x.archivo_url}" target="_blank" style="color:var(--blue);font-size:12px;font-weight:600">Ver</a>`:''}
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Aún no hay recibos cargados para tu unidad.</div>';
+}
+
+function nuevoInquilino(){ formInquilino(null); }
+function editarInquilino(id){ formInquilino((INQ.inquilinos||[]).find(x=>x.id===id)); }
+
+function formInquilino(i){
+  const f=document.getElementById('inqForm');
+  const v=k=>i&&i[k]?String(i[k]).replace(/"/g,'&quot;'):'';
+  f.innerHTML=`<div style="background:#F7F9FC;border-radius:13px;padding:17px;margin-bottom:14px">
+    <div style="font-weight:700;margin-bottom:12px">${i?'Editar':'Nuevo'} inquilino</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="grid-column:1/-1"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Nombre completo *</label><input id="iqNombre" value="${v('nombre_completo')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Teléfono</label><input id="iqTel" value="${v('telefono')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Correo</label><input id="iqMail" type="email" value="${v('email')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Tipo de renta</label>
+        <select id="iqTipo" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px">
+          <option value="largo_plazo"${i&&i.tipo==='largo_plazo'?' selected':''}>Renta larga</option>
+          <option value="vacacional"${i&&i.tipo==='vacacional'?' selected':''}>Vacacional</option>
+        </select></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Personas</label><input id="iqPers" type="number" value="${v('personas')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Desde</label><input id="iqIni" type="date" value="${v('fecha_inicio')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Hasta (opcional)</label><input id="iqFin" type="date" value="${v('fecha_fin')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div style="grid-column:1/-1"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Vehículo (placas / modelo)</label><input id="iqAuto" value="${v('vehiculo')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div style="grid-column:1/-1;border-top:1px dashed var(--border);padding-top:11px;font-size:12px;color:var(--muted)">Opcional: dale acceso al portal para que vea avisos, eventos y descuentos.</div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Clave de acceso</label><input id="iqClave" value="${v('clave')}" placeholder="ej. inq101A" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Contraseña</label><input id="iqPass" type="text" placeholder="${i&&i.tiene_acceso?'dejar vacío = no cambiar':'crea una'}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
+    </div>
+    <div id="iqMsg" style="display:none;font-size:13px;font-weight:600;padding:10px 13px;border-radius:9px;margin-top:11px"></div>
+    <div style="display:flex;gap:8px;margin-top:13px">
+      <button id="iqSave" onclick="guardarInquilino(${i?i.id:'null'})" style="background:var(--blue);color:#fff;border:0;border-radius:9px;padding:11px 19px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Guardar</button>
+      <button onclick="document.getElementById('inqForm').innerHTML=''" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 19px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Cancelar</button>
+    </div></div>`;
+  f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function guardarInquilino(id){
+  const g=k=>document.getElementById(k).value.trim();
+  const msg=document.getElementById('iqMsg'), btn=document.getElementById('iqSave');
+  if(!g('iqNombre')){msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='Escribe el nombre.';return;}
+  btn.disabled=true;btn.textContent='Guardando…';
+  try{
+    const r=await fetch(`${URL}/rpc/guardar_inquilino`,{method:'POST',headers:H,body:JSON.stringify({
+      p_user_id:sesionUser,p_password:sesionPass,p_id:id,p_nombre:g('iqNombre'),p_email:g('iqMail'),
+      p_telefono:g('iqTel'),p_tipo:document.getElementById('iqTipo').value,
+      p_inicio:g('iqIni')||null,p_fin:g('iqFin')||null,p_personas:Number(g('iqPers'))||null,
+      p_vehiculo:g('iqAuto'),p_clave:g('iqClave'),p_pass_inq:g('iqPass')})});
+    const d=await r.json();
+    if(d&&d.ok){document.getElementById('inqForm').innerHTML='';await cargarInquilinos();}
+    else{msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='No se pudo guardar. Si pusiste clave de acceso, prueba con otra: puede estar ocupada.';btn.disabled=false;btn.textContent='Guardar';}
+  }catch(e){msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='Error de conexión.';btn.disabled=false;btn.textContent='Guardar';}
+}
+
+async function bajaInquilino(id,activo){
+  try{
+    const r=await fetch(`${URL}/rpc/baja_inquilino`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_id:id,p_activo:activo})});
+    const d=await r.json(); if(d&&d.ok)cargarInquilinos();
+  }catch(e){}
+}
+
+async function cambiarRentando(){
+  const val=document.getElementById('inqRentando').checked;
+  try{
+    await fetch(`${URL}/rpc/set_rentando`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_rentando:val})});
+  }catch(e){}
+}
+
 async function cargarAviso() {
   try {
     const r = await fetch(`${URL}/rpc/aviso_activo`, { method:'POST', headers:H,
@@ -1064,6 +1245,7 @@ async function doLogin() {
     cargarMisDatos();
     cargarAviso();
     cargarMisRentas();
+    cargarInquilinos();
     cargarMiRenta();
 
   } catch(e) {
@@ -1380,7 +1562,7 @@ function go(id, el) {
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('portal').classList.remove('menu-abierto');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', incidencias:'Incidencias' };
+  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', inquilinos:'Mis inquilinos', incidencias:'Incidencias' };
   document.getElementById('topbar-title').textContent = t[id] || id;
 }
 
