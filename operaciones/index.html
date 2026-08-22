@@ -122,13 +122,15 @@
     <button class="tab" data-tab="llamadas">Llamadas</button>
     <button class="tab" data-tab="avisos">Avisos</button>
     <button class="tab" data-tab="gastos">Gastos e IVA</button>
+    <button class="tab" data-tab="servicios">Luz y agua</button>
     <button class="tab" data-tab="rentas">Rentas</button>
     <button class="tab" data-tab="convenios">Convenios</button>
     <button class="tab" data-tab="descuentos">Descuentos</button>
   </div>
   <div class="who" style="gap:8px">
     <select id="condoSel" style="width:auto;padding:6px 9px;font-size:.8rem;background:#ffffff18;color:#fff;border:1px solid #ffffff33;border-radius:7px"></select>
-        <span id="who" style="opacity:.6"></span><button class="logout" id="logout">Salir</button>
+        <button id="btnRefresh" title="Actualizar datos" style="background:#ffffff1a;color:#fff;border:1px solid #ffffff33;border-radius:8px;padding:7px 13px;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer">↻ Actualizar</button>
+    <span id="who" style="opacity:.6"></span><button class="logout" id="logout">Salir</button>
   </div>
 </div>
 
@@ -417,6 +419,35 @@
   </div>
 </div>
 
+<!-- LUZ Y AGUA -->
+<div id="tab-servicios" class="wrap hidden">
+  <div class="card pad">
+    <div class="cob-head">
+      <h2 style="margin:0;font-size:1.2rem">Recibos de luz y agua</h2>
+      <select id="svPeriodo" style="width:auto;padding:9px 12px;font-size:.86rem;margin-left:auto"><option value="">Todos los periodos</option></select>
+    </div>
+    <div class="kpis" id="svKpis"></div>
+
+    <details class="sv-new" style="margin:18px 0">
+      <summary style="cursor:pointer;font-weight:700;color:var(--blue)">+ Cargar recibo</summary>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px" class="cvgrid">
+        <div><label>Unidad</label><input id="svIdent" list="svUnidades" placeholder="A-101 (vacío = áreas comunes)"><datalist id="svUnidades"></datalist></div>
+        <div><label>Servicio</label><select id="svTipo"><option value="luz">⚡ Luz (CFE)</option><option value="agua">💧 Agua (CAPA)</option><option value="gas">🔥 Gas</option><option value="internet">🌐 Internet</option></select></div>
+        <div><label>Periodo</label><input id="svPer" placeholder="2026-08 o JUL-AGO 2026"></div>
+        <div><label>Consumo</label><input id="svCons" placeholder="245 kWh / 12 m³"></div>
+        <div><label>Monto</label><input id="svMonto" type="number" step="0.01" placeholder="1450.00"></div>
+        <div><label>Vencimiento</label><input id="svVenc" type="date"></div>
+        <div style="grid-column:1/-1"><label>Liga al PDF (opcional)</label><input id="svUrl" placeholder="https://... (Drive, Dropbox)"></div>
+      </div>
+      <button class="btn" id="svBtn" style="margin-top:12px">Cargar recibo</button>
+      <div class="hint">Deja la unidad vacía para gastos de áreas comunes. Si la llenas, el propietario lo ve en su portal.</div>
+    </details>
+
+    <div class="hint" id="svCount"></div>
+    <div class="dirlist" id="svList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -427,7 +458,7 @@ const MESC=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'
 let CREDS={p_user:'',p_password:''};
 let UNITS=[], DIR=[], COB=[], CURRENT=null;
 let loaded={cobranza:false,pagos:false,residentes:false,incidencias:false,convenios:false,descuentos:false,llamadas:false,avisos:false,rentas:false};
-let INC=[], CV=[], DC=[], LL=[], AV=[], GA=null, incF='todas';
+let INC=[], CV=[], DC=[], LL=[], AV=[], GA=null, SV=null, incF='todas';
 let RT={unidades:[],reservas:[],solicitudes:[]}, CONDO=1, RT_SEL=null;
 let CORTE={anio:2026,mes:8};
 let curYear=2026;
@@ -464,7 +495,7 @@ function logout(){location.reload();}
 // ---------- TABS ----------
 function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
-  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas','avisos','rentas','gastos'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  ['cobranza','pagos','residentes','incidencias','convenios','descuentos','llamadas','avisos','rentas','gastos','servicios'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
   if(name==='cobranza'&&loaded.cobranza){reloadCobranza();}
   if(name==='pagos'&&!loaded.pagos){loadUnits();}
   if(name==='residentes'&&!loaded.residentes){loadDir();}
@@ -474,6 +505,7 @@ function showTab(name){
   if(name==='llamadas'&&!loaded.llamadas){loadLl();}
   if(name==='avisos'&&!loaded.avisos){loadAv();}
   if(name==='gastos'&&!loaded.gastos){initGastos();}
+  if(name==='servicios'&&!loaded.servicios){initServ();}
   if(name==='rentas'&&!loaded.rentas){loadRt();}
 }
 
@@ -1550,10 +1582,115 @@ async function crearGasto(){
   btn.disabled=false;btn.textContent='Guardar gasto';
 }
 
+// ---------- LUZ Y AGUA ----------
+const SV_ICO={luz:'⚡',agua:'💧',gas:'🔥',internet:'🌐'};
+async function initServ(){
+  if(!loaded.pagos)await loadUnits();
+  document.getElementById('svUnidades').innerHTML=UNITS.map(u=>`<option value="${u.ident}">`).join('');
+  const d=new Date();
+  document.getElementById('svPer').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  loaded.servicios=true; loadSv();
+}
+async function loadSv(){
+  const per=document.getElementById('svPeriodo').value||null;
+  try{
+    const res=await rpc('pg_recibos_servicios',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_condominio:1,p_periodo:per});
+    if(res&&res.ok!==false){SV=res;renderSv();}
+  }catch(e){toast('No se pudieron cargar los recibos.',true);}
+}
+function renderSv(){
+  const r=SV.resumen||{}, recs=SV.recibos||[];
+  document.getElementById('svKpis').innerHTML=`
+    <div class="kpi"><div class="lbl">⚡ Luz</div><div class="val">${money(r.luz)}</div></div>
+    <div class="kpi"><div class="lbl">💧 Agua</div><div class="val">${money(r.agua)}</div></div>
+    <div class="kpi"><div class="lbl">Por pagar</div><div class="val" style="color:${Number(r.pendiente)>0?'var(--warn)':'var(--ok)'}">${money(r.pendiente)}</div></div>`;
+  const sel=document.getElementById('svPeriodo');
+  if(!sel.dataset.listo){
+    sel.innerHTML='<option value="">Todos los periodos</option>'+(SV.periodos||[]).map(p=>`<option value="${p}">${p}</option>`).join('');
+    sel.dataset.listo='1';
+  }
+  document.getElementById('svCount').textContent=`${recs.length} recibos · total ${money(r.total)}`;
+  const list=document.getElementById('svList');list.innerHTML='';
+  if(recs.length===0){
+    list.innerHTML=`<div style="text-align:center;padding:32px;background:var(--silver);border-radius:14px">
+      <div style="font-size:2rem">⚡💧</div><div style="font-weight:700;margin-top:6px">Sin recibos cargados</div>
+      <div style="color:#6a7382;font-size:.86rem;margin:5px 0 14px">Sube los de CFE y CAPA. Los de unidad aparecen en el portal del propietario.</div>
+      <button class="btn" onclick="document.querySelector('.sv-new').open=true;document.getElementById('svIdent').focus();">+ Cargar el primero</button></div>`;
+    return;}
+  recs.forEach(x=>{
+    const row=document.createElement('div');row.className='drow';row.style.gridTemplateColumns='1fr auto';
+    row.innerHTML=`
+      <div class="nm">${SV_ICO[x.tipo]||'📄'} ${x.ident} · ${x.periodo}
+        <small>${x.propietario||'—'}${x.consumo?' · '+x.consumo:''}${x.fecha_vencimiento?' · vence '+new Date(x.fecha_vencimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'}):''}</small>
+        <div style="font-size:.9rem;font-weight:700;margin-top:3px">${money(x.monto)}${x.archivo_url?` · <a href="${x.archivo_url}" target="_blank" style="color:var(--blue);font-size:.8rem">Ver PDF</a>`:''}</div>
+      </div>
+      <div class="db" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <span class="badge ${x.pagado?'clear':'debt'}">${x.pagado?'Pagado ✓':'Pendiente'}</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn ghost svP" data-id="${x.id}" data-p="${x.pagado?'0':'1'}" style="padding:7px 11px;font-size:.76rem">${x.pagado?'Marcar pendiente':'Marcar pagado'}</button>
+          <button class="btn ghost svD" data-id="${x.id}" style="padding:7px 10px;font-size:.76rem;color:var(--warn)">✕</button>
+        </div>
+      </div>`;
+    row.querySelector('.svP').addEventListener('click',async e=>{
+      try{const r2=await rpc('pg_recibo_servicio_estado',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:Number(e.target.dataset.id),p_pagado:e.target.dataset.p==='1'});
+        if(r2&&r2.ok){toast('Actualizado');loadSv();}}catch(err){toast('Error de conexión.',true);}
+    });
+    row.querySelector('.svD').addEventListener('click',async e=>{
+      if(!confirm('¿Borrar este recibo?'))return;
+      try{const r2=await rpc('pg_borrar_recibo_servicio',{p_user:CREDS.p_user,p_password:CREDS.p_password,p_id:Number(e.target.dataset.id)});
+        if(r2&&r2.ok){toast('Recibo borrado');loadSv();}}catch(err){toast('Error de conexión.',true);}
+    });
+    list.appendChild(row);
+  });
+}
+async function cargarRecibo(){
+  const g=k=>document.getElementById(k).value.trim();
+  if(!g('svPer')||!Number(g('svMonto'))){toast('Escribe el periodo y el monto.',true);return;}
+  const btn=document.getElementById('svBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r=await rpc('pg_cargar_recibo_servicio',{p_user:CREDS.p_user,p_password:CREDS.p_password,
+      p_ident:g('svIdent'),p_tipo:document.getElementById('svTipo').value,p_periodo:g('svPer'),
+      p_consumo:g('svCons'),p_monto:Number(g('svMonto')),p_venc:g('svVenc')||null,p_url:g('svUrl')});
+    if(r&&r.ok){toast('Recibo cargado');['svIdent','svCons','svMonto','svUrl'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('svPeriodo').dataset.listo='';loadSv();}
+    else toast('No se pudo cargar.',true);
+  }catch(e){toast('Error de conexión.',true);}
+  btn.disabled=false;btn.textContent='Cargar recibo';
+}
+
+// ---------- ACTUALIZAR SIN PERDER SESIÓN ----------
+async function refrescarTodo(){
+  const btn=document.getElementById('btnRefresh');
+  btn.disabled=true; const txt=btn.textContent; btn.innerHTML='<span class="spin"></span>';
+  const act=(document.querySelector('.tab.active')||{}).dataset||{};
+  try{
+    Object.keys(loaded).forEach(k=>{ if(k!=='cobranza') loaded[k]=false; });
+    UNITS=[];DIR=[];INC=[];CV=[];DC=[];LL=[];AV=[];
+    const c=await rpc('pg_cobranza',CREDS);
+    if(c&&c.ok!==false){COB=c.meses||[];renderCobranza();}
+    const t=act.tab||'cobranza';
+    if(t==='pagos')await loadUnits();
+    else if(t==='residentes')await loadDir();
+    else if(t==='incidencias')await loadInc();
+    else if(t==='convenios')await loadCv();
+    else if(t==='descuentos')await loadDc();
+    else if(t==='llamadas')await loadLl();
+    else if(t==='avisos')await loadAv();
+    else if(t==='gastos'){loaded.gastos=true;await loadGa();}
+    else if(t==='servicios'){loaded.servicios=true;await loadSv();}
+    else if(t==='rentas'&&typeof loadRentas==='function')await loadRentas();
+    toast('Datos actualizados');
+  }catch(e){toast('No se pudo actualizar.',true);}
+  btn.disabled=false;btn.textContent=txt;
+}
+
 // ---------- eventos ----------
 document.getElementById('loginBtn').onclick=doLogin;
 document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('logout').onclick=logout;
+document.getElementById('btnRefresh').onclick=refrescarTodo;
+document.getElementById('svBtn').onclick=cargarRecibo;
+document.getElementById('svPeriodo').addEventListener('change',loadSv);
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
 document.getElementById('q').addEventListener('input',e=>renderUnits(e.target.value));
 document.getElementById('clearq').onclick=()=>{document.getElementById('q').value='';document.getElementById('fEdif').value='';document.getElementById('fDepto').value='';document.getElementById('fOrden').value='ident';renderUnits('');};
