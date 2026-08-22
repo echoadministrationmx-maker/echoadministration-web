@@ -1004,6 +1004,30 @@ function renderEncuestasAdmin() {
   }).join('');
 }
 
+async function refrescarAdmin() {
+  const b = document.getElementById('btnRefreshAdmin');
+  if (b) { b.disabled = true; b.textContent = 'Actualizando…'; }
+  try {
+    const r = await fetch(`${URL}/rpc/admin_panel`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass }) });
+    const d = await r.json();
+    if (d && d.ok) {
+      allResidentes = d.residentes || []; allPagos = d.pagos || [];
+      allIncidencias = d.incidencias || []; allLlamadas = d.llamadas || [];
+      allEventos = d.eventos || []; allEncuestas = d.encuestas || [];
+      cmLoaded = false;
+      calcularMetricas(); poblarFiltros(); renderIncidenciasAdmin();
+      poblarSelectResidentes(); renderLlamadasAdmin();
+      if (typeof renderEventosAdmin === 'function') renderEventosAdmin();
+      if (typeof renderEncuestasAdmin === 'function') renderEncuestasAdmin();
+      await cargarCobranzaOverview();
+      const pg = document.querySelector('.page.active');
+      if (pg && pg.id === 'page-cobranzames') { cmLoaded = false; cargarCobranzaMes(); }
+    }
+  } catch(e) {}
+  if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
+}
+
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
