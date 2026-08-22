@@ -8,6 +8,7 @@
     { "source": "/convenios", "destination": "/convenios/index.html" },
     { "source": "/operaciones", "destination": "/operaciones/index.html" },
     { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/alberca", "destination": "/alberca/index.html" },
     { "source": "/terminos", "destination": "/terminos.html" }
   ]
 }
