@@ -217,7 +217,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
               <div class="kpi-sub" id="ov-morosos-pct">—</div>
             </div>
             <div class="kpi yellow" onclick="go('cartera',document.querySelectorAll('.nav-item')[1])">
-              <div class="kpi-label">Cartera vencida 2026</div>
+              <div class="kpi-label">Cartera vencida</div>
               <div class="kpi-val coral" id="ov-cartera">—</div>
               <div class="kpi-sub" id="ov-cartera-hist">Histórico: —</div>
             </div>
@@ -227,19 +227,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div class="card-hdr"><span class="card-title">🎯 Situación de cobranza</span>
               <span style="font-size:12px;color:var(--muted)" id="an-periodo"></span>
             </div>
-            <div id="an-kpis" style="padding:0 18px 6px"></div>
-            <div style="padding:0 18px 18px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px">
-                <b style="font-size:14px">Recaudación por edificio</b>
-                <select id="an-ord" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit">
-                  <option value="pct">Mejor recaudación</option>
-                  <option value="peor">Peor recaudación</option>
-                  <option value="adeudo">Mayor adeudo</option>
-                  <option value="az">Edificio A-Z</option>
-                </select>
-              </div>
-              <div id="an-edif"></div>
-            </div>
+            <div id="an-kpis" style="padding:0 18px 18px"></div>
           </div>
 
           <div class="card">
@@ -257,6 +245,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           <div class="card" style="margin-top:16px">
             <div class="card-hdr"><span class="card-title">📈 Avance del año</span></div>
             <div id="ov-anual"></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hdr"><span class="card-title">🏢 Desempeño por edificio</span>
+              <select id="an-ord" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit">
+                <option value="pct">Mejor recaudación</option>
+                <option value="peor">Peor recaudación</option>
+                <option value="adeudo">Mayor adeudo</option>
+                <option value="az">Edificio A-Z</option>
+              </select>
+            </div>
+            <div style="padding:0 18px 18px">
+              <div id="an-edif"></div>
+              <div id="an-edif-leyenda" style="font-size:11.5px;color:var(--muted);margin-top:12px"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -300,7 +303,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           </div>
           <div class="card">
             <div class="card-hdr">
-              <span class="card-title" id="cartera-titulo">Cartera vencida 2026</span>
+              <span class="card-title" id="cartera-titulo">Cartera vencida</span>
               <input type="text" class="search-box" placeholder="🔍 Buscar residente o depto..." oninput="filtrarCartera(this.value)">
             </div>
             <div class="tbl-scroll">
@@ -587,12 +590,7 @@ function calcularMetricas() {
   allMorosos = morosos.sort((a, b) => b.deuda2026 - a.deuda2026);
 
   // KPIs
-  document.getElementById('ov-alcorriente').textContent = alcorriente.length;
-  document.getElementById('ov-alcorriente-pct').textContent = Math.round(alcorriente.length / allResidentes.length * 100) + '% del total';
-  document.getElementById('ov-morosos').textContent = morosos.length;
-  document.getElementById('ov-morosos-pct').textContent = Math.round(morosos.length / allResidentes.length * 100) + '% del total';
-  document.getElementById('ov-cartera').textContent = '$' + totalDeuda2026.toLocaleString();
-  document.getElementById('ov-cartera-hist').textContent = 'Histórico: $' + totalDeudaHist.toLocaleString();
+  // Los KPIs de al corriente/morosos los define pg_analisis (fuente única) — ver renderAnalisis()
 
   // Mapa id -> edificio (letra) para mostrarlo en todas las secciones
   edifMap = {};
@@ -622,7 +620,7 @@ function calcularMetricas() {
 
 function renderCartera(vista) {
   carteraVista = vista;
-  document.getElementById('cartera-titulo').textContent = vista === '2026' ? 'Cartera vencida 2026' : 'Historial completo de adeudos';
+  document.getElementById('cartera-titulo').textContent = vista === '2026' ? 'Cartera vencida' : 'Historial completo de adeudos';
   const data = vista === '2026'
     ? allMorosos
     : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
@@ -1094,47 +1092,67 @@ function renderAnalisis(){
   if(!anData)return;
   const g=anData.global||{}, M=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const pe=document.getElementById('an-periodo'); if(pe)pe.textContent=M[anData.mes]+' '+anData.anio;
+  // KPIs superiores: misma fuente, sin contradicciones
+  const set=(id,v)=>{const e=document.getElementById(id); if(e)e.textContent=v;};
+  set('ov-total', g.unidades||0);
+  set('ov-alcorriente', g.al_corriente||0);
+  set('ov-alcorriente-pct', Number(g.pct_al_corriente||0).toFixed(1)+'% del total');
+  set('ov-morosos', g.con_adeudo||0);
+  set('ov-morosos-pct', Number(g.pct_con_adeudo||0).toFixed(1)+'% del total');
+  set('ov-cartera', anMoney(g.adeudo_total));
+  set('ov-cartera-hist', (g.en_convenio||0)+' con convenio · '+anMoney(g.saldo_convenios));
   const k=document.getElementById('an-kpis');
-  if(k)k.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:11px">
-    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Recaudado</div>
-      <div style="font-size:20px;font-weight:800;color:var(--green)">${anMoney(g.cobrado_mes)}</div>
-      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)}</div></div>
-    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Pendiente</div>
-      <div style="font-size:20px;font-weight:800;color:var(--coral)">${anMoney(g.pendiente_mes)}</div>
-      <div style="font-size:11px;color:var(--muted)">del mes</div></div>
-    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">% recaudación</div>
-      <div style="font-size:20px;font-weight:800;color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div>
-      <div style="font-size:11px;color:var(--muted)">${g.unidades} unidades</div></div>
-    <div style="background:#E7F5EC;border-radius:12px;padding:13px">
+  if(k)k.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div style="background:#F7F9FC;border-radius:12px;padding:14px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Recaudado del mes</div>
+      <div style="font-size:22px;font-weight:800;color:var(--green)">${anMoney(g.cobrado_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)} · ${Number(g.pct_mes||0).toFixed(1)}%</div></div>
+    <div style="background:#F7F9FC;border-radius:12px;padding:14px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Pendiente del mes</div>
+      <div style="font-size:22px;font-weight:800;color:var(--coral)">${anMoney(g.pendiente_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">cartera histórica ${anMoney(g.adeudo_total)}</div></div>
+    <div style="background:#E7F5EC;border-radius:12px;padding:14px">
       <div style="font-size:11px;color:#1B7A3D;font-weight:700;text-transform:uppercase">Al corriente</div>
-      <div style="font-size:20px;font-weight:800">${g.al_corriente||0}</div>
-      <div style="font-size:11px;color:var(--muted)">${Number(g.pct_al_corriente||0).toFixed(1)}%</div></div>
-    <div style="background:#FBE9EC;border-radius:12px;padding:13px">
+      <div style="font-size:22px;font-weight:800">${g.al_corriente||0} <span style="font-size:13px;color:var(--muted);font-weight:600">/ ${g.unidades}</span></div>
+      <div style="font-size:11px;color:var(--muted)">${Number(g.pct_al_corriente||0).toFixed(1)}% del total</div></div>
+    <div style="background:#FBE9EC;border-radius:12px;padding:14px">
       <div style="font-size:11px;color:#B00020;font-weight:700;text-transform:uppercase">Con adeudo</div>
-      <div style="font-size:20px;font-weight:800">${g.con_adeudo||0}</div>
-      <div style="font-size:11px;color:var(--muted)">${anMoney(g.adeudo_total)}</div></div>
-    <div style="background:#EEF3FF;border-radius:12px;padding:13px">
-      <div style="font-size:11px;color:#1847CC;font-weight:700;text-transform:uppercase">Convenios</div>
-      <div style="font-size:20px;font-weight:800">${g.en_convenio||0}</div>
-      <div style="font-size:11px;color:var(--muted)">${anMoney(g.saldo_convenios)}</div></div>
+      <div style="font-size:22px;font-weight:800">${g.con_adeudo||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${Number(g.pct_con_adeudo||0).toFixed(1)}% del total</div></div>
+    <div style="background:#EEF3FF;border-radius:12px;padding:14px">
+      <div style="font-size:11px;color:#1847CC;font-weight:700;text-transform:uppercase">Con convenio</div>
+      <div style="font-size:22px;font-weight:800">${g.en_convenio||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${anMoney(g.saldo_convenios)} bajo acuerdo</div></div>
   </div>`;
+
   let ed=(anData.edificios||[]).slice();
   if(anOrd==='pct')ed.sort((a,b)=>b.pct-a.pct);
   else if(anOrd==='peor')ed.sort((a,b)=>a.pct-b.pct);
   else if(anOrd==='adeudo')ed.sort((a,b)=>b.adeudo_total-a.adeudo_total);
   else ed.sort((a,b)=>a.edificio.localeCompare(b.edificio));
   const c=document.getElementById('an-edif');
-  if(c)c.innerHTML=ed.map(e=>{
-    const col=e.pct>=70?'var(--green)':e.pct>=45?'var(--yellow)':'var(--coral)';
-    return `<div style="padding:10px 0;border-bottom:1px solid #F1F3F7">
-      <div style="display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;font-size:13px;margin-bottom:5px">
-        <b>Edificio ${e.edificio} <span style="color:var(--muted);font-weight:400">· ${e.unidades} u. · ${e.al_corriente} al corriente · ${e.con_adeudo} con adeudo${e.en_convenio?' · '+e.en_convenio+' convenio':''}</span></b>
-        <span style="font-weight:800;color:${col}">${Number(e.pct).toFixed(1)}% · ${anMoney(e.cobrado)}</span></div>
-      <div style="height:7px;background:#F1F3F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:${Math.min(e.pct,100)}%;background:${col};border-radius:99px"></div></div>
-    </div>`;}).join('');
+  if(c){
+    const max=Math.max(100,...ed.map(e=>Number(e.pct)));
+    c.innerHTML=`<div style="display:flex;align-items:flex-end;gap:6px;overflow-x:auto;padding:8px 0 4px;min-height:200px">
+      ${ed.map(e=>{
+        const p=Number(e.pct)||0;
+        const col=p>=70?'#059669':p>=45?'#D97706':'#DC2626';
+        const h=Math.max(4,Math.round(150*p/max));
+        return `<div title="Edificio ${e.edificio} · ${p.toFixed(1)}% · cobrado ${anMoney(e.cobrado)} · pendiente ${anMoney(e.pendiente_mes)} · ${e.con_adeudo} con adeudo"
+          style="flex:1 0 44px;display:flex;flex-direction:column;align-items:center;gap:5px">
+          <div style="font-size:10.5px;font-weight:800;color:${col}">${p.toFixed(0)}%</div>
+          <div style="width:100%;height:${h}px;background:${col};border-radius:5px 5px 0 0;transition:height .3s"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--ink)">${e.edificio}</div>
+          <div style="font-size:9.5px;color:var(--muted);line-height:1.25;text-align:center">${anMoney(e.cobrado)}<br><span style="color:#DC2626">${e.con_adeudo} mor.</span></div>
+        </div>`;}).join('')}
+    </div>`;
+    const lg=document.getElementById('an-edif-leyenda');
+    if(lg){
+      const mejor=ed.reduce((a,b)=>Number(a.pct)>=Number(b.pct)?a:b,ed[0]||{});
+      const peor=ed.reduce((a,b)=>Number(a.pct)<=Number(b.pct)?a:b,ed[0]||{});
+      lg.innerHTML=`🟢 ≥70% &nbsp;·&nbsp; 🟠 45–69% &nbsp;·&nbsp; 🔴 &lt;45% &nbsp;&nbsp;|&nbsp;&nbsp; Mejor: <b>${mejor.edificio||'—'}</b> (${Number(mejor.pct||0).toFixed(1)}%) &nbsp;·&nbsp; Requiere atención: <b>${peor.edificio||'—'}</b> (${Number(peor.pct||0).toFixed(1)}%)`;
+    }
+  }
   const so=document.getElementById('an-ord');
   if(so&&!so.dataset.l){so.dataset.l='1';so.onchange=e=>{anOrd=e.target.value;renderAnalisis();};}
 }
