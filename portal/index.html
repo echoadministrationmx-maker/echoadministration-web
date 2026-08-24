@@ -265,15 +265,34 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div class="page" id="page-cuenta">
         <div id="cuenta-loading" class="loading">⏳ Cargando estado de cuenta...</div>
         <div id="cuenta-content" class="hidden">
-          <div class="ec-header">
-            <div style="font-size:13px;opacity:.7">Saldo total pendiente</div>
-            <div class="ec-total" id="ec-total">$0</div>
-            <div style="font-size:13px;opacity:.7;margin-top:4px" id="ec-sub">Manzana 80</div>
-            <div class="ec-chips">
-              <div class="ec-chip"><div class="ec-chip-val" id="ec-pag">0</div><div class="ec-chip-lbl">Pagados</div></div>
-              <div class="ec-chip"><div class="ec-chip-val" id="ec-pend">0</div><div class="ec-chip-lbl">Pendientes</div></div>
-              <div class="ec-chip"><div class="ec-chip-val">$500</div><div class="ec-chip-lbl">Cuota mensual</div></div>
+          <div class="ec-header" style="padding-bottom:20px">
+            <div id="ec-sub" style="font-size:13px;opacity:.75">Manzana 80</div>
+
+            <div style="background:#ffffff1f;border-radius:16px;padding:18px;margin-top:14px">
+              <div style="font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.05em" id="ec-mesLbl">Mantenimiento del mes</div>
+              <div style="display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-top:5px">
+                <div class="ec-total" style="margin:0" id="ec-mesMonto">$515</div>
+                <span id="ec-mesEstado" style="background:#fff;color:#1E3A5F;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:800"></span>
+              </div>
+              <div style="font-size:12.5px;opacity:.8;margin-top:5px" id="ec-mesNota"></div>
             </div>
+
+            <div id="ec-anteriorBox" style="display:none;background:#ffffff14;border-radius:14px;padding:14px 16px;margin-top:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Adeudo de meses anteriores</div>
+                  <div style="font-size:12.5px;opacity:.75;margin-top:2px" id="ec-anteriorMeses"></div>
+                </div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px" id="ec-anteriorMonto">$0</div>
+              </div>
+            </div>
+
+            <div id="ec-totalBox" style="display:none;border-top:1px solid #ffffff33;margin-top:13px;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:13px;font-weight:700">Total a pagar hoy</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px" id="ec-total">$0</div>
+            </div>
+
+            <div id="ec-futuroNota" style="display:none;font-size:11.5px;opacity:.7;margin-top:11px"></div>
           </div>
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
@@ -556,6 +575,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <input id="md-tel" type="tel" placeholder="55 1234 5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
           </div>
 
+          <div id="md-pend" style="display:none;background:#FBF1DF;color:#B87503;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:14px">
+            Ayúdanos a confirmar tus datos. Con tu correo te enviamos comprobantes y avisos importantes.
+          </div>
           <div id="md-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:14px"></div>
           <button id="md-btn" onclick="guardarMisDatos()" style="background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Confirmar mis datos</button>
           <div id="md-conf" style="font-size:12px;color:var(--muted);margin-top:12px"></div>
@@ -992,6 +1014,7 @@ async function refrescarPortal() {
     await cargarAviso();
     await cargarMisRentas();
     await cargarInquilinos();
+    await cargarEstadoCuenta();
     if (typeof cargarMiRenta === 'function') await cargarMiRenta();
   } catch(e) {}
   if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
@@ -1115,6 +1138,55 @@ async function cambiarRentando(){
   }catch(e){}
 }
 
+// ===== ESTADO DE CUENTA CENTRADO EN EL MES EN CURSO =====
+const $m = n => '$' + Number(n||0).toLocaleString('es-MX');
+async function cargarEstadoCuenta(){
+  try{
+    const r=await fetch(`${URL}/rpc/mi_estado_cuenta`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
+    const d=await r.json();
+    if(!d||!d.ok)return;
+
+    const mes=d.mes_actual, pagado = mes && mes.estado==='pagado';
+    const cuota = mes ? Number(mes.monto) : Number(d.cuota_mes);
+    document.getElementById('ec-mesLbl').textContent='Mantenimiento · '+d.mes_nombre;
+    document.getElementById('ec-mesMonto').textContent=$m(cuota);
+    const est=document.getElementById('ec-mesEstado');
+    est.textContent = pagado ? '✓ Pagado' : 'Por pagar';
+    est.style.background = pagado ? '#D6F5E0' : '#fff';
+    est.style.color = pagado ? '#0E5C2C' : '#1E3A5F';
+    document.getElementById('ec-mesNota').textContent = pagado
+      ? 'Gracias, ya recibimos tu pago de este mes.'
+      : (mes && mes.vencimiento ? 'Vence el '+new Date(mes.vencimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long'}) : '');
+
+    const ant=Number(d.anterior_monto||0);
+    const box=document.getElementById('ec-anteriorBox');
+    if(ant>0){
+      box.style.display='block';
+      document.getElementById('ec-anteriorMonto').textContent=$m(ant);
+      const det=(d.anterior_detalle||[]).map(x=>String(x).replace('Cuota ',''));
+      document.getElementById('ec-anteriorMeses').textContent =
+        d.anterior_meses+' '+(d.anterior_meses===1?'mes':'meses')+(det.length?' · '+det.slice(0,3).join(', ')+(det.length>3?' y '+(det.length-3)+' más':''):'');
+    } else box.style.display='none';
+
+    const tot=Number(d.total_exigible||0);
+    const tb=document.getElementById('ec-totalBox');
+    if(ant>0 && tot>0){ tb.style.display='flex'; document.getElementById('ec-total').textContent=$m(tot); }
+    else { tb.style.display='none'; }
+
+    const fut=document.getElementById('ec-futuroNota');
+    if(Number(d.futuro_monto)>0){
+      fut.style.display='block';
+      fut.textContent='Nota: tienes '+d.futuro_meses+' mes(es) por '+$m(d.futuro_monto)+' con vencimiento futuro. Aún no son exigibles y no forman parte de tu adeudo.';
+    } else fut.style.display='none';
+
+    ['pago-total','pago-total2'].forEach(id=>{const e=document.getElementById(id); if(e)e.textContent=$m(tot);});
+    const kd=document.getElementById('kpi-deuda'); if(kd)kd.textContent=$m(tot);
+    const kp=document.getElementById('kpi-deuda-pill');
+    if(kp)kp.textContent = tot>0 ? (pagado?'Adeudo anterior':'Incluye este mes') : '✓ Al corriente';
+  }catch(e){}
+}
+
 async function cargarAviso() {
   try {
     const r = await fetch(`${URL}/rpc/aviso_activo`, { method:'POST', headers:H,
@@ -1155,6 +1227,8 @@ async function cargarMisDatos() {
     c.textContent = x.datos_confirmados_at
       ? 'Última confirmación: ' + new Date(x.datos_confirmados_at).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})
       : 'Aún no has confirmado tus datos.';
+    const pend = document.getElementById('md-pend');
+    if (pend) pend.style.display = x.datos_confirmados_at ? 'none' : 'block';
   } catch(e) {}
 }
 
@@ -1175,7 +1249,8 @@ async function guardarMisDatos() {
     const d = await r.json();
     if (d && d.ok) {
       msg.style.display='block'; msg.style.background='#E7F5EC'; msg.style.color='#1B7A3D';
-      msg.textContent='¡Listo! Tus datos quedaron confirmados y actualizados.';
+      msg.textContent='¡Listo! Tus datos quedaron confirmados. La administración los revisará.';
+      const pe=document.getElementById('md-pend'); if(pe)pe.style.display='none';
       document.getElementById('md-conf').textContent = 'Última confirmación: ' + d.confirmado;
     } else {
       msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
@@ -1246,6 +1321,7 @@ async function doLogin() {
     cargarAviso();
     cargarMisRentas();
     cargarInquilinos();
+    cargarEstadoCuenta();
     cargarMiRenta();
 
   } catch(e) {
@@ -1258,17 +1334,14 @@ async function doLogin() {
 function pintarDatos() {
   const pags = pagos.filter(p => p.estado === 'pagado');
   const pends = pagos.filter(p => p.estado === 'pendiente');
-  const deuda = pends.reduce((s,p) => s + (p.monto || 500), 0);
+  const deuda = pends.reduce((s,p) => s + (p.monto || 515), 0);
 
   document.getElementById('kpi-deuda').textContent = '$' + deuda.toLocaleString();
   document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? pends.length + ' meses pendientes' : '✓ Al corriente';
   document.getElementById('kpi-pagados').textContent = pags.length;
   document.getElementById('kpi-pendientes').textContent = pends.length;
   document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
-  document.getElementById('ec-total').textContent = '$' + deuda.toLocaleString();
   document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
-  document.getElementById('ec-pag').textContent = pags.length;
-  document.getElementById('ec-pend').textContent = pends.length;
   document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
   document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
 
