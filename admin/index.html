@@ -160,6 +160,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Pagos recibidos
       </button>
+      <button class="nav-item" onclick="go('llamadasadmin',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Llamadas recibidas
+      </button>
       <button class="nav-item" onclick="go('cobranzames',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Cobranza mensual
@@ -236,6 +240,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div id="ov-anual"></div>
           </div>
         </div>
+      </div>
+
+      <!-- LLAMADAS RECIBIDAS DE OPERACIONES -->
+      <div class="page" id="page-llamadasadmin">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><h3>Llamadas de atención enviadas por Operaciones</h3></div>
+          <div style="padding:0 18px 18px;font-size:13px;color:#7A8699">
+            Aquí llegan únicamente las llamadas que Rosaura ya revisó y analizó. Incluyen su dictamen y la fecha de seguimiento.
+          </div>
+        </div>
+        <div id="lla-loading" class="loading">⏳ Cargando…</div>
+        <div id="lla-content"></div>
       </div>
 
       <!-- COBRANZA MENSUAL -->
@@ -1033,9 +1049,44 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', cobranzames:'Cobranza mensual', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
+  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', cobranzames:'Cobranza mensual', llamadasadmin:'Llamadas de atención recibidas', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
   document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
   if (id === 'cobranzames') cargarCobranzaMes();
+  if (id === 'llamadasadmin') cargarLlamadasAdmin();
+}
+
+// ===== LLAMADAS RECIBIDAS =====
+async function cargarLlamadasAdmin() {
+  const cont = document.getElementById('lla-content');
+  try {
+    const r = await fetch(`${URL}/rpc/pg_llamadas_admin`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass }) });
+    const d = await r.json();
+    document.getElementById('lla-loading').classList.add('hidden');
+    const ll = (d && d.llamadas) || [];
+    if (!ll.length) {
+      cont.innerHTML = '<div class="card" style="padding:36px;text-align:center;color:var(--muted)">Sin llamadas enviadas por Operaciones.</div>';
+      return;
+    }
+    cont.innerHTML = ll.map(l => `
+      <div class="card" style="margin-bottom:14px;padding:18px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span class="badge blue">${l.ident || '—'}</span>
+          <b style="font-size:15px">${l.motivo || 'General'}</b>
+          <span class="badge" style="background:#E7F5EC;color:#1B7A3D">${l.ocupante_tipo === 'rentero' ? 'Rentero' : 'Propietario'}</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--muted)">Enviada ${new Date(l.enviado_admin_at).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${l.nombre_completo || ''} · reportada ${new Date(l.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:14px;color:var(--body)">${l.descripcion || ''}</div>
+        ${l.evidencia_url ? `<div style="margin-top:8px"><a href="${l.evidencia_url}" target="_blank" style="color:var(--blue);font-size:13px;font-weight:600">📎 Ver evidencia</a></div>` : ''}
+        <div style="background:#EEF3FF;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px">
+          <b style="color:var(--blue)">Análisis de Operaciones (${l.revisado_por || '—'}):</b> ${l.observaciones_rosaura || 'Sin observaciones'}
+        </div>
+        ${l.fecha_seguimiento ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">Seguimiento programado: ${new Date(l.fecha_seguimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('lla-loading').textContent = 'No se pudo cargar.';
+  }
 }
 
 // ===== COBRANZA MENSUAL =====
