@@ -223,6 +223,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             </div>
           </div>
 
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-hdr"><span class="card-title">🎯 Situación de cobranza</span>
+              <span style="font-size:12px;color:var(--muted)" id="an-periodo"></span>
+            </div>
+            <div id="an-kpis" style="padding:0 18px 6px"></div>
+            <div style="padding:0 18px 18px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px">
+                <b style="font-size:14px">Recaudación por edificio</b>
+                <select id="an-ord" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit">
+                  <option value="pct">Mejor recaudación</option>
+                  <option value="peor">Peor recaudación</option>
+                  <option value="adeudo">Mayor adeudo</option>
+                  <option value="az">Edificio A-Z</option>
+                </select>
+              </div>
+              <div id="an-edif"></div>
+            </div>
+          </div>
+
           <div class="card">
             <div class="card-hdr"><span class="card-title">📊 Cobranza 2026 por mes</span>
               <button class="card-link" onclick="go('cobranzames',document.querySelectorAll('.nav-item')[4])">Ver detalle →</button>
@@ -581,6 +600,7 @@ function calcularMetricas() {
 
   // Cobranza mensual (misma fuente que la pestaña Cobranza mensual)
   cargarCobranzaOverview();
+  cargarAnalisis();
 
   // Cartera stats
   document.getElementById('cartera-stats').innerHTML = `
@@ -1037,10 +1057,13 @@ async function refrescarAdmin() {
       if (typeof renderEventosAdmin === 'function') renderEventosAdmin();
       if (typeof renderEncuestasAdmin === 'function') renderEncuestasAdmin();
       await cargarCobranzaOverview();
+      await cargarAnalisis();
       const pg = document.querySelector('.page.active');
       if (pg && pg.id === 'page-cobranzames') { cmLoaded = false; cargarCobranzaMes(); }
     }
   } catch(e) {}
+  const u = document.getElementById('tb-ultima');
+  if (u) u.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
 }
 
@@ -1053,6 +1076,67 @@ function go(id, el) {
   document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
   if (id === 'cobranzames') cargarCobranzaMes();
   if (id === 'llamadasadmin') cargarLlamadasAdmin();
+}
+
+// ===== ANÁLISIS (misma fuente que Operaciones) =====
+let anData=null, anOrd='pct';
+const anMoney=n=>'$'+Number(n||0).toLocaleString('es-MX');
+async function cargarAnalisis(){
+  try{
+    const r=await fetch(`${URL}/rpc/pg_analisis`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user:adminUser,p_password:adminPass,p_anio:null,p_mes:null})});
+    const d=await r.json();
+    if(!d||d.ok===false)return;
+    anData=d; renderAnalisis();
+  }catch(e){}
+}
+function renderAnalisis(){
+  if(!anData)return;
+  const g=anData.global||{}, M=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const pe=document.getElementById('an-periodo'); if(pe)pe.textContent=M[anData.mes]+' '+anData.anio;
+  const k=document.getElementById('an-kpis');
+  if(k)k.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:11px">
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Recaudado</div>
+      <div style="font-size:20px;font-weight:800;color:var(--green)">${anMoney(g.cobrado_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)}</div></div>
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Pendiente</div>
+      <div style="font-size:20px;font-weight:800;color:var(--coral)">${anMoney(g.pendiente_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">del mes</div></div>
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">% recaudación</div>
+      <div style="font-size:20px;font-weight:800;color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div>
+      <div style="font-size:11px;color:var(--muted)">${g.unidades} unidades</div></div>
+    <div style="background:#E7F5EC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#1B7A3D;font-weight:700;text-transform:uppercase">Al corriente</div>
+      <div style="font-size:20px;font-weight:800">${g.al_corriente||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${Number(g.pct_al_corriente||0).toFixed(1)}%</div></div>
+    <div style="background:#FBE9EC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#B00020;font-weight:700;text-transform:uppercase">Con adeudo</div>
+      <div style="font-size:20px;font-weight:800">${g.con_adeudo||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${anMoney(g.adeudo_total)}</div></div>
+    <div style="background:#EEF3FF;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#1847CC;font-weight:700;text-transform:uppercase">Convenios</div>
+      <div style="font-size:20px;font-weight:800">${g.en_convenio||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${anMoney(g.saldo_convenios)}</div></div>
+  </div>`;
+  let ed=(anData.edificios||[]).slice();
+  if(anOrd==='pct')ed.sort((a,b)=>b.pct-a.pct);
+  else if(anOrd==='peor')ed.sort((a,b)=>a.pct-b.pct);
+  else if(anOrd==='adeudo')ed.sort((a,b)=>b.adeudo_total-a.adeudo_total);
+  else ed.sort((a,b)=>a.edificio.localeCompare(b.edificio));
+  const c=document.getElementById('an-edif');
+  if(c)c.innerHTML=ed.map(e=>{
+    const col=e.pct>=70?'var(--green)':e.pct>=45?'var(--yellow)':'var(--coral)';
+    return `<div style="padding:10px 0;border-bottom:1px solid #F1F3F7">
+      <div style="display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;font-size:13px;margin-bottom:5px">
+        <b>Edificio ${e.edificio} <span style="color:var(--muted);font-weight:400">· ${e.unidades} u. · ${e.al_corriente} al corriente · ${e.con_adeudo} con adeudo${e.en_convenio?' · '+e.en_convenio+' convenio':''}</span></b>
+        <span style="font-weight:800;color:${col}">${Number(e.pct).toFixed(1)}% · ${anMoney(e.cobrado)}</span></div>
+      <div style="height:7px;background:#F1F3F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:${Math.min(e.pct,100)}%;background:${col};border-radius:99px"></div></div>
+    </div>`;}).join('');
+  const so=document.getElementById('an-ord');
+  if(so&&!so.dataset.l){so.dataset.l='1';so.onchange=e=>{anOrd=e.target.value;renderAnalisis();};}
 }
 
 // ===== LLAMADAS RECIBIDAS =====
