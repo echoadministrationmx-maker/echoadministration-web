@@ -3,652 +3,481 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal de Residentes — Echo Administración</title>
+<title>Echo Admin — Panel de Administración</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--blue:#1847CC;--blue-light:#EBF0FD;--green:#059669;--green-light:#ECFDF5;--ink:#0F1923;--body:#374151;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;--white:#fff;--coral:#DC2626;--coral-light:#FEF2F2;--yellow:#D97706;--yellow-light:#FFFBEB}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--body);min-height:100vh}
 .hidden{display:none!important}
-#login-screen{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0F1923 0%,#1847CC 100%)}
-.login-nav{padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
-.login-nav a{font-size:13px;color:rgba(255,255,255,.6);text-decoration:none}
-.login-nav a:hover{color:#fff}
-.login-nav-links{display:flex;gap:20px}
-.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
-.login-box{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1923,#1847CC);padding:24px}
+.login-box{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.ll{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
 .lm{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
 .lm svg{width:20px;height:20px}
-.ln{font-size:17px;font-weight:800;color:var(--ink)}
-.ln span{color:var(--blue)}
+.ln{font-size:17px;font-weight:800;color:var(--ink)}.ln span{color:var(--blue)}
 .login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
-.login-sub{font-size:13.5px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
+.admin-badge{background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;padding:5px 14px;border-radius:100px;display:inline-block;margin-bottom:20px;width:100%;text-align:center}
 .fg{margin-bottom:16px}
 .fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
 .fg input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(24,71,204,.08)}
-.btn-login{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .2s}
-.btn-login:hover{background:#1240C0}
-.btn-login:disabled{opacity:.6;cursor:not-allowed}
+.btn-login{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
 .login-error{background:var(--coral-light);color:var(--coral);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
-.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
-.login-footer{padding:20px 32px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
-.login-footer a{font-size:12px;color:rgba(255,255,255,.35);text-decoration:none}
-.login-footer a:hover{color:rgba(255,255,255,.7)}
 
-#portal{min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:var(--bg)}
-.sidebar{background:var(--ink);display:flex;flex-direction:column}
-.sb-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
-.sb-lm{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
-.sb-lm svg{width:16px;height:16px}
-.sb-ln{font-size:14px;font-weight:700;color:#fff}
-.sb-ln span{color:#7BA8FF}
-.sb-user{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
-.sb-name{font-size:14px;font-weight:600;color:#fff}
-.sb-dept{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
-.nav{flex:1;padding:8px 0}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13.5px;color:rgba(255,255,255,.55);cursor:pointer;transition:background .1s;position:relative;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+/* LAYOUT */
+#admin{min-height:100vh;display:grid;grid-template-columns:220px 1fr}
+.sidebar{background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-logo{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px}
+.sb-lm{width:26px;height:26px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.sb-lm svg{width:14px;height:14px}
+.sb-ln{font-size:13px;font-weight:700;color:#fff}.sb-ln span{color:#7BA8FF}
+.sb-proj{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-proj-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.sb-proj-name{font-size:13px;font-weight:600;color:#fff}
+.nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;transition:background .1s;position:relative}
 .nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.9)}
 .nav-item.active{color:#fff;background:rgba(26,71,204,.25)}
 .nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
-.nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sb-bottom{padding:16px 20px;border-top:1px solid rgba(255,255,255,.07)}
-.btn-out{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;font-family:inherit;padding:0}
-.btn-out:hover{color:rgba(255,255,255,.8)}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.sb-bottom{padding:14px 20px;border-top:1px solid rgba(255,255,255,.07)}
+.btn-out{background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;font-family:inherit;padding:0}
 
-.main{display:flex;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
-.topbar-title{font-size:16px;font-weight:700;color:var(--ink)}
-.btn-ver{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.content{padding:24px;overflow-y:auto;flex:1}
+.main{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10}
+.topbar-title{font-size:15px;font-weight:700;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.tb-badge{background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+
+.content{padding:20px;overflow-y:auto;flex:1}
 .page{display:none}.page.active{display:block}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px}
-.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.kpi-val{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
-.kpi-val.danger{color:var(--coral)}.kpi-val.success{color:var(--green)}
-.kpi-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;margin-top:7px;font-weight:600}
-.kpi-pill.danger{background:var(--coral-light);color:var(--coral)}
-.kpi-pill.success{background:var(--green-light);color:var(--green)}
-.kpi-pill.warn{background:var(--yellow-light);color:var(--yellow)}
+/* COMPONENTS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .15s}
+.kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.blue::before{background:var(--blue)}.kpi.green::before{background:var(--green)}
+.kpi.coral::before{background:var(--coral)}.kpi.yellow::before{background:var(--yellow)}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-bottom:3px}
+.kpi-val.coral{color:var(--coral)}.kpi-val.green{color:var(--green)}.kpi-val.blue{color:var(--blue)}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.kpi-sub.up{color:var(--green)}.kpi-sub.down{color:var(--coral)}
 
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-.card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:700;color:var(--ink)}
+.card-link{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500}
+
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:11px;color:var(--muted);font-weight:600;padding:9px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
-.tbl td{padding:11px 12px;font-size:13.5px;border-bottom:1px solid var(--border)}
+.tbl th{font-size:10px;color:var(--muted);font-weight:700;padding:8px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.tbl td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--bg)}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600}
+.tbl tr:hover td{background:#fafafa}
+.tbl-scroll{overflow-x:auto}
+
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600;white-space:nowrap}
 .badge.paid{background:var(--green-light);color:var(--green)}
 .badge.pending{background:var(--yellow-light);color:var(--yellow)}
+.badge.overdue{background:var(--coral-light);color:var(--coral)}
+.badge.blue{background:var(--blue-light);color:var(--blue)}
 
-.ec-header{background:linear-gradient(135deg,var(--blue),#0E35A8);border-radius:12px;padding:24px;color:#fff;margin-bottom:16px}
-.ec-total{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:6px 0 4px}
-.ec-chips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.ec-chip{background:rgba(255,255,255,.15);border-radius:8px;padding:10px 16px;text-align:center}
-.ec-chip-val{font-size:16px;font-weight:700}
-.ec-chip-lbl{font-size:10px;opacity:.7;margin-top:2px}
-.loading{text-align:center;padding:48px;color:var(--muted);font-size:15px}
-/* ===== Responsive móvil ===== */
-.hamburguesa{display:none;background:none;border:none;cursor:pointer;color:var(--ink);padding:4px;flex-shrink:0}
-.hamburguesa svg{width:24px;height:24px;display:block}
-.sb-overlay{display:none}
-@media (max-width:820px){
-  #portal{grid-template-columns:1fr}
-  .sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;z-index:60;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
-  #portal.menu-abierto .sidebar{transform:translateX(0)}
-  .sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
-  #portal.menu-abierto .sb-overlay{display:block}
-  .hamburguesa{display:block}
-  .topbar{padding:0 14px;height:54px}
-  .btn-ver{display:none}
-  .topbar-title{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .content{padding:16px}
-  .kpi-grid{grid-template-columns:1fr;gap:12px}
-  .card{overflow-x:auto}
-  .tbl th,.tbl td{padding:9px 8px;font-size:12.5px}
-}
-@media (max-width:480px){
-  .login-box{padding:30px 22px}
-  .login-nav{padding:16px 18px}
-  .kpi-val{font-size:22px}
-}
+.prog-bar{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:100px;transition:width 1s ease}
+.prog-fill.green{background:var(--green)}.prog-fill.coral{background:var(--coral)}.prog-fill.blue{background:var(--blue)}
+
+.search-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search-box{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;color:var(--body);outline:none;min-width:200px}
+.search-box:focus{border-color:var(--blue)}
+.filter-select{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--body);outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--blue)}
+
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.stat-chip{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;flex:1;min-width:100px}
+.stat-chip-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.stat-chip-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+.loading{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+.empty-row td{text-align:center;color:var(--muted);padding:32px!important;font-style:italic}
+
+/* Cartera detail panel */
+.detail-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:8px;width:fit-content;margin-bottom:16px}
+.detail-tab{font-size:13px;font-weight:500;color:var(--muted);padding:6px 16px;border-radius:6px;cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .15s}
+.detail-tab.active{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-nav">
-    <a href="/">← Echo Administración</a>
-    <div class="login-nav-links">
-      <a href="/privacidad">Aviso de privacidad</a>
-      <a href="/terminos">Términos</a>
+  <div class="login-box">
+    <div class="ll">
+      <div class="lm"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <span class="ln">Echo <span>Admin</span></span>
     </div>
-  </div>
-  <div class="login-body">
-    <div class="login-box">
-      <div class="login-logo">
-        <div class="lm"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-        <span class="ln">Echo <span>Administración</span></span>
-      </div>
-      <h2>Portal de Residentes</h2>
-      <p class="login-sub">Manzana 80 · Aldea Tulum</p>
-      <div class="fg">
-        <label>Clave de acceso</label>
-        <input type="text" id="input-user" placeholder="Ej: 301D2, 204A, 101O1">
-      </div>
-      <div class="fg">
-        <label>Contraseña</label>
-        <input type="password" id="input-pass" placeholder="Tulum + tu clave">
-      </div>
-      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
-      <div class="login-error" id="login-error">Clave o contraseña incorrecta.</div>
-      <p class="login-hint">¿No sabes tu clave?<br><a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
-    </div>
-  </div>
-  <div class="login-footer">
-    <a href="/privacidad">Aviso de privacidad</a>
-    <a href="/terminos">Términos y condiciones</a>
-    <a href="mailto:echoadministrationmx@gmail.com">Contacto</a>
-    <a href="/">← Inicio</a>
+    <div class="admin-badge">🔐 Panel de Administración</div>
+    <h2>Acceso restringido</h2>
+    <p class="login-sub">Manzana 80 · Echo Administración</p>
+    <div class="fg"><label>Usuario</label><input type="text" id="a-user" placeholder="echoadmin"></div>
+    <div class="fg"><label>Contraseña</label><input type="password" id="a-pass" placeholder="••••••••"></div>
+    <button class="btn-login" onclick="adminLogin()">Entrar al panel →</button>
+    <div class="login-error" id="a-err">Usuario o contraseña incorrectos.</div>
   </div>
 </div>
 
-<div id="portal" class="hidden">
+<!-- ADMIN PANEL -->
+<div id="admin" class="hidden">
   <div class="sidebar">
     <div class="sb-logo">
-      <div class="sb-lm"><svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <div class="sb-lm"><svg viewBox="0 0 20 20" fill="none" width="14" height="14"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
       <span class="sb-ln">Echo <span>Admin</span></span>
     </div>
-    <div class="sb-user">
-      <div class="sb-name" id="sb-nombre">—</div>
-      <div class="sb-dept" id="sb-depto">—</div>
-    </div>
+    <div class="sb-proj"><div class="sb-proj-lbl">Condominio activo</div><div class="sb-proj-name">Manzana 80</div></div>
     <div class="nav">
-      <button class="nav-item active" onclick="go('dashboard',this)">
+      <div class="nav-section">Dashboard</div>
+      <button class="nav-item active" onclick="go('overview',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Resumen
+        Resumen general
       </button>
-      <button class="nav-item" onclick="go('cuenta',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Estado de cuenta
+      <div class="nav-section">Cobranza</div>
+      <button class="nav-item" onclick="go('cartera',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Cartera vencida
       </button>
-      <button class="nav-item" onclick="go('pago',this)">
+      <button class="nav-item" onclick="go('morosos',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Lista de morosos
+      </button>
+      <button class="nav-item" onclick="go('pagos',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Pagar ahora
+        Pagos recibidos
       </button>
-      <button class="nav-item" onclick="go('docs',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Documentos
+      <button class="nav-item" onclick="go('llamadasadmin',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Llamadas recibidas
+      </button>
+      <button class="nav-item" onclick="go('cobranzames',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Cobranza mensual
+      </button>
+      <div class="nav-section">Operaciones</div>
+      <button class="nav-item" onclick="go('residentes',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Residentes
+      </button>
+      <button class="nav-item" onclick="go('incidencias',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Incidencias
+      </button>
+      <button class="nav-item" onclick="go('llamadas',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Llamadas
       </button>
       <button class="nav-item" onclick="go('comunidad',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.94.36 1.86.7 2.73a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.35-1.35a2 2 0 0 1 2.11-.45c.87.34 1.79.57 2.73.7A2 2 0 0 1 22 16.92z"/></svg>
-        Contactos de emergencia
-      </button>
-      <button class="nav-item" onclick="go('comunidad2',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Comunidad
       </button>
-      <button class="nav-item" onclick="go('mirenta',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Mi renta
-      </button>
-      <button class="nav-item" onclick="go('inquilinos',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Mis inquilinos
-      </button>
-      <button class="nav-item" onclick="go('misrentas',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Mis rentas
-      </button>
-      <button class="nav-item" onclick="go('misdatos',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mis datos
-      </button>
-      <button class="nav-item" onclick="go('convenios',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        Convenios
-      </button>
-      <button class="nav-item" onclick="go('incidencias',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Incidencias
-      </button>
     </div>
-    <div class="sb-bottom">
-      <button class="btn-out" onclick="doLogout()">← Cerrar sesión</button>
-    </div>
+    <div class="sb-bottom"><button class="btn-out" onclick="adminLogout()">← Cerrar sesión</button></div>
   </div>
-
-  <div class="sb-overlay" id="sb-overlay" onclick="toggleMenu()"></div>
 
   <div class="main">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:12px;min-width:0">
-        <button class="hamburguesa" onclick="toggleMenu()" aria-label="Abrir menú">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <span class="topbar-title" id="topbar-title">Resumen</span>
-      </div>
-      <button class="btn-ver" onclick="go('cuenta',document.querySelectorAll('.nav-item')[1])">Ver estado de cuenta →</button>
+      <span class="topbar-title" id="topbar-title">Resumen general — Manzana 80</span>
+      <div class="topbar-right"><span class="tb-badge" id="tb-fecha">Cargando...</span></div>
     </div>
     <div class="content">
 
-      <!-- DASHBOARD -->
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="refrescarPortal()" id="btnRefreshPortal" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">↻ Actualizar</button>
-      </div>
-      <div id="banner-aviso" style="display:none;margin-bottom:18px;border-radius:14px;padding:16px 18px;font-size:14px"></div>
-
-      <div class="page active" id="page-dashboard">
-        <div id="dash-loading" class="loading">⏳ Cargando tu información...</div>
-        <div id="dash-content" class="hidden">
-          <div id="dash-aviso-llamadas"></div>
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div id="ov-loading" class="loading">⏳ Cargando datos...</div>
+        <div id="ov-content" class="hidden">
           <div class="kpi-grid">
-            <div class="kpi"><div class="kpi-label">Saldo pendiente</div><div class="kpi-val danger" id="kpi-deuda">$0</div><div class="kpi-pill danger" id="kpi-deuda-pill">—</div></div>
-            <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En el periodo</div></div>
-            <div class="kpi"><div class="kpi-label">Meses pendientes</div><div class="kpi-val" id="kpi-pendientes">0</div><div class="kpi-pill warn" id="kpi-pend-pill">2026</div></div>
-          </div>
-          <div class="card">
-            <div class="card-title">Últimos movimientos</div>
-            <table class="tbl">
-              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
-              <tbody id="tabla-mov"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ESTADO DE CUENTA -->
-      <div class="page" id="page-cuenta">
-        <div id="cuenta-loading" class="loading">⏳ Cargando estado de cuenta...</div>
-        <div id="cuenta-content" class="hidden">
-          <div class="ec-header" style="padding-bottom:20px">
-            <div id="ec-sub" style="font-size:13px;opacity:.75">Manzana 80</div>
-
-            <div style="background:#ffffff1f;border-radius:16px;padding:18px;margin-top:14px">
-              <div style="font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.05em" id="ec-mesLbl">Mantenimiento del mes</div>
-              <div style="display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-top:5px">
-                <div class="ec-total" style="margin:0" id="ec-mesMonto">$515</div>
-                <span id="ec-mesEstado" style="background:#fff;color:#1E3A5F;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:800"></span>
-              </div>
-              <div style="font-size:12.5px;opacity:.8;margin-top:5px" id="ec-mesNota"></div>
+            <div class="kpi blue" onclick="go('residentes',document.querySelectorAll('.nav-item')[5])">
+              <div class="kpi-label">Total departamentos</div>
+              <div class="kpi-val blue" id="ov-total">320</div>
+              <div class="kpi-sub">Manzana 80</div>
             </div>
-
-            <div id="ec-anteriorBox" style="display:none;background:#ffffff14;border-radius:14px;padding:14px 16px;margin-top:10px">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-                <div>
-                  <div style="font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Adeudo de meses anteriores</div>
-                  <div style="font-size:12.5px;opacity:.75;margin-top:2px" id="ec-anteriorMeses"></div>
-                </div>
-                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px" id="ec-anteriorMonto">$0</div>
-              </div>
+            <div class="kpi green" onclick="go('pagos',document.querySelectorAll('.nav-item')[3])">
+              <div class="kpi-label">Al corriente</div>
+              <div class="kpi-val green" id="ov-alcorriente">—</div>
+              <div class="kpi-sub" id="ov-alcorriente-pct">—</div>
             </div>
-
-            <div id="ec-totalBox" style="display:none;border-top:1px solid #ffffff33;margin-top:13px;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
-              <div style="font-size:13px;font-weight:700">Total a pagar hoy</div>
-              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px" id="ec-total">$0</div>
+            <div class="kpi coral" onclick="go('morosos',document.querySelectorAll('.nav-item')[2])">
+              <div class="kpi-label">Morosos</div>
+              <div class="kpi-val coral" id="ov-morosos">—</div>
+              <div class="kpi-sub" id="ov-morosos-pct">—</div>
             </div>
-
-            <div id="ec-futuroNota" style="display:none;font-size:11.5px;opacity:.7;margin-top:11px"></div>
+            <div class="kpi yellow" onclick="go('cartera',document.querySelectorAll('.nav-item')[1])">
+              <div class="kpi-label">Cartera vencida 2026</div>
+              <div class="kpi-val coral" id="ov-cartera">—</div>
+              <div class="kpi-sub" id="ov-cartera-hist">Histórico: —</div>
+            </div>
           </div>
-          <div id="cv-card" style="display:none"></div>
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-              <div class="card-title" style="margin-bottom:0">Historial de pagos</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <select id="filtro-anio" onchange="filtrar()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-family:inherit;color:var(--body);outline:none">
-                  <option value="todos">Todos los años</option>
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
+
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-hdr"><span class="card-title">🎯 Situación de cobranza</span>
+              <span style="font-size:12px;color:var(--muted)" id="an-periodo"></span>
+            </div>
+            <div id="an-kpis" style="padding:0 18px 6px"></div>
+            <div style="padding:0 18px 18px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px">
+                <b style="font-size:14px">Recaudación por edificio</b>
+                <select id="an-ord" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit">
+                  <option value="pct">Mejor recaudación</option>
+                  <option value="peor">Peor recaudación</option>
+                  <option value="adeudo">Mayor adeudo</option>
+                  <option value="az">Edificio A-Z</option>
                 </select>
-                <button onclick="go('pago',document.querySelectorAll('.nav-item')[2])" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💳 Pagar ahora</button>
               </div>
+              <div id="an-edif"></div>
             </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">📊 Cobranza 2026 por mes</span>
+              <button class="card-link" onclick="go('cobranzames',document.querySelectorAll('.nav-item')[4])">Ver detalle →</button>
+            </div>
+            <div id="ov-chart"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hdr"><span class="card-title">Estado de cobranza — mes actual</span></div>
+            <div id="ov-estado"><div style="font-size:13px;color:var(--muted)">Cargando…</div></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hdr"><span class="card-title">📈 Avance del año</span></div>
+            <div id="ov-anual"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LLAMADAS RECIBIDAS DE OPERACIONES -->
+      <div class="page" id="page-llamadasadmin">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><h3>Llamadas de atención enviadas por Operaciones</h3></div>
+          <div style="padding:0 18px 18px;font-size:13px;color:#7A8699">
+            Aquí llegan únicamente las llamadas que Rosaura ya revisó y analizó. Incluyen su dictamen y la fecha de seguimiento.
+          </div>
+        </div>
+        <div id="lla-loading" class="loading">⏳ Cargando…</div>
+        <div id="lla-content"></div>
+      </div>
+
+      <!-- COBRANZA MENSUAL -->
+      <div class="page" id="page-cobranzames">
+        <div id="cm-loading" class="loading">⏳ Cargando cobranza...</div>
+        <div id="cm-content" class="hidden">
+          <div class="detail-tabs" id="cm-years"></div>
+          <div class="kpi-grid" id="cm-kpis"></div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-head"><h3>Recaudación mes por mes</h3></div>
+            <div style="padding:8px 18px 18px" id="cm-table"></div>
+            <div style="padding:0 18px 18px;font-size:12px;color:#7A8699">
+              Ideal = 320 departamentos × cuota del mes ($500; $515 desde julio 2026). Se actualiza al registrar pagos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARTERA VENCIDA -->
+      <div class="page" id="page-cartera">
+        <div id="cartera-loading" class="loading">⏳ Cargando cartera...</div>
+        <div id="cartera-content" class="hidden">
+          <div class="stat-row" id="cartera-stats"></div>
+          <div class="detail-tabs">
+            <button class="detail-tab active" onclick="switchCartera('2026',this)">Adeudos 2026</button>
+            <button class="detail-tab" onclick="switchCartera('historico',this)">Histórico completo</button>
+          </div>
+          <div class="card">
+            <div class="card-hdr">
+              <span class="card-title" id="cartera-titulo">Cartera vencida 2026</span>
+              <input type="text" class="search-box" placeholder="🔍 Buscar residente o depto..." oninput="filtrarCartera(this.value)">
+            </div>
+            <div class="tbl-scroll">
+              <table class="tbl">
+                <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Meses pendientes</th><th>Total adeudo</th><th>Último pago</th><th>Estado</th></tr></thead>
+                <tbody id="tabla-cartera"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOROSOS -->
+      <div class="page" id="page-morosos">
+        <div class="search-row">
+          <input type="text" class="search-box" placeholder="🔍 Buscar por nombre o depto..." oninput="filtrarMorosos(this.value)" id="morosos-search">
+          <select class="filter-select" onchange="filtrarMorosos(document.getElementById('morosos-search').value)" id="morosos-edificio">
+            <option value="todos">Todos los edificios</option>
+          </select>
+          <select class="filter-select" onchange="filtrarMorosos(document.getElementById('morosos-search').value)" id="morosos-orden">
+            <option value="deuda">Mayor deuda primero</option>
+            <option value="meses">Más meses pendientes</option>
+            <option value="nombre">Por nombre A-Z</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">⚠️ Lista de morosos</span>
+            <span id="morosos-count" style="font-size:12px;color:var(--muted)">Cargando...</span>
+          </div>
+          <div class="tbl-scroll">
             <table class="tbl">
-              <thead><tr><th>Concepto</th><th>Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
-              <tbody id="tabla-cuenta"></tbody>
+              <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Meses 2026</th><th>Adeudo 2026</th><th>Histórico total</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-morosos"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- PAGAR -->
-      <div class="page" id="page-pago">
-        <div class="card" style="max-width:420px;margin:0 auto">
-          <div class="card-title">💳 Realizar pago</div>
-          <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px">
-            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Saldo pendiente</span><span style="font-weight:700;color:var(--coral)" id="pago-total">$0</span></div>
-            <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px"><span style="font-weight:700">Total a pagar</span><span style="font-weight:800;color:var(--green);font-size:20px" id="pago-total2">$0</span></div>
-          </div>
-          <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Pagar de forma segura</button>
-          <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
-          <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
+      <!-- PAGOS -->
+      <div class="page" id="page-pagos">
+        <div class="search-row">
+          <select class="filter-select" onchange="filtrarPagosMes()" id="pagos-mes">
+            <option value="todos">Todos los meses</option>
+            <option value="2026-05">Mayo 2026</option>
+            <option value="2026-04">Abril 2026</option>
+            <option value="2026-03">Marzo 2026</option>
+            <option value="2026-02">Febrero 2026</option>
+            <option value="2026-01">Enero 2026</option>
+            <option value="2025">Todo 2025</option>
+            <option value="2024">Todo 2024</option>
+            <option value="2023">Todo 2023</option>
+          </select>
+          <input type="text" class="search-box" placeholder="🔍 Buscar residente..." oninput="filtrarPagosMes()" id="pagos-search">
         </div>
-
-        <div id="card-transferencia" class="card" style="max-width:420px;margin:16px auto 0">
-          <div class="card-title" style="display:flex;align-items:center;gap:10px">
-            <span style="width:32px;height:32px;border-radius:8px;background:#00296B;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.02em">BBVA</span>
-            <span>Transferencia bancaria</span>
-          </div>
-          <p style="font-size:12.5px;color:var(--muted);margin:0 0 14px">Manzana 80 Aldea Tulum A.C.</p>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Banco</span><span style="font-weight:600">BBVA</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px"><span style="color:var(--muted)">Cuenta</span><span style="font-weight:600;user-select:all">0125301696</span></div>
-          <div style="background:var(--blue-light);border:1.5px solid var(--blue);border-radius:8px;padding:12px;margin:14px 0">
-            <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--blue);margin-bottom:4px">CLABE interbancaria</div>
-            <div id="clabe-valor" style="font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.03em;user-select:all">012 69400 1253 016 969</div>
-            <button onclick="copiarClabe()" style="margin-top:8px;background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar CLABE</button>
-          </div>
-          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px">
-            <span>✏️</span>
-            <div>
-              <div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Escribe este concepto</div>
-              <div style="font-size:13.5px;font-weight:700">Edif + Depto + Mes</div>
-            </div>
-          </div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.5">Después de transferir, envía tu comprobante a <a href="mailto:aldeamz80@gmail.com?subject=Comprobante%20de%20pago%20-%20Manzana%2080" style="color:var(--blue);font-weight:600">aldeamz80@gmail.com</a> para que se registre tu pago.</p>
-          <div style="display:flex;gap:6px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-            <span style="font-size:12px">🛡️</span>
-            <p style="font-size:11px;color:var(--muted);line-height:1.5;margin:0">Verifica que la cuenta, CLABE y beneficiario coincidan antes de transferir. No envíes contraseñas ni datos de tarjeta.</p>
-          </div>
-        </div>
-
-        <div style="max-width:420px;margin:16px auto 0;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div style="width:48px;height:48px;border-radius:12px;background:#E7F9EF;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💬</div>
-          <div style="flex:1;min-width:170px">
-            <div style="font-size:16px;font-weight:700;color:var(--ink)">¿Necesitas ayuda?</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:2px">Escríbenos para encontrar la mejor solución para tu situación.</div>
-          </div>
-          <a id="wa-soporte-pago" href="#" target="_blank" rel="noopener" style="background:#25D366;color:#fff;text-decoration:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:700;white-space:nowrap">Escríbenos</a>
-        </div>
-      </div>
-
-      <!-- DOCUMENTOS -->
-      <div class="page" id="page-docs">
         <div class="card">
-          <div class="card-title">Documentos del condominio</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div onclick="abrirReglamento('alberca')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">💧</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento de alberca</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
-            <div onclick="abrirReglamento('interno')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📋</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Reglamento interno</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📄</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Acta última asamblea</div><div style="font-size:11px;color:var(--muted)">2026</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">📊</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Presupuesto 2026</div><div style="font-size:11px;color:var(--muted)">Aprobado en asamblea</div></div></div>
-            <div onclick="alert('Disponible próximamente')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer"><div style="width:38px;height:38px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">🧾</div><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Estado financiero Q1</div><div style="font-size:11px;color:var(--muted)">Ene – Mar 2026</div></div></div>
+          <div class="card-hdr">
+            <span class="card-title">✅ Pagos recibidos</span>
+            <span id="pagos-count" style="font-size:12px;color:var(--muted)"></span>
+          </div>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Depto</th><th>Edificio</th><th>Residente</th><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+              <tbody id="tabla-pagos-admin"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- REGLAMENTO (modal) -->
-      <div id="reglamento-modal" onclick="if(event.target===this)cerrarReglamento()" style="display:none;position:fixed;inset:0;background:rgba(12,19,32,.5);z-index:200;align-items:center;justify-content:center;padding:16px">
-        <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
-          <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-            <div id="reglamento-titulo" style="font-size:16px;font-weight:700;color:var(--ink)">📋 Reglamento interno</div>
-            <button onclick="cerrarReglamento()" style="background:var(--bg);border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;color:var(--muted)">✕</button>
-          </div>
-          <div id="reglamento-body" style="padding:20px;overflow-y:auto"></div>
-          <div style="padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-shrink:0">¿Dudas sobre el reglamento? Escribe a <a href="mailto:aldeamz80@gmail.com" style="color:var(--blue);font-weight:600">aldeamz80@gmail.com</a></div>
+      <!-- RESIDENTES -->
+      <div class="page" id="page-residentes">
+        <div class="search-row">
+          <input type="text" class="search-box" placeholder="🔍 Buscar residente..." oninput="filtrarResidentes(this.value)" id="res-search">
+          <select class="filter-select" onchange="filtrarResidentes(document.getElementById('res-search').value)" id="res-edificio">
+            <option value="todos">Todos los edificios</option>
+          </select>
         </div>
-      </div>
-
-      <!-- COMUNIDAD Y AYUDA -->
-      <div class="page" id="page-comunidad">
-
-        <!-- 1) EMERGENCIAS -->
-        <div class="card" style="border-color:#FECACA;background:linear-gradient(135deg,#FEF2F2,#fff)">
-          <div class="card-title" style="color:var(--coral)">🚨 Emergencias · Quintana Roo</div>
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #FECACA;border-radius:10px;padding:18px">
-            <div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--coral)">Emergencia general</div>
-              <div style="font-size:46px;font-weight:800;color:var(--coral);line-height:1;margin-top:2px">911</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:4px">Policía · Bomberos · Ambulancia</div>
-            </div>
-            <a href="tel:911" style="display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#fff;text-decoration:none;border-radius:10px;padding:15px 26px;font-size:16px;font-weight:700">📞 Marcar 911</a>
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">👥 Residentes — Manzana 80</span>
+            <span id="res-count" style="font-size:12px;color:var(--muted)"></span>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px">
-            <a href="tel:+529848061349" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Cruz Roja Tulum</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 806 1349</div>
-            </a>
-            <a href="tel:+529848712688" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Protección Civil</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 871 2688</div>
-            </a>
-            <a href="tel:+529841336532" style="text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:12px">
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Bomberos Tulum</div>
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">984 133 6532</div>
-            </a>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>#</th><th>Depto</th><th>Edificio</th><th>Nombre completo</th><th>Estado de cuenta</th></tr></thead>
+              <tbody id="tabla-residentes-admin"></tbody>
+            </table>
           </div>
         </div>
-
-        <!-- 2) EMERGENCIA - ENVIAR UBICACIÓN POR WHATSAPP -->
-        <div class="card" style="border-color:#FECACA;background:linear-gradient(135deg,#FFF5F5,#fff)">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-            <span style="font-size:20px">📍</span>
-            <span style="font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--coral);text-transform:uppercase;line-height:1.35">En caso de emergencia manda WhatsApp con tu ubicación a:</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #FECACA;border-radius:10px;padding:18px">
-            <div>
-              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Central de monitoreo</div>
-              <div style="font-size:20px;font-weight:800;color:var(--ink);line-height:1.1;margin-top:2px">C2 Tulum</div>
-              <div style="font-size:26px;font-weight:800;color:var(--coral);line-height:1.1">984 240 5427</div>
-            </div>
-            <a href="https://wa.me/529842405427?text=Hola,%20comparto%20mi%20ubicaci%C3%B3n%20porque%20tengo%20una%20emergencia." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:10px;padding:15px 24px;font-size:15px;font-weight:700">💬 Enviar ubicación</a>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- CONVENIOS -->
-      <div class="page" id="page-mirenta">
-        <div id="renta-cont" style="max-width:760px"><div style="color:var(--muted);font-size:13px">Cargando…</div></div>
-      </div>
-
-      <div class="page" id="page-inquilinos">
-        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px;max-width:760px">
-          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-            <div style="flex:1;min-width:220px">
-              <h2 style="margin:0 0 3px;font-size:18px;color:var(--ink)">¿Tu departamento está rentado?</h2>
-              <p style="margin:0;color:var(--muted);font-size:13px">Mantener esto al día nos permite atender emergencias, controlar accesos y avisarle a quien realmente vive ahí.</p>
-            </div>
-            <label style="display:flex;align-items:center;gap:9px;cursor:pointer;background:#F7F9FC;border-radius:10px;padding:11px 15px;font-weight:600;font-size:14px">
-              <input type="checkbox" id="inqRentando" onchange="cambiarRentando()" style="width:19px;height:19px;accent-color:var(--blue)">
-              Sí, está rentado
-            </label>
-          </div>
-        </div>
-
-        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;max-width:760px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-            <h3 style="margin:0;font-size:17px;color:var(--ink)">Personas que habitan tu unidad</h3>
-            <button onclick="nuevoInquilino()" style="background:var(--blue);color:#fff;border:0;border-radius:9px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">+ Agregar</button>
-          </div>
-          <p style="color:var(--muted);font-size:12px;margin:0 0 16px">Puedes darles acceso al portal para que vean avisos, eventos y descuentos. Nunca verán tus adeudos ni tus datos financieros.</p>
-          <div id="inqForm"></div>
-          <div id="inqLista"></div>
-        </div>
-
-        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;max-width:760px;margin-top:16px">
-          <h3 style="margin:0 0 4px;font-size:17px;color:var(--ink)">Recibos de servicios</h3>
-          <p style="color:var(--muted);font-size:12px;margin:0 0 14px">Luz y agua de tu unidad, cargados por la administración.</p>
-          <div id="inqServicios"></div>
-        </div>
-      </div>
-
-      <div class="page" id="page-misrentas">
-        <div id="mr-load" style="color:var(--muted);font-size:14px">Cargando…</div>
-
-        <!-- NO INSCRITA: invitación + registro -->
-        <div id="mr-registro" style="display:none">
-          <div style="background:linear-gradient(135deg,#1847CC,#7BA8FF);color:#fff;border-radius:18px;padding:28px;margin-bottom:18px">
-            <h2 style="margin:0 0 8px;font-size:22px">Renta tu departamento con Echo</h2>
-            <p style="margin:0;opacity:.92;font-size:14px;line-height:1.6">Nosotros publicamos tu unidad en Airbnb y Booking, atendemos a los huéspedes, coordinamos limpieza y mantenimiento, y te entregamos un estado de cuenta claro cada mes. Tú solo recibes tu depósito.</p>
-          </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px;max-width:640px">
-            <h3 style="margin:0 0 4px;font-size:17px;color:var(--ink)">Registra tu departamento</h3>
-            <p style="color:var(--muted);font-size:13px;margin:0 0 18px">Cuéntanos de tu unidad y la administración te contacta para cerrar los detalles.</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div style="grid-column:1/-1">
-                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">¿Cómo describirías tu depa?</label>
-                <input id="mr-nombre" placeholder="Ej. 2 recámaras, vista al jardín, terraza" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
-              </div>
-              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Recámaras</label>
-                <input id="mr-rec" type="number" min="1" placeholder="2" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit"></div>
-              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Huéspedes máximo</label>
-                <input id="mr-cap" type="number" min="1" placeholder="4" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit"></div>
-              <div style="grid-column:1/-1"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Tarifa por noche que tienes en mente (opcional)</label>
-                <input id="mr-tarifa" type="number" placeholder="1800" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit"></div>
-              <div style="grid-column:1/-1"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Algo que debamos saber (opcional)</label>
-                <input id="mr-notas" placeholder="Ej. ya está en Airbnb, tiene mascota, etc." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit"></div>
-            </div>
-            <div id="mr-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-top:14px"></div>
-            <button id="mr-btn" onclick="enviarSolicitudRenta()" style="margin-top:16px;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Enviar solicitud</button>
-          </div>
-        </div>
-
-        <!-- SOLICITADA, EN REVISIÓN -->
-        <div id="mr-pendiente" style="display:none">
-          <div style="background:#FBF1DF;border:1px solid #B8750333;color:#B87503;border-radius:16px;padding:22px;max-width:640px">
-            <div style="font-weight:700;font-size:16px;margin-bottom:5px">Solicitud recibida</div>
-            <div style="font-size:14px;line-height:1.6">Tu departamento está en revisión por la administración. Te contactaremos para acordar tarifa, fotos y fechas de arranque. Cuando quede activo, aquí verás tu calendario y tu estado de cuenta.</div>
-          </div>
-        </div>
-
-        <!-- ACTIVA: calendario + liquidación -->
-        <div id="mr-activa" style="display:none">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px" id="mr-kpis"></div>
-
-          <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-              <h3 style="margin:0;font-size:17px;color:var(--ink)">Calendario de reservas</h3>
-              <div style="display:flex;gap:6px;align-items:center">
-                <button onclick="mrMes(-1)" style="border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 11px;cursor:pointer;font-family:inherit">‹</button>
-                <span id="mr-mesLbl" style="font-weight:600;font-size:14px;min-width:130px;text-align:center"></span>
-                <button onclick="mrMes(1)" style="border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 11px;cursor:pointer;font-family:inherit">›</button>
-              </div>
-            </div>
-            <div id="mr-cal"></div>
-            <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;color:var(--muted);flex-wrap:wrap">
-              <span><i style="display:inline-block;width:11px;height:11px;background:#FF5A5F;border-radius:3px;vertical-align:-1px"></i> Airbnb</span>
-              <span><i style="display:inline-block;width:11px;height:11px;background:#003580;border-radius:3px;vertical-align:-1px"></i> Booking</span>
-              <span><i style="display:inline-block;width:11px;height:11px;background:#1847CC;border-radius:3px;vertical-align:-1px"></i> Directa</span>
-              <span><i style="display:inline-block;width:11px;height:11px;background:#9CA3AF;border-radius:3px;vertical-align:-1px"></i> Bloqueo</span>
-            </div>
-          </div>
-
-          <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:18px">
-            <h3 style="margin:0 0 4px;font-size:17px;color:var(--ink)">Estado de cuenta de rentas</h3>
-            <p style="color:var(--muted);font-size:12px;margin:0 0 14px">Últimos 90 días</p>
-            <div id="mr-liq"></div>
-          </div>
-
-          <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px">
-            <h3 style="margin:0 0 14px;font-size:17px;color:var(--ink)">Reservas</h3>
-            <div id="mr-lista"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page" id="page-misdatos">
-        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px;max-width:640px">
-          <h2 style="margin:0 0 4px;font-size:19px;color:var(--ink)">Mis datos de contacto</h2>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 20px">Revisa que tu correo y teléfono estén correctos. Los usamos para enviarte tus comprobantes de pago, estados de cuenta y avisos importantes.</p>
-
-          <div style="background:#F7F9FC;border-radius:14px;padding:18px;margin-bottom:20px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Propietario</div><div id="md-nombre" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
-              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Clave de acceso</div><div id="md-clave" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
-              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Edificio</div><div id="md-edificio" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
-              <div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Departamento</div><div id="md-depto" style="font-weight:600;color:var(--ink);margin-top:3px">—</div></div>
-            </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:14px">Si algún dato de tu unidad es incorrecto, avísale a la administración.</div>
-          </div>
-
-          <div style="margin-bottom:14px">
-            <label style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">Correo electrónico</label>
-            <input id="md-email" type="email" placeholder="tucorreo@ejemplo.com" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
-            <div style="font-size:11px;color:var(--muted);margin-top:5px">Aquí te llegan tus comprobantes de pago.</div>
-          </div>
-          <div style="margin-bottom:18px">
-            <label style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">Teléfono / WhatsApp</label>
-            <input id="md-tel" type="tel" placeholder="55 1234 5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
-          </div>
-
-          <div id="md-pend" style="display:none;background:#FBF1DF;color:#B87503;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:14px">
-            Ayúdanos a confirmar tus datos. Con tu correo te enviamos comprobantes y avisos importantes.
-          </div>
-          <div id="md-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:14px"></div>
-          <button id="md-btn" onclick="guardarMisDatos()" style="background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Confirmar mis datos</button>
-          <div id="md-conf" style="font-size:12px;color:var(--muted);margin-top:12px"></div>
-        </div>
-      </div>
-
-      <div class="page" id="page-convenios">
-        <div style="margin-bottom:6px">
-          <div style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.02em">Convenios para residentes</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:3px">Beneficios y descuentos exclusivos por ser parte de Manzana 80.</div>
-        </div>
-        <div id="convenios-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px"></div>
       </div>
 
       <!-- INCIDENCIAS -->
-      <!-- COMUNIDAD (eventos + encuestas) -->
-      <div class="page" id="page-comunidad2">
+      <div class="page" id="page-incidencias">
         <div class="card">
-          <div class="card-title">📅 Eventos de tu manzana</div>
-          <div id="eventos-lista"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">🗳️ Encuestas activas</div>
-          <div id="encuestas-lista"></div>
+          <div class="card-hdr">
+            <span class="card-title">📋 Incidencias reportadas</span>
+            <span id="inc-admin-count" style="font-size:12px;color:var(--muted)"></span>
+          </div>
+          <div style="margin-bottom:14px">
+            <select id="inc-admin-filtro" onchange="renderIncidenciasAdmin()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)">
+              <option value="todos">Todas</option>
+              <option value="Pendiente">Pendientes</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Resuelta">Resueltas</option>
+            </select>
+          </div>
+          <div id="inc-admin-lista"></div>
         </div>
       </div>
 
-      <div class="page" id="page-incidencias">
-
+      <div class="page" id="page-llamadas">
         <div class="card">
-          <div class="card-title">📌 Llamadas de atención a tu departamento</div>
-          <div id="llamadas-lista"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">📝 Reportar una incidencia</div>
-          <div style="display:grid;gap:14px">
+          <div class="card-hdr"><span class="card-title">📌 Registrar llamada de atención</span></div>
+          <div style="display:grid;gap:14px;max-width:560px">
             <div>
-              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Categoría</label>
-              <select id="inc-categoria" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)">
-                <option>Plomería</option>
-                <option>Eléctrico</option>
-                <option>Áreas comunes</option>
-                <option>Seguridad</option>
-                <option>Limpieza</option>
-                <option>Otro</option>
-              </select>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Residente / Departamento</label>
+              <select id="ll-residente" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)"></select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Motivo</label>
+              <input id="ll-motivo" placeholder="Ej. Ruido excesivo, mascota sin correa…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
             </div>
             <div>
               <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Descripción</label>
-              <textarea id="inc-desc" rows="4" placeholder="Describe el problema con el mayor detalle posible…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
+              <textarea id="ll-desc" rows="3" placeholder="Detalle de la llamada de atención…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
+            </div>
+            <div id="ll-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="ll-btn" onclick="crearLlamada()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Registrar llamada</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Historial de llamadas</span><span id="ll-count" style="font-size:12px;color:var(--muted)"></span></div>
+          <div id="ll-lista"></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-comunidad">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">📅 Crear evento</span></div>
+          <div style="display:grid;gap:12px;max-width:560px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Título</label>
+              <input id="ev-titulo" placeholder="Ej. Asamblea trimestral" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
             </div>
             <div>
-              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Foto (opcional)</label>
-              <input type="file" id="inc-foto" accept="image/*" onchange="prepararFoto(this)" style="font-size:13px;font-family:inherit">
-              <div id="inc-foto-preview" style="margin-top:10px"></div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Fecha</label>
+              <input id="ev-fecha" type="date" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
             </div>
-            <div id="inc-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button id="inc-enviar" onclick="enviarIncidencia()" style="flex:1;min-width:160px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Enviar reporte</button>
-              <button onclick="correoIncidencia()" style="background:#fff;color:var(--blue);border:1px solid var(--blue);border-radius:8px;padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">✉️ Enviar por correo</button>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Descripción</label>
+              <textarea id="ev-desc" rows="2" placeholder="Detalles del evento…" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;color:var(--ink);box-sizing:border-box"></textarea>
             </div>
+            <div id="ev-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="ev-btn" onclick="crearEvento()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Agregar evento</button>
           </div>
+          <div style="margin-top:18px" id="ev-lista"></div>
         </div>
 
         <div class="card">
-          <div class="card-title">Mis reportes</div>
-          <div id="inc-lista"></div>
+          <div class="card-hdr"><span class="card-title">🗳️ Crear encuesta</span></div>
+          <div style="display:grid;gap:12px;max-width:560px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px">Pregunta</label>
+              <input id="en-pregunta" placeholder="Ej. ¿Qué día prefieren la asamblea?" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div style="display:grid;gap:8px">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--muted)">Opciones (mínimo 2)</label>
+              <input id="en-op1" placeholder="Opción 1" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op2" placeholder="Opción 2" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op3" placeholder="Opción 3 (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+              <input id="en-op4" placeholder="Opción 4 (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--ink);box-sizing:border-box">
+            </div>
+            <div id="en-msg" style="display:none;font-size:13px;padding:10px 12px;border-radius:8px"></div>
+            <button id="en-btn" onclick="crearEncuesta()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Publicar encuesta</button>
+          </div>
+          <div style="margin-top:18px" id="en-lista"></div>
         </div>
-
       </div>
 
     </div>
@@ -656,1011 +485,418 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 </div>
 
 <script>
-const SUPABASE_URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co';
-const URL = SUPABASE_URL + '/rest/v1';
-const AUTH_URL = SUPABASE_URL + '/auth/v1';
-const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';
+const URL = 'https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1';
 const KEY = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
-const H = {
-  'apikey': KEY,
-  'Authorization': 'Bearer ' + KEY,
-  'Content-Type': 'application/json',
-  'Accept': 'application/json',
-  'Prefer': 'return=representation'
-};
+const H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Accept': 'application/json', 'Content-Type': 'application/json' };
 
-let residente = null;
-let pagos = [];
-let incidencias = [];
-let llamadas = [];
-let eventos = [];
-let encuestas = [];
-let sesionUser = '';
-let sesionPass = '';
-let fotoBase64 = null;
+let allResidentes = [], allPagos = [], allMorosos = [], carteraVista = '2026';
+let allIncidencias = [], allLlamadas = [], allEventos = [], allEncuestas = [], adminUser = '', adminPass = '';
+let deudaMap = {};
 
-/* ============================================================
-   Sesión de pago (Mercado Pago) — Supabase Auth
-   El login del portal (login_residente) es independiente de
-   Supabase Auth. Para poder cobrar necesitamos además una
-   sesión real de Supabase Auth (mismo usuario/clave), porque
-   la Edge Function crear-preferencia exige un JWT autenticado.
-   ============================================================ */
-let mpAccessToken = null;
-let mpAuthPromise = null;
-let pagoEnProceso = false;
-
-async function resolverIdentidad(clave) {
-  try {
-    const r = await fetch(`${URL}/rpc/resolver_identidad`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify({ p_clave: clave })
-    });
-    if (!r.ok) return null;
-    const email = await r.json();
-    return email || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-async function iniciarSesionPago(clave, password) {
-  const email = await resolverIdentidad(clave);
-  if (!email) return null;
-  try {
-    const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
-      method: 'POST',
-      headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const d = await r.json().catch(() => null);
-    if (!r.ok || !d || !d.access_token) return null;
-    return d.access_token;
-  } catch (e) {
-    return null;
-  }
-}
-
-/* ============================================================
-   EDITABLE — Convenios. Agrega o quita objetos de esta lista.
-   ============================================================ */
-let CONVENIOS_ACTIVOS = [];
-
-/* ============================================================
-   EDITABLE — WhatsApp de soporte (botón en "Pagar ahora").
-   Reemplaza las X por tu número: 52 + 1 + 10 dígitos.
-   ============================================================ */
-const SOPORTE_NUMERO = '522206808919'; // WhatsApp de soporte Echo
-const SOPORTE_TEXTO  = 'Hola Echo Administration, necesito ayuda para realizar un convenio de pagos';
-
-function renderConvenios() {
-  const g = document.getElementById('convenios-grid');
-  if (!g) return;
-  if (!CONVENIOS_ACTIVOS.length) {
-    g.innerHTML = '<p style="color:var(--muted);font-size:13px">Aún no hay convenios activos. ¡Pronto habrá beneficios para ti!</p>';
-    return;
-  }
-  g.innerHTML = CONVENIOS_ACTIVOS.map(c => `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(12,19,32,.04);transition:transform .15s, box-shadow .15s"
-         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(12,19,32,.10)'"
-         onmouseout="this.style.transform='none';this.style.boxShadow='0 1px 2px rgba(12,19,32,.04)'">
-      <div style="width:54px;height:54px;border-radius:15px;background:#EEF3FF;display:flex;align-items:center;justify-content:center;font-size:27px;margin-bottom:16px">${c.icono || '🏷️'}</div>
-      <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25">${c.nombre_negocio || c.nombreNegocio}</div>
-      <div style="display:inline-block;margin-top:10px;background:#EEF3FF;color:var(--blue);font-size:13px;font-weight:700;padding:5px 13px;border-radius:100px">${c.descuento}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:6px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Vigencia: ${c.vigencia}
-      </div>
-    </div>`).join('');
-}
-
-async function cargarConvenios() {
-  try {
-    const r = await fetch(`${URL}/rpc/convenios_publicos`, { method:'POST', headers:H, body:'{}' });
-    const d = await r.json();
-    if (d && d.ok) { CONVENIOS_ACTIVOS = d.convenios || []; }
-  } catch(e) {}
-  renderConvenios();
-}
-
-function fmtF(d){ if(!d) return ''; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
-function money0(n){ return '$'+Number(n||0).toLocaleString('es-MX'); }
-
-async function cargarMiRenta() {
-  const c = document.getElementById('renta-cont');
-  try {
-    const r = await fetch(`${URL}/rpc/mis_rentas`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
-    const d = await r.json();
-    if (!d || !d.ok) { c.innerHTML = '<div style="color:var(--muted);font-size:13px">No disponible.</div>'; return; }
-
-    if (!d.activa) {
-      c.innerHTML = `
-        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px">
-          <h2 style="margin:0 0 6px;font-size:19px;color:var(--ink)">Programa de rentas vacacionales</h2>
-          <p style="color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 18px">
-            ¿Rentas tu departamento en Airbnb o Booking? Echo puede administrarlo por ti: coordinamos limpiezas y check-ins,
-            llevamos el calendario en un solo lugar y te entregamos el estado de cuenta con ingresos y gastos de tu unidad.
-          </p>
-          ${d.solicitud_pendiente ? `
-            <div style="background:#FBF1DF;color:#B87503;border-radius:12px;padding:14px 16px;font-size:13.5px;font-weight:600">
-              Ya recibimos tu solicitud. La administración la está revisando y te contactará pronto.
-            </div>` : `
-            <div style="margin-bottom:12px">
-              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">¿En qué plataformas la rentas?</label>
-              <input id="sr-plat" placeholder="Airbnb, Booking, particular…" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
-            </div>
-            <div style="margin-bottom:12px">
-              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Liga de calendario de Airbnb (opcional)</label>
-              <input id="sr-air" placeholder="https://www.airbnb.mx/calendar/ical/..." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit">
-            </div>
-            <div style="margin-bottom:12px">
-              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Liga de calendario de Booking (opcional)</label>
-              <input id="sr-book" placeholder="https://admin.booking.com/..." style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit">
-            </div>
-            <div style="margin-bottom:16px">
-              <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Comentarios</label>
-              <input id="sr-com" placeholder="Cuéntanos de tu unidad" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit">
-            </div>
-            <div id="sr-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:12px"></div>
-            <button id="sr-btn" onclick="enviarSolicitudRenta()" style="background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Quiero registrar mi departamento</button>
-          `}
-        </div>`;
-      return;
-    }
-
-    const res = d.reservas || [], gas = d.gastos || [], rm = d.resumen_mes || {};
-    const neto = Number(rm.ingresos||0) - Number(rm.gastos||0);
-    const hoy = new Date().toISOString().slice(0,10);
-    const prox = res.filter(x => x.checkout >= hoy);
-    c.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
-        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px">
-          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Ingresos del mes</div>
-          <div style="font-size:22px;font-weight:800;color:#1B8A4C;margin-top:3px">${money0(rm.ingresos)}</div></div>
-        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px">
-          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Gastos del mes</div>
-          <div style="font-size:22px;font-weight:800;color:#C0392B;margin-top:3px">${money0(rm.gastos)}</div></div>
-        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px">
-          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Neto · ${rm.noches||0} noches</div>
-          <div style="font-size:22px;font-weight:800;color:var(--blue);margin-top:3px">${money0(neto)}</div></div>
-      </div>
-
-      <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px">
-        <h3 style="margin:0 0 12px;font-size:16px">Próximas reservas</h3>
-        ${prox.length ? prox.map(x => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #F1F3F7;gap:10px">
-            <div><div style="font-weight:600;font-size:14px">${x.huesped || (x.estado==='bloqueo'?'No disponible':'Reserva')}</div>
-              <div style="font-size:12px;color:var(--muted)">${fmtF(x.checkin)} → ${fmtF(x.checkout)} · ${x.noches} noche(s) · ${x.origen}</div></div>
-            <div style="font-weight:700">${money0(x.monto_total)}</div>
-          </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Sin reservas próximas.</div>'}
-      </div>
-
-      <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px">
-        <h3 style="margin:0 0 12px;font-size:16px">Gastos recientes</h3>
-        ${gas.length ? gas.map(g => `
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F3F7">
-            <div><div style="font-weight:600;font-size:13.5px">${g.concepto}</div>
-              <div style="font-size:11.5px;color:var(--muted)">${fmtF(g.fecha)} · ${g.tipo}</div></div>
-            <div style="font-weight:700;color:#C0392B">${money0(g.monto)}</div>
-          </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Sin gastos registrados.</div>'}
-      </div>`;
-  } catch(e) { c.innerHTML = '<div style="color:var(--muted);font-size:13px">Error de conexión.</div>'; }
-}
-
-async function enviarSolicitudRenta() {
-  const btn = document.getElementById('sr-btn'), msg = document.getElementById('sr-msg');
-  const plat = document.getElementById('sr-plat').value.trim();
-  if (!plat) { msg.style.display='block'; msg.style.background='#FDEDED'; msg.style.color='#C0392B'; msg.textContent='Dinos en qué plataformas la rentas.'; return; }
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  try {
-    const r = await fetch(`${URL}/rpc/solicitar_renta`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_plataformas: plat,
-        p_ical_airbnb: document.getElementById('sr-air').value.trim(),
-        p_ical_booking: document.getElementById('sr-book').value.trim(),
-        p_comentarios: document.getElementById('sr-com').value.trim() }) });
-    const d = await r.json();
-    if (d && d.ok) { cargarMiRenta(); }
-    else { msg.style.display='block'; msg.style.background='#FDEDED'; msg.style.color='#C0392B';
-      msg.textContent = (d && d.error === 'ya_tienes_solicitud') ? 'Ya tienes una solicitud en revisión.' : 'No se pudo enviar.';
-      btn.disabled=false; btn.textContent='Quiero registrar mi departamento'; }
-  } catch(e) { btn.disabled=false; btn.textContent='Quiero registrar mi departamento'; }
-}
-
-// ===== MIS RENTAS =====
-let MR = null, mrCursor = new Date();
-const MR_CANAL = { airbnb:['#FF5A5F','Airbnb'], booking:['#003580','Booking'], directa:['#1847CC','Directa'], bloqueo:['#9CA3AF','Bloqueo'] };
-const mrMoney = n => '$' + Number(n||0).toLocaleString('es-MX');
-
-async function cargarMisRentas() {
-  try {
-    const r = await fetch(`${URL}/rpc/mis_rentas`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
-    const d = await r.json();
-    document.getElementById('mr-load').style.display = 'none';
-    if (!d || !d.ok) return;
-    MR = d;
-    if (d.inscrita) { document.getElementById('mr-activa').style.display='block'; renderMisRentas(); }
-    else if (d.solicitada) { document.getElementById('mr-pendiente').style.display='block'; }
-    else { document.getElementById('mr-registro').style.display='block'; }
-  } catch(e) { document.getElementById('mr-load').textContent = 'No se pudo cargar.'; }
-}
-
-async function enviarSolicitudRenta() {
-  const nombre = document.getElementById('mr-nombre').value.trim();
-  const rec = Number(document.getElementById('mr-rec').value) || null;
-  const cap = Number(document.getElementById('mr-cap').value) || null;
-  const tar = Number(document.getElementById('mr-tarifa').value) || null;
-  const notas = document.getElementById('mr-notas').value.trim();
-  const msg = document.getElementById('mr-msg'), btn = document.getElementById('mr-btn');
-  if (!nombre) { msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020'; msg.textContent='Describe brevemente tu departamento.'; return; }
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  try {
-    const r = await fetch(`${URL}/rpc/solicitar_renta`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_nombre: nombre, p_recamaras: rec, p_capacidad: cap, p_tarifa: tar, p_notas: notas }) });
-    const d = await r.json();
-    if (d && d.ok) {
-      document.getElementById('mr-registro').style.display='none';
-      document.getElementById('mr-pendiente').style.display='block';
-    } else {
-      msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
-      msg.textContent='No se pudo enviar. Inténtalo de nuevo.';
-      btn.disabled=false; btn.textContent='Enviar solicitud';
-    }
-  } catch(e) {
-    msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
-    msg.textContent='Error de conexión.'; btn.disabled=false; btn.textContent='Enviar solicitud';
-  }
-}
-
-function mrMes(delta) { mrCursor.setMonth(mrCursor.getMonth()+delta); renderCalendario(); }
-
-function renderMisRentas() {
-  const res = MR.reservas || [], gas = MR.gastos || [], u = MR.unidad || {};
-  const ingresos = res.reduce((a,r)=>a+Number(r.tarifa_total||0),0);
-  const comision = res.reduce((a,r)=>a+Number(r.comision||0),0);
-  const gastos = gas.reduce((a,g)=>a+Number(g.monto||0),0);
-  const neto = ingresos - comision - gastos;
-  const noches = res.reduce((a,r)=>a+Number(r.noches||0),0);
-
-  document.getElementById('mr-kpis').innerHTML = `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Ingresos</div>
-      <div style="font-size:21px;font-weight:800;color:var(--ink);margin-top:2px">${mrMoney(ingresos)}</div></div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Noches rentadas</div>
-      <div style="font-size:21px;font-weight:800;color:var(--ink);margin-top:2px">${noches}</div></div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Tu neto</div>
-      <div style="font-size:21px;font-weight:800;color:#1B7A3D;margin-top:2px">${mrMoney(neto)}</div></div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:15px">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase">Tarifa / noche</div>
-      <div style="font-size:21px;font-weight:800;color:var(--ink);margin-top:2px">${u.tarifa?mrMoney(u.tarifa):'—'}</div></div>`;
-
-  const filaGasto = t => gas.filter(g=>g.tipo===t).reduce((a,g)=>a+Number(g.monto),0);
-  const op = filaGasto('operativo'), sv = filaGasto('servicios'), mt = filaGasto('mantenimiento') + filaGasto('amenidad');
-  const fila = (lbl,val,col,bold) => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F3F7;${bold?'font-weight:700;font-size:16px;border-bottom:0;border-top:2px solid var(--border);margin-top:6px;padding-top:12px':'font-size:14px'}">
-      <span style="color:${bold?'var(--ink)':'var(--body)'}">${lbl}</span><span style="color:${col||'var(--ink)'}">${val}</span></div>`;
-  document.getElementById('mr-liq').innerHTML =
-    fila('Ingresos por reservas', mrMoney(ingresos)) +
-    fila(`Comisión Echo (${u.comision||20}%)`, '− '+mrMoney(comision), '#B00020') +
-    (op?fila('Gastos operativos', '− '+mrMoney(op), '#B00020'):'') +
-    (sv?fila('Servicios (luz, agua, internet)', '− '+mrMoney(sv), '#B00020'):'') +
-    (mt?fila('Mantenimiento y amenidades', '− '+mrMoney(mt), '#B00020'):'') +
-    fila('Neto a tu favor', mrMoney(neto), '#1B7A3D', true);
-
-  document.getElementById('mr-lista').innerHTML = res.length ? res.slice().reverse().map(r=>{
-    const [col,nom] = MR_CANAL[(r.canal||'directa').toLowerCase()] || MR_CANAL.directa;
-    const ci = new Date(r.checkin+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'});
-    const co = new Date(r.checkout+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
-    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F1F3F7;flex-wrap:wrap">
-      <div><div style="font-weight:600;font-size:14px;color:var(--ink)">${ci} → ${co} <span style="color:var(--muted);font-weight:400">· ${r.noches} noches</span></div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">
-          <span style="background:${col};color:#fff;border-radius:5px;padding:1px 7px;font-size:11px;font-weight:600">${nom}</span>
-          ${r.huesped?' · '+r.huesped:''}</div></div>
-      <div style="font-weight:700;font-size:15px">${mrMoney(r.tarifa_total)}</div>
-    </div>`;
-  }).join('') : '<div style="color:var(--muted);font-size:13px">Aún no hay reservas registradas.</div>';
-
-  renderCalendario();
-}
-
-function renderCalendario() {
-  if (!MR) return;
-  const res = (MR.reservas||[]);
-  const y = mrCursor.getFullYear(), m = mrCursor.getMonth();
-  document.getElementById('mr-mesLbl').textContent =
-    mrCursor.toLocaleDateString('es-MX',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
-  const primero = new Date(y,m,1), dias = new Date(y,m+1,0).getDate();
-  let inicio = primero.getDay(); inicio = inicio===0?6:inicio-1; // lunes primero
-  const ocupado = {};
-  res.forEach(r=>{
-    const ci=new Date(r.checkin+'T12:00:00'), co=new Date(r.checkout+'T12:00:00');
-    for(let d=new Date(ci); d<co; d.setDate(d.getDate()+1)){
-      if(d.getFullYear()===y && d.getMonth()===m) ocupado[d.getDate()] = (r.canal||'directa').toLowerCase();
-    }
-  });
-  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
-  ['L','M','M','J','V','S','D'].forEach(d=>html+=`<div style="text-align:center;font-size:11px;color:var(--muted);font-weight:600;padding:4px 0">${d}</div>`);
-  for(let i=0;i<inicio;i++) html+='<div></div>';
-  const hoy=new Date();
-  for(let d=1;d<=dias;d++){
-    const canal=ocupado[d];
-    const col=canal?(MR_CANAL[canal]||MR_CANAL.directa)[0]:null;
-    const esHoy = hoy.getFullYear()===y&&hoy.getMonth()===m&&hoy.getDate()===d;
-    html+=`<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:${canal?'700':'500'};
-      background:${col||'#F7F9FC'};color:${canal?'#fff':'var(--body)'};${esHoy?'box-shadow:inset 0 0 0 2px var(--blue)':''}">${d}</div>`;
-  }
-  document.getElementById('mr-cal').innerHTML = html + '</div>';
-}
-
-async function refrescarPortal() {
-  const b = document.getElementById('btnRefreshPortal');
-  if (b) { b.disabled = true; b.textContent = 'Actualizando…'; }
-  try {
-    const r = await fetch(`${URL}/rpc/login_residente`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
-    const d = await r.json();
-    if (d && d.ok) {
-      if (typeof residente !== 'undefined' && d.residente) residente = d.residente;
-      if (d.pagos) pagos = d.pagos;
-      if (typeof pintarDatos === 'function') pintarDatos();
-      if (typeof renderIncidencias === 'function') renderIncidencias();
-      if (typeof renderLlamadas === 'function') renderLlamadas();
-      if (typeof renderAvisoLlamadas === 'function') renderAvisoLlamadas();
-    }
-    await cargarConvenios();
-    await cargarMisDatos();
-    await cargarAviso();
-    await cargarMisRentas();
-    await cargarInquilinos();
-    await cargarEstadoCuenta();
-    await cargarConvenio();
-    if (typeof cargarMiRenta === 'function') await cargarMiRenta();
-  } catch(e) {}
-  if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
-}
-
-// ===== MIS INQUILINOS =====
-let INQ=null;
-const TIPO_INQ={largo_plazo:'Renta larga',vacacional:'Vacacional'};
-const SERV_ICO={luz:'⚡',agua:'💧',gas:'🔥',internet:'🌐'};
-
-async function cargarInquilinos(){
-  try{
-    const r=await fetch(`${URL}/rpc/mis_inquilinos`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
-    const d=await r.json();
-    if(!d||!d.ok)return;
-    INQ=d;
-    document.getElementById('inqRentando').checked=!!d.rentando;
-    renderInquilinos();
-  }catch(e){}
-}
-
-function renderInquilinos(){
-  const lista=INQ.inquilinos||[];
-  document.getElementById('inqLista').innerHTML = lista.length ? lista.map(i=>`
-    <div style="border:1px solid var(--border);border-radius:13px;padding:15px;margin-bottom:10px;${i.activo?'':'opacity:.55'}">
-      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
-        <div style="font-weight:700;font-size:15px;color:var(--ink)">${i.nombre_completo}</div>
-        <span style="background:${i.activo?'#E7F5EC':'#F1F3F7'};color:${i.activo?'#1B7A3D':'#6B7280'};border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700">${i.activo?'Habitando':'Salió'}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 16px;margin-top:9px;font-size:13px;color:var(--body)">
-        <div>${TIPO_INQ[i.tipo]||i.tipo}${i.personas?' · '+i.personas+' personas':''}</div>
-        ${i.telefono?`<div>✆ ${i.telefono}</div>`:''}
-        ${i.email?`<div>✉ ${i.email}</div>`:''}
-        ${i.fecha_inicio?`<div>Desde ${new Date(i.fecha_inicio+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'})}${i.fecha_fin?' al '+new Date(i.fecha_fin+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):''}</div>`:''}
-        ${i.vehiculo?`<div>🚗 ${i.vehiculo}</div>`:''}
-        ${i.tiene_acceso?`<div style="color:var(--blue);font-weight:600">Acceso al portal: ${i.clave}</div>`:'<div style="color:var(--muted)">Sin acceso al portal</div>'}
-      </div>
-      <div style="display:flex;gap:7px;margin-top:11px">
-        <button onclick="editarInquilino(${i.id})" style="background:#F7F9FC;border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
-        <button onclick="bajaInquilino(${i.id},${i.activo?'false':'true'})" style="background:#F7F9FC;border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">${i.activo?'Marcar salida':'Reactivar'}</button>
-      </div>
-    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Aún no has registrado a nadie. Si rentas tu depa, agrégalo aquí.</div>';
-
-  const serv=INQ.servicios||[];
-  document.getElementById('inqServicios').innerHTML = serv.length ? serv.map(x=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F1F3F7;flex-wrap:wrap">
-      <div><div style="font-weight:600;font-size:14px">${SERV_ICO[x.tipo]||'📄'} ${x.tipo.charAt(0).toUpperCase()+x.tipo.slice(1)} · ${x.periodo}</div>
-        <div style="font-size:12px;color:var(--muted)">${x.consumo?x.consumo+' · ':''}${x.fecha_vencimiento?'Vence '+new Date(x.fecha_vencimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'short'}):''}</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-weight:700">$${Number(x.monto).toLocaleString('es-MX')}</span>
-        <span style="background:${x.pagado?'#E7F5EC':'#FBE9EC'};color:${x.pagado?'#1B7A3D':'#B00020'};border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700">${x.pagado?'Pagado':'Pendiente'}</span>
-        ${x.archivo_url?`<a href="${x.archivo_url}" target="_blank" style="color:var(--blue);font-size:12px;font-weight:600">Ver</a>`:''}
-      </div>
-    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">Aún no hay recibos cargados para tu unidad.</div>';
-}
-
-function nuevoInquilino(){ formInquilino(null); }
-function editarInquilino(id){ formInquilino((INQ.inquilinos||[]).find(x=>x.id===id)); }
-
-function formInquilino(i){
-  const f=document.getElementById('inqForm');
-  const v=k=>i&&i[k]?String(i[k]).replace(/"/g,'&quot;'):'';
-  f.innerHTML=`<div style="background:#F7F9FC;border-radius:13px;padding:17px;margin-bottom:14px">
-    <div style="font-weight:700;margin-bottom:12px">${i?'Editar':'Nuevo'} inquilino</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="grid-column:1/-1"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Nombre completo *</label><input id="iqNombre" value="${v('nombre_completo')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Teléfono</label><input id="iqTel" value="${v('telefono')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Correo</label><input id="iqMail" type="email" value="${v('email')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Tipo de renta</label>
-        <select id="iqTipo" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px">
-          <option value="largo_plazo"${i&&i.tipo==='largo_plazo'?' selected':''}>Renta larga</option>
-          <option value="vacacional"${i&&i.tipo==='vacacional'?' selected':''}>Vacacional</option>
-        </select></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Personas</label><input id="iqPers" type="number" value="${v('personas')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Desde</label><input id="iqIni" type="date" value="${v('fecha_inicio')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Hasta (opcional)</label><input id="iqFin" type="date" value="${v('fecha_fin')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div style="grid-column:1/-1"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Vehículo (placas / modelo)</label><input id="iqAuto" value="${v('vehiculo')}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div style="grid-column:1/-1;border-top:1px dashed var(--border);padding-top:11px;font-size:12px;color:var(--muted)">Opcional: dale acceso al portal para que vea avisos, eventos y descuentos.</div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Clave de acceso</label><input id="iqClave" value="${v('clave')}" placeholder="ej. inq101A" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-      <div><label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Contraseña</label><input id="iqPass" type="text" placeholder="${i&&i.tiene_acceso?'dejar vacío = no cambiar':'crea una'}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px"></div>
-    </div>
-    <div id="iqMsg" style="display:none;font-size:13px;font-weight:600;padding:10px 13px;border-radius:9px;margin-top:11px"></div>
-    <div style="display:flex;gap:8px;margin-top:13px">
-      <button id="iqSave" onclick="guardarInquilino(${i?i.id:'null'})" style="background:var(--blue);color:#fff;border:0;border-radius:9px;padding:11px 19px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Guardar</button>
-      <button onclick="document.getElementById('inqForm').innerHTML=''" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 19px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Cancelar</button>
-    </div></div>`;
-  f.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-async function guardarInquilino(id){
-  const g=k=>document.getElementById(k).value.trim();
-  const msg=document.getElementById('iqMsg'), btn=document.getElementById('iqSave');
-  if(!g('iqNombre')){msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='Escribe el nombre.';return;}
-  btn.disabled=true;btn.textContent='Guardando…';
-  try{
-    const r=await fetch(`${URL}/rpc/guardar_inquilino`,{method:'POST',headers:H,body:JSON.stringify({
-      p_user_id:sesionUser,p_password:sesionPass,p_id:id,p_nombre:g('iqNombre'),p_email:g('iqMail'),
-      p_telefono:g('iqTel'),p_tipo:document.getElementById('iqTipo').value,
-      p_inicio:g('iqIni')||null,p_fin:g('iqFin')||null,p_personas:Number(g('iqPers'))||null,
-      p_vehiculo:g('iqAuto'),p_clave:g('iqClave'),p_pass_inq:g('iqPass')})});
-    const d=await r.json();
-    if(d&&d.ok){document.getElementById('inqForm').innerHTML='';await cargarInquilinos();}
-    else{msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='No se pudo guardar. Si pusiste clave de acceso, prueba con otra: puede estar ocupada.';btn.disabled=false;btn.textContent='Guardar';}
-  }catch(e){msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent='Error de conexión.';btn.disabled=false;btn.textContent='Guardar';}
-}
-
-async function bajaInquilino(id,activo){
-  try{
-    const r=await fetch(`${URL}/rpc/baja_inquilino`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_id:id,p_activo:activo})});
-    const d=await r.json(); if(d&&d.ok)cargarInquilinos();
-  }catch(e){}
-}
-
-async function cambiarRentando(){
-  const val=document.getElementById('inqRentando').checked;
-  try{
-    await fetch(`${URL}/rpc/set_rentando`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_rentando:val})});
-  }catch(e){}
-}
-
-// ===== ESTADO DE CUENTA CENTRADO EN EL MES EN CURSO =====
-const $m = n => '$' + Number(n||0).toLocaleString('es-MX');
-async function cargarEstadoCuenta(){
-  try{
-    const r=await fetch(`${URL}/rpc/mi_estado_cuenta`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
-    const d=await r.json();
-    if(!d||!d.ok)return;
-
-    const mes=d.mes_actual, pagado = mes && mes.estado==='pagado';
-    const cuota = mes ? Number(mes.monto) : Number(d.cuota_mes);
-    document.getElementById('ec-mesLbl').textContent='Mantenimiento · '+d.mes_nombre;
-    document.getElementById('ec-mesMonto').textContent=$m(cuota);
-    const est=document.getElementById('ec-mesEstado');
-    est.textContent = pagado ? '✓ Pagado' : 'Por pagar';
-    est.style.background = pagado ? '#D6F5E0' : '#fff';
-    est.style.color = pagado ? '#0E5C2C' : '#1E3A5F';
-    document.getElementById('ec-mesNota').textContent = pagado
-      ? 'Gracias, ya recibimos tu pago de este mes.'
-      : (mes && mes.vencimiento ? 'Vence el '+new Date(mes.vencimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long'}) : '');
-
-    const ant=Number(d.anterior_monto||0);
-    const box=document.getElementById('ec-anteriorBox');
-    if(ant>0){
-      box.style.display='block';
-      document.getElementById('ec-anteriorMonto').textContent=$m(ant);
-      const det=(d.anterior_detalle||[]).map(x=>String(x).replace('Cuota ',''));
-      document.getElementById('ec-anteriorMeses').textContent =
-        d.anterior_meses+' '+(d.anterior_meses===1?'mes':'meses')+(det.length?' · '+det.slice(0,3).join(', ')+(det.length>3?' y '+(det.length-3)+' más':''):'');
-    } else box.style.display='none';
-
-    const tot=Number(d.total_exigible||0);
-    const tb=document.getElementById('ec-totalBox');
-    if(ant>0 && tot>0){ tb.style.display='flex'; document.getElementById('ec-total').textContent=$m(tot); }
-    else { tb.style.display='none'; }
-
-    if(MICV&&MICV.activo){
-      const ab=document.getElementById('ec-anteriorBox');
-      if(ab&&ab.style.display!=='none'){
-        const n=document.createElement('div');
-        n.style.cssText='font-size:11.5px;opacity:.85;margin-top:7px';
-        n.textContent='Parte de este saldo está cubierto por tu convenio de pago activo. Consulta el detalle abajo.';
-        if(!ab.dataset.cv){ab.appendChild(n);ab.dataset.cv='1';}
-      }
-    }
-    const fut=document.getElementById('ec-futuroNota');
-    if(Number(d.futuro_monto)>0){
-      fut.style.display='block';
-      fut.textContent='Nota: tienes '+d.futuro_meses+' mes(es) por '+$m(d.futuro_monto)+' con vencimiento futuro. Aún no son exigibles y no forman parte de tu adeudo.';
-    } else fut.style.display='none';
-
-    ['pago-total','pago-total2'].forEach(id=>{const e=document.getElementById(id); if(e)e.textContent=$m(tot);});
-    const kd=document.getElementById('kpi-deuda'); if(kd)kd.textContent=$m(tot);
-    const kp=document.getElementById('kpi-deuda-pill');
-    if(kp)kp.textContent = tot>0 ? (pagado?'Adeudo anterior':'Incluye este mes') : '✓ Al corriente';
-  }catch(e){}
-}
-
-// ===== MI CONVENIO DE PAGO =====
-let MICV=null;
-async function cargarConvenio(){
-  try{
-    const r=await fetch(`${URL}/rpc/mi_convenio`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
-    const d=await r.json();
-    if(!d||!d.ok)return;
-    MICV=d; pintarConvenio();
-  }catch(e){}
-}
-function pintarConvenio(){
-  const box=document.getElementById('cv-card'); if(!box)return;
-  box.style.display='block';
-  if(!MICV.activo){
-    box.innerHTML=`<div class="card" style="border-style:dashed">
-      <div class="card-title">Mi convenio de pago</div>
-      <div style="color:var(--muted);font-size:14px">No tienes un convenio de pago activo.</div>
-      <div style="color:var(--muted);font-size:12.5px;margin-top:6px">Si necesitas ponerte al corriente en parcialidades, escríbenos y lo revisamos contigo.</div>
-    </div>`;
-    return;
-  }
-  const c=MICV.convenio;
-  const f=x=>x?new Date(x+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}):'Sin fecha';
-  const M=n=>'$'+Number(n||0).toLocaleString('es-MX');
-  const pct=Number(c.monto_total)>0?Math.min(100,100*Number(c.pagado)/Number(c.monto_total)):0;
-  box.innerHTML=`
-    <div class="card" style="border:2px solid #1847CC;background:#F7F9FF">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
-        <div class="card-title" style="margin:0">Mi convenio de pago</div>
-        <span style="background:#E7F5EC;color:#1B7A3D;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:800">🟢 Activo</span>
-      </div>
-      <div style="color:var(--muted);font-size:12.5px;margin-bottom:14px">${c.tipo||'Pago en parcialidades'}</div>
-
-      <div style="background:#fff;border-radius:12px;padding:15px;margin-bottom:13px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
-          <div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Tu próximo pago</div>
-            <div style="font-size:24px;font-weight:800;color:var(--ink)">${M(c.abono_mensual)}</div></div>
-          <div style="text-align:right"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Fecha</div>
-            <div style="font-size:15px;font-weight:700;color:#1847CC">${f(c.proximo_pago)}</div></div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:13px">
-        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px">
-          <span style="color:var(--muted)">Avance del convenio</span>
-          <b>${M(c.pagado)} de ${M(c.monto_total)}</b></div>
-        <div style="height:9px;background:#E6EAF2;border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#1847CC;border-radius:99px"></div></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px 18px;font-size:13.5px">
-        <div><span style="color:var(--muted)">Monto acordado</span><br><b>${M(c.monto_total)}</b></div>
-        <div><span style="color:var(--muted)">Saldo pendiente</span><br><b style="color:#B00020">${M(c.saldo)}</b></div>
-        <div><span style="color:var(--muted)">Inicio</span><br><b>${f(c.fecha_inicio)}</b></div>
-        <div><span style="color:var(--muted)">Término</span><br><b>${c.fecha_fin?f(c.fecha_fin):'Sin fecha definida'}</b></div>
-      </div>
-
-      ${c.condiciones?`<div style="background:#fff;border-radius:11px;padding:12px 14px;margin-top:13px;font-size:13px">
-        <b style="color:#1847CC">Condiciones</b><div style="color:var(--body);margin-top:4px">${c.condiciones}</div></div>`:''}
-
-      <div style="font-size:12px;color:var(--muted);margin-top:12px;border-top:1px solid #E6EAF2;padding-top:10px">
-        Este saldo está cubierto por tu convenio vigente y no se trata como adeudo ordinario mientras cumplas los abonos.
-      </div>
-    </div>`;
-}
-
-async function cargarAviso() {
-  try {
-    const r = await fetch(`${URL}/rpc/aviso_activo`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
-    const d = await r.json();
-    const b = document.getElementById('banner-aviso');
-    if (!b || !d || !d.ok || !d.aviso) return;
-    const estilos = {
-      info:    ['#EEF3FF', '#1847CC', 'ℹ️'],
-      alerta:  ['#FBF1DF', '#B87503', '⚠️'],
-      urgente: ['#FBE9EC', '#B00020', '🔔']
-    };
-    const [bg, col, ico] = estilos[d.aviso.tipo] || estilos.info;
-    b.style.background = bg; b.style.color = col; b.style.border = '1px solid ' + col + '33';
-    b.innerHTML = `<div style="display:flex;gap:11px;align-items:flex-start">
-        <div style="font-size:19px;line-height:1.1">${ico}</div>
-        <div>${d.aviso.titulo ? `<div style="font-weight:700;margin-bottom:3px">${d.aviso.titulo}</div>` : ''}
-          <div style="font-weight:500;line-height:1.5">${d.aviso.mensaje}</div></div>
-      </div>`;
-    b.style.display = 'block';
-  } catch(e) {}
-}
-
-async function cargarMisDatos() {
-  try {
-    const r = await fetch(`${URL}/rpc/mis_datos`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass }) });
-    const d = await r.json();
-    if (!d || !d.ok) return;
-    const x = d.datos;
-    document.getElementById('md-nombre').textContent = x.nombre || '—';
-    document.getElementById('md-clave').textContent = x.clave || '—';
-    document.getElementById('md-edificio').textContent = x.edificio || '—';
-    document.getElementById('md-depto').textContent = x.departamento || '—';
-    document.getElementById('md-email').value = x.email || '';
-    document.getElementById('md-tel').value = x.telefono || '';
-    const c = document.getElementById('md-conf');
-    c.textContent = x.datos_confirmados_at
-      ? 'Última confirmación: ' + new Date(x.datos_confirmados_at).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})
-      : 'Aún no has confirmado tus datos.';
-    const pend = document.getElementById('md-pend');
-    if (pend) pend.style.display = x.datos_confirmados_at ? 'none' : 'block';
-  } catch(e) {}
-}
-
-async function guardarMisDatos() {
-  const email = document.getElementById('md-email').value.trim();
-  const tel = document.getElementById('md-tel').value.trim();
-  const btn = document.getElementById('md-btn');
-  const msg = document.getElementById('md-msg');
-  msg.style.display = 'none';
-  if (email && !email.includes('@')) {
-    msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
-    msg.textContent='Escribe un correo válido.'; return;
-  }
-  btn.disabled = true; btn.textContent = 'Guardando…';
-  try {
-    const r = await fetch(`${URL}/rpc/actualizar_mis_datos`, { method:'POST', headers:H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_email: email, p_telefono: tel }) });
-    const d = await r.json();
-    if (d && d.ok) {
-      msg.style.display='block'; msg.style.background='#E7F5EC'; msg.style.color='#1B7A3D';
-      msg.textContent='¡Listo! Tus datos quedaron confirmados. La administración los revisará.';
-      const pe=document.getElementById('md-pend'); if(pe)pe.style.display='none';
-      document.getElementById('md-conf').textContent = 'Última confirmación: ' + d.confirmado;
-    } else {
-      msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
-      msg.textContent='No se pudo guardar. Inténtalo de nuevo.';
-    }
-  } catch(e) {
-    msg.style.display='block'; msg.style.background='#FBE9EC'; msg.style.color='#B00020';
-    msg.textContent='Error de conexión.';
-  }
-  btn.disabled = false; btn.textContent = 'Confirmar mis datos';
-}
-
-function initComunidad() {
-  cargarConvenios();
-  const wa = document.getElementById('wa-soporte-pago');
-  if (wa) wa.href = `https://wa.me/${SOPORTE_NUMERO}?text=${encodeURIComponent(SOPORTE_TEXTO)}`;
-}
-
-async function doLogin() {
-  const u = document.getElementById('input-user').value.trim();
-  const p = document.getElementById('input-pass').value.trim();
-  const btn = document.getElementById('btn-login');
-  const err = document.getElementById('login-error');
-  err.style.display = 'none';
-
-  if (!u || !p) { err.style.display='block'; err.textContent='Llena ambos campos.'; return; }
-
-  btn.disabled = true; btn.textContent = 'Verificando...';
-
+async function adminLogin() {
+  const u = document.getElementById('a-user').value.trim();
+  const p = document.getElementById('a-pass').value.trim();
+  const errEl = document.getElementById('a-err');
+  errEl.style.display = 'none';
+  if (!u || !p) { errEl.textContent = 'Llena ambos campos.'; errEl.style.display = 'block'; return; }
   try {
     const ctrl = new AbortController();
-    const reloj = setTimeout(() => ctrl.abort(), 12000);
-    const r = await fetch(`${URL}/rpc/login_residente`, {
+    const reloj = setTimeout(() => ctrl.abort(), 15000);
+    const r = await fetch(`${URL}/rpc/admin_panel`, {
       method: 'POST',
       headers: H,
-      body: JSON.stringify({ p_user_id: u, p_password: p }),
+      body: JSON.stringify({ p_user: u, p_password: p }),
       signal: ctrl.signal
     });
     clearTimeout(reloj);
     const d = await r.json();
-
     if (!r.ok || !d || !d.ok) {
-      err.style.display = 'block';
-      err.textContent = 'Clave o contraseña incorrecta. Contacta: echoadministrationmx@gmail.com';
-      btn.disabled = false; btn.textContent = 'Entrar al portal →';
+      errEl.textContent = 'Usuario o contraseña incorrectos.';
+      errEl.style.display = 'block';
       return;
     }
-
-    residente = d.residente;
-    pagos = d.pagos || [];
-    incidencias = d.incidencias || [];
-    llamadas = d.llamadas || [];
-    eventos = d.eventos || [];
-    encuestas = d.encuestas || [];
-    sesionUser = u;
-    sesionPass = p;
-    mpAuthPromise = iniciarSesionPago(u, p).then(tok => { mpAccessToken = tok; return tok; });
-    document.getElementById('sb-nombre').textContent = residente.nombre_completo;
-    document.getElementById('sb-depto').textContent = 'Depto ' + residente.departamento + ' · Manzana 80';
+    allResidentes = d.residentes || [];
+    allPagos = d.pagos || [];
+    allIncidencias = d.incidencias || [];
+    allLlamadas = d.llamadas || [];
+    allEventos = d.eventos || [];
+    allEncuestas = d.encuestas || [];
+    adminUser = u;
+    adminPass = p;
     document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('portal').classList.remove('hidden');
-    pintarDatos();
-    renderIncidencias();
-    renderLlamadas();
-    renderAvisoLlamadas();
-    renderComunidad();
-    cargarMisDatos();
-    cargarAviso();
-    cargarMisRentas();
-    cargarInquilinos();
-    cargarEstadoCuenta();
-    cargarConvenio();
-    cargarMiRenta();
-
+    document.getElementById('admin').classList.remove('hidden');
+    document.getElementById('tb-fecha').textContent = new Date().toLocaleDateString('es-MX', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    calcularMetricas();
+    poblarFiltros();
+    renderIncidenciasAdmin();
+    poblarSelectResidentes();
+    renderLlamadasAdmin();
+    renderEventosAdmin();
+    renderEncuestasAdmin();
   } catch(e) {
-    err.style.display = 'block';
-    err.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
-    btn.disabled = false; btn.textContent = 'Entrar al portal →';
+    errEl.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
+    errEl.style.display = 'block';
   }
 }
 
-function pintarDatos() {
-  const pags = pagos.filter(p => p.estado === 'pagado');
-  const pends = pagos.filter(p => p.estado === 'pendiente');
-  const deuda = pends.reduce((s,p) => s + (p.monto || 515), 0);
-
-  document.getElementById('kpi-deuda').textContent = '$' + deuda.toLocaleString();
-  document.getElementById('kpi-deuda-pill').textContent = deuda > 0 ? pends.length + ' meses pendientes' : '✓ Al corriente';
-  document.getElementById('kpi-pagados').textContent = pags.length;
-  document.getElementById('kpi-pendientes').textContent = pends.length;
-  document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
-  document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
-  document.getElementById('pago-total').textContent = '$' + deuda.toLocaleString();
-  document.getElementById('pago-total2').textContent = '$' + deuda.toLocaleString();
-
-  renderMovimientos(pagos.slice(0, 6));
-  renderCuenta(pagos);
-
-  document.getElementById('dash-loading').classList.add('hidden');
-  document.getElementById('dash-content').classList.remove('hidden');
-  document.getElementById('cuenta-loading').classList.add('hidden');
-  document.getElementById('cuenta-content').classList.remove('hidden');
+function poblarFiltros() {
+  const edificios = [...new Set(allResidentes.map(r => (r.num||'').trim()).filter(Boolean))].sort();
+  ['morosos-edificio', 'res-edificio'].forEach(id => {
+    const sel = document.getElementById(id);
+    edificios.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e; opt.textContent = 'Edificio ' + e;
+      sel.appendChild(opt);
+    });
+  });
 }
 
-function renderMovimientos(data) {
-  document.getElementById('tabla-mov').innerHTML = data.map(p => `
+function calcularMetricas() {
+  const pagos2026 = allPagos.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith('2026'));
+  const pagosHist = allPagos;
+
+  deudaMap = {};
+  allResidentes.forEach(r => {
+    deudaMap[r.id_residente] = { res: r, pags2026: 0, pends2026: 0, deuda2026: 0, deudaHist: 0, ultimoPago: null };
+  });
+
+  pagos2026.forEach(p => {
+    if (!deudaMap[p.id_residente]) return;
+    if (p.estado === 'pagado') {
+      deudaMap[p.id_residente].pags2026++;
+      if (!deudaMap[p.id_residente].ultimoPago || p.fecha_vencimiento > deudaMap[p.id_residente].ultimoPago)
+        deudaMap[p.id_residente].ultimoPago = p.fecha_vencimiento;
+    } else {
+      deudaMap[p.id_residente].pends2026++;
+      deudaMap[p.id_residente].deuda2026 += (p.monto || 500);
+    }
+  });
+
+  pagosHist.forEach(p => {
+    if (!deudaMap[p.id_residente]) return;
+    if (p.estado === 'pendiente') deudaMap[p.id_residente].deudaHist += (p.monto || 500);
+  });
+
+  const morosos = Object.values(deudaMap).filter(d => d.deuda2026 > 0);
+  const alcorriente = Object.values(deudaMap).filter(d => d.deuda2026 === 0);
+  const totalDeuda2026 = morosos.reduce((s, d) => s + d.deuda2026, 0);
+  const totalDeudaHist = Object.values(deudaMap).reduce((s, d) => s + d.deudaHist, 0);
+  const totalPagado = pagos2026.filter(p => p.estado === 'pagado').length * 500;
+  const totalEsperado = pagos2026.length * 500;
+
+  allMorosos = morosos.sort((a, b) => b.deuda2026 - a.deuda2026);
+
+  // KPIs
+  document.getElementById('ov-alcorriente').textContent = alcorriente.length;
+  document.getElementById('ov-alcorriente-pct').textContent = Math.round(alcorriente.length / allResidentes.length * 100) + '% del total';
+  document.getElementById('ov-morosos').textContent = morosos.length;
+  document.getElementById('ov-morosos-pct').textContent = Math.round(morosos.length / allResidentes.length * 100) + '% del total';
+  document.getElementById('ov-cartera').textContent = '$' + totalDeuda2026.toLocaleString();
+  document.getElementById('ov-cartera-hist').textContent = 'Histórico: $' + totalDeudaHist.toLocaleString();
+
+  // Mapa id -> edificio (letra) para mostrarlo en todas las secciones
+  edifMap = {};
+  allResidentes.forEach(r => { edifMap[r.id_residente] = (r.num || '').trim(); });
+
+  // Cobranza mensual (misma fuente que la pestaña Cobranza mensual)
+  cargarCobranzaOverview();
+  cargarAnalisis();
+
+  // Cartera stats
+  document.getElementById('cartera-stats').innerHTML = `
+    <div class="stat-chip"><div class="stat-chip-val coral">$${totalDeuda2026.toLocaleString()}</div><div class="stat-chip-lbl">Adeudo 2026</div></div>
+    <div class="stat-chip"><div class="stat-chip-val" style="color:var(--yellow)">$${totalDeudaHist.toLocaleString()}</div><div class="stat-chip-lbl">Histórico total</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">${morosos.length}</div><div class="stat-chip-lbl">Deudores</div></div>
+    <div class="stat-chip"><div class="stat-chip-val green">$${totalPagado.toLocaleString()}</div><div class="stat-chip-lbl">Recuperado 2026</div></div>`;
+
+  renderCartera('2026');
+  renderMorosos(allMorosos);
+  filtrarPagosMes();
+  renderResidentes(allResidentes);
+
+  document.getElementById('ov-loading').classList.add('hidden');
+  document.getElementById('ov-content').classList.remove('hidden');
+  document.getElementById('cartera-loading').classList.add('hidden');
+  document.getElementById('cartera-content').classList.remove('hidden');
+}
+
+function renderCartera(vista) {
+  carteraVista = vista;
+  document.getElementById('cartera-titulo').textContent = vista === '2026' ? 'Cartera vencida 2026' : 'Historial completo de adeudos';
+  const data = vista === '2026'
+    ? allMorosos
+    : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
+
+  document.getElementById('tabla-cartera').innerHTML = data.length === 0
+    ? '<tr><td colspan="7" class="empty-row">✓ Sin adeudos registrados</td></tr>'
+    : data.map(d => `
+      <tr>
+        <td style="font-weight:600">${d.res.departamento}</td>
+        <td><span class="badge blue">${(d.res.num||'').trim() || '—'}</span></td>
+        <td>${d.res.nombre_completo}</td>
+        <td>${vista === '2026' ? d.pends2026 + ' meses' : '—'}</td>
+        <td style="font-weight:700;color:var(--coral)">$${(vista === '2026' ? d.deuda2026 : d.deudaHist).toLocaleString()}</td>
+        <td style="color:var(--muted);font-size:12px">${d.ultimoPago ? fmtMes(d.ultimoPago) : 'Sin pagos'}</td>
+        <td><span class="badge overdue">Moroso</span></td>
+      </tr>`).join('');
+}
+
+let carteraSearch = '';
+function filtrarCartera(q) {
+  carteraSearch = q.toLowerCase();
+  const vista = carteraVista;
+  const base = vista === '2026'
+    ? allMorosos
+    : Object.values(deudaMap).filter(d => d.deudaHist > 0).sort((a, b) => b.deudaHist - a.deudaHist);
+  const f = base.filter(d =>
+    d.res.nombre_completo.toLowerCase().includes(carteraSearch) ||
+    d.res.departamento.includes(carteraSearch)
+  );
+  document.getElementById('tabla-cartera').innerHTML = f.map(d => `
     <tr>
-      <td>${p.concepto}</td>
-      <td>${fmt(p.fecha_vencimiento)}</td>
-      <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
-      <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
+      <td style="font-weight:600">${d.res.departamento}</td>
+      <td>${d.res.nombre_completo}</td>
+      <td>${vista === '2026' ? d.pends2026 + ' meses' : '—'}</td>
+      <td style="font-weight:700;color:var(--coral)">$${(vista === '2026' ? d.deuda2026 : d.deudaHist).toLocaleString()}</td>
+      <td style="color:var(--muted);font-size:12px">${d.ultimoPago ? fmtMes(d.ultimoPago) : 'Sin pagos'}</td>
+      <td><span class="badge overdue">Moroso</span></td>
     </tr>`).join('');
 }
 
-function renderCuenta(data) {
-  document.getElementById('tabla-cuenta').innerHTML = data.map(p => `
+function switchCartera(vista, el) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCartera(vista);
+}
+
+function renderMorosos(data) {
+  const orden = document.getElementById('morosos-orden') ? document.getElementById('morosos-orden').value : 'deuda';
+  const sorted = [...data].sort((a, b) => {
+    if (orden === 'deuda') return b.deuda2026 - a.deuda2026;
+    if (orden === 'meses') return b.pends2026 - a.pends2026;
+    return a.res.nombre_completo.localeCompare(b.res.nombre_completo);
+  });
+  document.getElementById('morosos-count').textContent = sorted.length + ' residentes';
+  document.getElementById('tabla-morosos').innerHTML = sorted.length === 0
+    ? '<tr><td colspan="7" class="empty-row">✓ Sin morosos para este filtro</td></tr>'
+    : sorted.map(d => `
+      <tr>
+        <td style="font-weight:600">${d.res.departamento}</td>
+        <td><span class="badge blue">${(d.res.num||'').trim() || '—'}</span></td>
+        <td>${d.res.nombre_completo}</td>
+        <td>${d.pends2026} meses</td>
+        <td style="font-weight:700;color:var(--coral)">$${d.deuda2026.toLocaleString()}</td>
+        <td style="color:var(--muted)">$${d.deudaHist.toLocaleString()}</td>
+        <td><span class="badge overdue">Moroso</span></td>
+      </tr>`).join('');
+}
+
+function filtrarMorosos(q) {
+  const edificio = document.getElementById('morosos-edificio').value;
+  let f = allMorosos;
+  if (edificio !== 'todos') f = f.filter(d => (d.res.num||'').trim() === edificio);
+  if (q) f = f.filter(d =>
+    d.res.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
+    d.res.departamento.includes(q)
+  );
+  renderMorosos(f);
+}
+
+function filtrarPagosMes() {
+  const mes = document.getElementById('pagos-mes').value;
+  const q = (document.getElementById('pagos-search') ? document.getElementById('pagos-search').value : '').toLowerCase();
+  let f = allPagos.filter(p => p.estado === 'pagado');
+  if (mes === 'todos') f = f.slice(0, 200);
+  else if (mes.length === 4) f = f.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
+  else f = f.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(mes));
+  if (q) f = f.filter(p => (p.nombre || '').toLowerCase().includes(q) || (p.departamento || '').includes(q));
+  document.getElementById('pagos-count').textContent = f.length + ' registros';
+  document.getElementById('tabla-pagos-admin').innerHTML = f.map(p => `
     <tr>
-      <td>${p.concepto}</td>
-      <td>${fmt(p.fecha_vencimiento)}</td>
-      <td style="font-weight:600;color:${p.estado==='pagado'?'var(--green)':'var(--coral)'}">$${p.monto}</td>
-      <td><span class="badge ${p.estado==='pagado'?'paid':'pending'}">${p.estado==='pagado'?'✓ Pagado':'⏳ Pendiente'}</span></td>
+      <td style="font-weight:600">${p.departamento}</td>
+      <td><span class="badge blue">${edifMap[p.id_residente] || '—'}</span></td>
+      <td style="font-size:12px">${p.nombre}</td>
+      <td style="font-size:12px">${p.concepto}</td>
+      <td style="font-weight:600;color:var(--green)">$${p.monto}</td>
+      <td style="color:var(--muted);font-size:12px">${fmtMes(p.fecha_vencimiento)}</td>
+      <td><span class="badge paid">✓ Pagado</span></td>
     </tr>`).join('');
 }
 
-function filtrar() {
-  const a = document.getElementById('filtro-anio').value;
-  const f = a === 'todos' ? pagos : pagos.filter(p => p.fecha_vencimiento && p.fecha_vencimiento.startsWith(a));
-  renderCuenta(f);
+function renderResidentes(data) {
+  document.getElementById('res-count').textContent = data.length + ' residentes';
+  document.getElementById('tabla-residentes-admin').innerHTML = data.map((r, i) => {
+    const dm = deudaMap[r.id_residente];
+    const deuda = dm ? dm.deuda2026 : 0;
+    const estado = deuda === 0
+      ? '<span class="badge paid">✓ Al corriente</span>'
+      : `<span class="badge overdue">$${deuda.toLocaleString()} adeudo</span>`;
+    return `<tr>
+      <td style="color:var(--muted)">${i + 1}</td>
+      <td style="font-weight:600">${r.departamento}</td>
+      <td><span class="badge blue">${(r.num||'').trim() || '—'}</span></td>
+      <td>${r.nombre_completo}</td>
+      <td>${estado}</td>
+    </tr>`;
+  }).join('');
 }
 
-function fmt(f) {
+function filtrarResidentes(q) {
+  const edificio = document.getElementById('res-edificio').value;
+  let f = allResidentes;
+  if (edificio !== 'todos') f = f.filter(r => (r.num||'').trim() === edificio);
+  if (q) f = f.filter(r =>
+    r.nombre_completo.toLowerCase().includes(q.toLowerCase()) ||
+    r.departamento.includes(q)
+  );
+  renderResidentes(f);
+}
+
+function fmtMes(f) {
   if (!f) return '—';
   const m = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const p = f.split('-');
   return m[parseInt(p[1])] + ' ' + p[0];
 }
 
-function prepararFoto(input) {
-  const file = input.files[0];
-  const prev = document.getElementById('inc-foto-preview');
-  if (!file) { fotoBase64 = null; prev.innerHTML = ''; return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const max = 1000;
-      let w = img.width, h = img.height;
-      if (w > max || h > max) {
-        if (w > h) { h = Math.round(h * max / w); w = max; }
-        else { w = Math.round(w * max / h); h = max; }
-      }
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      fotoBase64 = c.toDataURL('image/jpeg', 0.6);
-      prev.innerHTML = '<img src="' + fotoBase64 + '" style="max-width:140px;border-radius:8px;border:1px solid var(--border)">';
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function mostrarMsgInc(texto, ok) {
-  const m = document.getElementById('inc-msg');
-  m.textContent = texto;
-  m.style.display = 'block';
-  m.style.background = ok ? '#ECFDF5' : 'var(--coral-light)';
-  m.style.color = ok ? 'var(--green)' : 'var(--coral)';
-  m.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
-}
-
-async function enviarIncidencia() {
-  const cat = document.getElementById('inc-categoria').value;
-  const desc = document.getElementById('inc-desc').value.trim();
-  const btn = document.getElementById('inc-enviar');
-  document.getElementById('inc-msg').style.display = 'none';
-  if (!desc) { mostrarMsgInc('Por favor describe el problema antes de enviar.', false); return; }
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  try {
-    const r = await fetch(`${URL}/rpc/crear_incidencia`, {
-      method: 'POST',
-      headers: H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_categoria: cat, p_descripcion: desc, p_foto: fotoBase64 })
-    });
-    const d = await r.json();
-    if (!r.ok || !d || !d.ok) {
-      mostrarMsgInc('No se pudo enviar el reporte. Intenta de nuevo.', false);
-      btn.disabled = false; btn.textContent = 'Enviar reporte';
-      return;
-    }
-    incidencias.unshift({ id: d.id, categoria: cat, descripcion: desc, estado: 'Pendiente', foto: fotoBase64, created_at: new Date().toISOString() });
-    renderIncidencias();
-    document.getElementById('inc-desc').value = '';
-    document.getElementById('inc-foto').value = '';
-    document.getElementById('inc-foto-preview').innerHTML = '';
-    fotoBase64 = null;
-    mostrarMsgInc('✓ Reporte enviado. Lo verás abajo en “Mis reportes”.', true);
-    btn.disabled = false; btn.textContent = 'Enviar reporte';
-  } catch (e) {
-    mostrarMsgInc('Error de conexión. Revisa tu internet e intenta de nuevo.', false);
-    btn.disabled = false; btn.textContent = 'Enviar reporte';
-  }
-}
-
-function correoIncidencia() {
-  const cat = document.getElementById('inc-categoria').value;
-  const desc = document.getElementById('inc-desc').value.trim();
-  const depto = residente ? residente.departamento : '';
-  const nombre = residente ? residente.nombre_completo : '';
-  const asunto = 'Incidencia ' + cat + ' - Depto ' + depto;
-  const cuerpo = 'Hola Echo Administration,\n\nReporto la siguiente incidencia:\n\n'
-    + 'Categoría: ' + cat + '\nDepartamento: ' + depto + '\nResidente: ' + nombre + '\n\n'
-    + 'Descripción:\n' + desc + '\n\n(Si tengo foto, la adjunto a este correo.)';
-  window.location.href = 'mailto:echoadministrationmx@gmail.com?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
-}
-
 function fmtFechaInc(iso) {
   if (!iso) return '';
-  try { return new Date(iso).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }); }
+  try { return new Date(iso).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
   catch (e) { return iso; }
 }
 
-function verLlamadas() {
-  go('incidencias', document.querySelector('.nav-item[onclick*=incidencias]'));
-}
-
-function renderAvisoLlamadas() {
-  const cont = document.getElementById('dash-aviso-llamadas');
+function renderIncidenciasAdmin() {
+  const sel = document.getElementById('inc-admin-filtro');
+  const filtro = sel ? sel.value : 'todos';
+  let data = allIncidencias;
+  if (filtro !== 'todos') data = data.filter(i => (i.estado || 'Pendiente') === filtro);
+  const countEl = document.getElementById('inc-admin-count');
+  if (countEl) countEl.textContent = data.length + ' reporte(s)';
+  const cont = document.getElementById('inc-admin-lista');
   if (!cont) return;
-  const activas = llamadas.filter(l => (l.estado || 'Activa') === 'Activa');
-  if (!activas.length) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
-  cont.style.display = 'block';
-  const n = activas.length;
-  cont.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid var(--coral);border-radius:12px;padding:16px;margin-bottom:18px">
-      <span style="font-size:22px">📌</span>
-      <div style="flex:1;min-width:180px">
-        <div style="font-weight:700;color:var(--ink);font-size:15px">Tienes ${n} llamada${n>1?'s':''} de atención activa${n>1?'s':''}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">Revisa los detalles en tu apartado de Incidencias.</div>
-      </div>
-      <button onclick="verLlamadas()" style="background:var(--coral);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Ver</button>
-    </div>`;
-}
-
-function renderComunidad() { renderEventos(); renderEncuestas(); }
-
-function renderEventos() {
-  const cont = document.getElementById('eventos-lista');
-  if (!cont) return;
-  if (!eventos.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">No hay eventos próximos por ahora.</div>'; return; }
-  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  cont.innerHTML = eventos.map(e => {
-    const d = e.fecha ? new Date(e.fecha + 'T00:00:00') : null;
-    const dia = d ? d.getDate() : '–';
-    const mes = d ? meses[d.getMonth()] : '';
+  if (!data.length) {
+    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Sin incidencias para este filtro.</div>';
+    return;
+  }
+  const badge = est => {
+    const map = { 'Pendiente':['#FEF3C7','#92400E'], 'En proceso':['#DBEAFE','#1E40AF'], 'Resuelta':['#D1FAE5','#065F46'] };
+    const c = map[est] || ['#F3F4F6','#374151'];
+    return '<span style="background:' + c[0] + ';color:' + c[1] + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">' + est + '</span>';
+  };
+  const btnEstado = (id, est, actual) => {
+    const activo = est === actual;
+    const style = 'font-size:12px;font-family:inherit;cursor:pointer;border-radius:6px;padding:5px 10px;border:1px solid var(--border);' + (activo ? 'background:var(--blue);color:#fff;border-color:var(--blue)' : 'background:#fff;color:var(--ink)');
+    return `<button onclick="cambiarEstadoIncidencia(${id},'${est}')" style="${style}">${est}</button>`;
+  };
+  cont.innerHTML = data.map(i => {
+    const est = i.estado || 'Pendiente';
+    const fotoBtn = i.tiene_foto
+      ? `<button onclick="verFotoIncidencia(${i.id},this)" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:5px 10px">📷 Ver foto</button>`
+      : '';
     return `
-    <div style="display:flex;gap:14px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="flex-shrink:0;width:54px;text-align:center;background:#EEF3FF;border-radius:10px;padding:8px 0">
-        <div style="font-size:20px;font-weight:800;color:var(--blue);line-height:1">${dia}</div>
-        <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase">${mes}</div>
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div>
+          <span style="font-weight:700;color:var(--ink)">${i.categoria || 'Otro'}</span>
+          <span style="color:var(--muted);font-size:12px"> · Edificio ${edifMap[i.id_residente] || '—'} · Depto ${i.departamento || '—'} · ${i.nombre || ''}</span>
+        </div>
+        ${badge(est)}
       </div>
-      <div style="flex:1">
-        <div style="font-weight:700;color:var(--ink);font-size:15px">${(e.titulo||'').replace(/</g,'&lt;')}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap">${(e.descripcion||'').replace(/</g,'&lt;')}</div>
+      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(i.descripcion || '').replace(/</g,'&lt;')}</div>
+      <div id="inc-foto-${i.id}" style="margin-top:8px">${fotoBtn}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(i.created_at)}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        ${btnEstado(i.id,'Pendiente',est)}
+        ${btnEstado(i.id,'En proceso',est)}
+        ${btnEstado(i.id,'Resuelta',est)}
       </div>
     </div>`;
   }).join('');
 }
 
-function renderEncuestas() {
-  const cont = document.getElementById('encuestas-lista');
-  if (!cont) return;
-  if (!encuestas.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">No hay encuestas activas por ahora.</div>'; return; }
-  cont.innerHTML = encuestas.map(enc => {
-    const ops = enc.opciones || [];
-    const conteos = enc.conteos || [];
-    const total = enc.total || 0;
-    const voted = enc.mi_voto !== null && enc.mi_voto !== undefined;
-    let opsHtml;
-    if (voted) {
-      opsHtml = ops.map((op, i) => {
-        const c = conteos[i] || 0;
-        const pct = total ? Math.round(c * 100 / total) : 0;
-        const mine = i === enc.mi_voto;
-        return `
-        <div onclick="votar(${enc.id},${i})" style="margin-bottom:10px;cursor:pointer">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:var(--ink);font-weight:${mine?'700':'500'}">${mine?'✓ ':''}${(''+op).replace(/</g,'&lt;')}</span>
-            <span style="color:var(--muted)">${pct}%</span>
-          </div>
-          <div style="height:9px;background:var(--bg);border-radius:100px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${mine?'var(--blue)':'#7BA8FF'}"></div></div>
-        </div>`;
-      }).join('');
-      opsHtml += '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + total + ' voto' + (total !== 1 ? 's' : '') + ' · Toca otra opción para cambiar tu voto</div>';
-    } else {
-      opsHtml = '<div style="display:grid;gap:8px">' + ops.map((op, i) =>
-        `<button onclick="votar(${enc.id},${i})" style="text-align:left;font-size:14px;font-family:inherit;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:#fff;color:var(--ink)" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">${(''+op).replace(/</g,'&lt;')}</button>`
-      ).join('') + '</div>';
-    }
-    return `
-    <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-      <div style="font-weight:700;color:var(--ink);font-size:15px;margin-bottom:12px">${(enc.pregunta||'').replace(/</g,'&lt;')}</div>
-      ${opsHtml}
-    </div>`;
-  }).join('');
-}
-
-async function votar(encuestaId, opcion) {
+async function verFotoIncidencia(id, btn) {
+  btn.disabled = true; btn.textContent = 'Cargando…';
   try {
-    const r = await fetch(`${URL}/rpc/votar_encuesta`, {
+    const r = await fetch(`${URL}/rpc/obtener_foto_incidencia`, {
       method: 'POST', headers: H,
-      body: JSON.stringify({ p_user_id: sesionUser, p_password: sesionPass, p_encuesta_id: encuestaId, p_opcion: opcion })
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id })
     });
     const d = await r.json();
-    if (!r.ok || !d || !d.ok) return;
-    const enc = encuestas.find(e => e.id === encuestaId);
-    if (enc) {
-      const prev = enc.mi_voto;
-      if (!enc.conteos) enc.conteos = (enc.opciones || []).map(() => 0);
-      if (prev === null || prev === undefined) { enc.total = (enc.total || 0) + 1; }
-      else if (prev !== opcion) { enc.conteos[prev] = Math.max(0, (enc.conteos[prev] || 0) - 1); }
-      if (prev !== opcion) enc.conteos[opcion] = (enc.conteos[opcion] || 0) + 1;
-      enc.mi_voto = opcion;
+    const cont = document.getElementById('inc-foto-' + id);
+    if (d && d.ok && d.foto) cont.innerHTML = '<img src="' + d.foto + '" style="max-width:240px;border-radius:8px;border:1px solid var(--border)">';
+    else cont.innerHTML = '<span style="font-size:12px;color:var(--muted)">Sin foto disponible.</span>';
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '📷 Ver foto';
+  }
+}
+
+async function cambiarEstadoIncidencia(id, estado) {
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_incidencia_estado`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_estado: estado })
+    });
+    const d = await r.json();
+    if (d && d.ok) {
+      const inc = allIncidencias.find(x => x.id === id);
+      if (inc) inc.estado = estado;
+      renderIncidenciasAdmin();
     }
-    renderEncuestas();
   } catch (e) {}
 }
 
-function renderLlamadas() {
-  const cont = document.getElementById('llamadas-lista');
+function poblarSelectResidentes() {
+  const sel = document.getElementById('ll-residente');
+  if (!sel) return;
+  const ordenados = [...allResidentes].sort((a,b) => (''+a.departamento).localeCompare(''+b.departamento, 'es', {numeric:true}));
+  sel.innerHTML = '<option value="">Selecciona un residente…</option>' +
+    ordenados.map(r => '<option value="'+r.id_residente+'">Depto '+(r.departamento||'?')+' · '+(r.nombre_completo||'')+'</option>').join('');
+}
+
+function mostrarMsgLl(texto, ok) {
+  const m = document.getElementById('ll-msg');
+  m.textContent = texto; m.style.display = 'block';
+  m.style.background = ok ? '#ECFDF5' : '#FEF2F2';
+  m.style.color = ok ? '#065F46' : '#DC2626';
+  m.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
+}
+
+async function crearLlamada() {
+  const idr = document.getElementById('ll-residente').value;
+  const motivo = document.getElementById('ll-motivo').value.trim();
+  const desc = document.getElementById('ll-desc').value.trim();
+  const btn = document.getElementById('ll-btn');
+  document.getElementById('ll-msg').style.display = 'none';
+  if (!idr) { mostrarMsgLl('Selecciona un residente.', false); return; }
+  if (!desc) { mostrarMsgLl('Escribe la descripción de la llamada.', false); return; }
+  btn.disabled = true; btn.textContent = 'Registrando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_llamada_atencion`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id_residente: parseInt(idr,10), p_motivo: motivo, p_descripcion: desc })
+    });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error('fail');
+    allLlamadas.unshift({ id: d.id, id_residente: parseInt(idr,10), departamento: d.departamento, motivo: motivo || 'General', descripcion: desc, estado: 'Activa', created_at: new Date().toISOString() });
+    renderLlamadasAdmin();
+    document.getElementById('ll-motivo').value = '';
+    document.getElementById('ll-desc').value = '';
+    document.getElementById('ll-residente').value = '';
+    mostrarMsgLl('✓ Llamada registrada. El residente ya la verá en su portal.', true);
+    btn.disabled = false; btn.textContent = 'Registrar llamada';
+  } catch (e) {
+    mostrarMsgLl('No se pudo registrar. Intenta de nuevo.', false);
+    btn.disabled = false; btn.textContent = 'Registrar llamada';
+  }
+}
+
+function renderLlamadasAdmin() {
+  const cont = document.getElementById('ll-lista');
   if (!cont) return;
-  if (!llamadas.length) {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px;color:var(--green);font-size:14px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px"><span>✓</span> No tienes llamadas de atención. ¡Todo en orden!</div>';
+  const countEl = document.getElementById('ll-count');
+  if (countEl) countEl.textContent = allLlamadas.length + ' registro(s)';
+  if (!allLlamadas.length) {
+    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Aún no hay llamadas de atención registradas.</div>';
     return;
   }
   const badge = est => {
@@ -1668,43 +904,167 @@ function renderLlamadas() {
     const c = map[est] || ['#F3F4F6','#374151','var(--border)'];
     return '<span style="background:'+c[0]+';color:'+c[1]+';border:1px solid '+c[2]+';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">'+est+'</span>';
   };
-  cont.innerHTML = llamadas.map(l => `
-    <div style="border:1px solid var(--border);border-left:3px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="font-weight:700;color:var(--ink);font-size:14px">${(l.motivo || 'General').replace(/</g,'&lt;')}</div>
-        ${badge(l.estado || 'Activa')}
-      </div>
-      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(l.descripcion || '').replace(/</g,'&lt;')}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(l.created_at)}</div>
-    </div>`).join('');
-}
-
-function renderIncidencias() {
-  const cont = document.getElementById('inc-lista');
-  if (!cont) return;
-  if (!incidencias.length) {
-    cont.innerHTML = '<p style="color:var(--muted);font-size:13px">Aún no has reportado nada. Cuando lo hagas, aparecerá aquí con su estado.</p>';
-    return;
-  }
-  const badge = est => {
-    const map = { 'Pendiente':['#FEF3C7','#92400E'], 'En proceso':['#DBEAFE','#1E40AF'], 'Resuelta':['#D1FAE5','#065F46'], 'Resuelto':['#D1FAE5','#065F46'] };
-    const c = map[est] || ['#F3F4F6','#374151'];
-    return '<span style="background:' + c[0] + ';color:' + c[1] + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">' + est + '</span>';
+  const btnEstado = (id, est, actual) => {
+    const activo = est === actual;
+    const style = 'font-size:12px;font-family:inherit;cursor:pointer;border-radius:6px;padding:5px 10px;border:1px solid var(--border);' + (activo ? 'background:var(--blue);color:#fff;border-color:var(--blue)' : 'background:#fff;color:var(--ink)');
+    return `<button onclick="cambiarEstadoLlamada(${id},'${est}')" style="${style}">${est}</button>`;
   };
-  cont.innerHTML = incidencias.map(i => `
-    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="font-weight:700;color:var(--ink);font-size:14px">${i.categoria || 'Otro'}</div>
-        ${badge(i.estado || 'Pendiente')}
+  cont.innerHTML = allLlamadas.map(l => {
+    const est = l.estado || 'Activa';
+    return `
+    <div style="border:1px solid var(--border);border-left:3px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div><span style="font-weight:700;color:var(--ink)">${(l.motivo||'General').replace(/</g,'&lt;')}</span><span style="color:var(--muted);font-size:12px"> · Edificio ${edifMap[l.id_residente] || '—'} · Depto ${l.departamento||'—'}</span></div>
+        ${badge(est)}
       </div>
-      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(i.descripcion || '').replace(/</g,'&lt;')}</div>
-      ${i.foto ? '<img src="' + i.foto + '" style="max-width:120px;border-radius:8px;margin-top:8px;border:1px solid var(--border)">' : ''}
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(i.created_at)}</div>
+      <div style="font-size:13px;color:var(--ink);margin-top:6px;white-space:pre-wrap">${(l.descripcion||'').replace(/</g,'&lt;')}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">${fmtFechaInc(l.created_at)}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">${btnEstado(l.id,'Activa',est)}${btnEstado(l.id,'Resuelta',est)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function cambiarEstadoLlamada(id, estado) {
+  try {
+    const r = await fetch(`${URL}/rpc/actualizar_llamada_estado`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_estado: estado })
+    });
+    const d = await r.json();
+    if (d && d.ok) {
+      const l = allLlamadas.find(x => x.id === id);
+      if (l) l.estado = estado;
+      renderLlamadasAdmin();
+    }
+  } catch (e) {}
+}
+
+function msgBox(el, texto, ok) {
+  el.textContent = texto; el.style.display = 'block';
+  el.style.background = ok ? '#ECFDF5' : '#FEF2F2';
+  el.style.color = ok ? '#065F46' : '#DC2626';
+  el.style.border = '1px solid ' + (ok ? '#A7F3D0' : '#FECACA');
+}
+
+async function crearEvento() {
+  const titulo = document.getElementById('ev-titulo').value.trim();
+  const fecha = document.getElementById('ev-fecha').value;
+  const desc = document.getElementById('ev-desc').value.trim();
+  const btn = document.getElementById('ev-btn'); const msg = document.getElementById('ev-msg'); msg.style.display = 'none';
+  if (!titulo || !fecha) { msgBox(msg, 'Escribe al menos título y fecha.', false); return; }
+  btn.disabled = true; btn.textContent = 'Agregando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_evento`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_titulo: titulo, p_fecha: fecha, p_descripcion: desc }) });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error();
+    allEventos.push({ id: d.id, titulo, fecha, descripcion: desc });
+    allEventos.sort((a, b) => (''+a.fecha).localeCompare(''+b.fecha));
+    renderEventosAdmin();
+    document.getElementById('ev-titulo').value = ''; document.getElementById('ev-fecha').value = ''; document.getElementById('ev-desc').value = '';
+    msgBox(msg, '✓ Evento agregado. Ya aparece en el portal de los residentes.', true);
+    btn.disabled = false; btn.textContent = 'Agregar evento';
+  } catch (e) { msgBox(msg, 'No se pudo agregar. Intenta de nuevo.', false); btn.disabled = false; btn.textContent = 'Agregar evento'; }
+}
+
+async function eliminarEvento(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  try {
+    const r = await fetch(`${URL}/rpc/eliminar_evento`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id }) });
+    const d = await r.json();
+    if (d && d.ok) { allEventos = allEventos.filter(e => e.id !== id); renderEventosAdmin(); }
+  } catch (e) {}
+}
+
+function renderEventosAdmin() {
+  const cont = document.getElementById('ev-lista'); if (!cont) return;
+  if (!allEventos.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">Sin eventos por ahora.</div>'; return; }
+  cont.innerHTML = allEventos.map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div><div style="font-weight:700;color:var(--ink);font-size:14px">${(e.titulo||'').replace(/</g,'&lt;')}</div>
+      <div style="font-size:12px;color:var(--muted)">${e.fecha||''} · ${(e.descripcion||'').replace(/</g,'&lt;')}</div></div>
+      <button onclick="eliminarEvento(${e.id})" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid #FECACA;color:#DC2626;border-radius:6px;padding:6px 10px;white-space:nowrap">Eliminar</button>
     </div>`).join('');
 }
 
-function toggleMenu() {
-  document.getElementById('portal').classList.toggle('menu-abierto');
+async function crearEncuesta() {
+  const preg = document.getElementById('en-pregunta').value.trim();
+  const ops = ['en-op1','en-op2','en-op3','en-op4'].map(i => document.getElementById(i).value.trim()).filter(x => x);
+  const btn = document.getElementById('en-btn'); const msg = document.getElementById('en-msg'); msg.style.display = 'none';
+  if (!preg) { msgBox(msg, 'Escribe la pregunta.', false); return; }
+  if (ops.length < 2) { msgBox(msg, 'Agrega al menos 2 opciones.', false); return; }
+  btn.disabled = true; btn.textContent = 'Publicando…';
+  try {
+    const r = await fetch(`${URL}/rpc/crear_encuesta`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_pregunta: preg, p_opciones: ops }) });
+    const d = await r.json();
+    if (!r.ok || !d || !d.ok) throw new Error();
+    allEncuestas.unshift({ id: d.id, pregunta: preg, opciones: ops, activa: true, total: 0, conteos: ops.map(() => 0) });
+    renderEncuestasAdmin();
+    document.getElementById('en-pregunta').value = ''; ['en-op1','en-op2','en-op3','en-op4'].forEach(i => document.getElementById(i).value = '');
+    msgBox(msg, '✓ Encuesta publicada. Los residentes ya pueden votar.', true);
+    btn.disabled = false; btn.textContent = 'Publicar encuesta';
+  } catch (e) { msgBox(msg, 'No se pudo publicar. Intenta de nuevo.', false); btn.disabled = false; btn.textContent = 'Publicar encuesta'; }
+}
+
+async function cerrarEncuesta(id, activa) {
+  try {
+    const r = await fetch(`${URL}/rpc/cerrar_encuesta`, { method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass, p_id: id, p_activa: activa }) });
+    const d = await r.json();
+    if (d && d.ok) { const e = allEncuestas.find(x => x.id === id); if (e) e.activa = activa; renderEncuestasAdmin(); }
+  } catch (e) {}
+}
+
+function renderEncuestasAdmin() {
+  const cont = document.getElementById('en-lista'); if (!cont) return;
+  if (!allEncuestas.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px">Sin encuestas por ahora.</div>'; return; }
+  cont.innerHTML = allEncuestas.map(e => {
+    const ops = e.opciones || []; const conteos = e.conteos || []; const total = e.total || 0;
+    const barras = ops.map((op, i) => {
+      const c = conteos[i] || 0; const pct = total ? Math.round(c * 100 / total) : 0;
+      return `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--ink)">${(''+op).replace(/</g,'&lt;')}</span><span style="color:var(--muted)">${c} (${pct}%)</span></div><div style="height:7px;background:var(--bg);border-radius:100px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--blue)"></div></div></div>`;
+    }).join('');
+    const badge = e.activa
+      ? '<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px">Activa</span>'
+      : '<span style="background:#F3F4F6;color:#374151;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px">Cerrada</span>';
+    const toggle = e.activa
+      ? `<button onclick="cerrarEncuesta(${e.id},false)" style="font-size:12px;font-family:inherit;cursor:pointer;background:#fff;border:1px solid var(--border);color:var(--ink);border-radius:6px;padding:6px 10px">Cerrar</button>`
+      : `<button onclick="cerrarEncuesta(${e.id},true)" style="font-size:12px;font-family:inherit;cursor:pointer;background:var(--blue);border:none;color:#fff;border-radius:6px;padding:6px 10px">Reabrir</button>`;
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px"><div style="font-weight:700;color:var(--ink);font-size:14px">${(e.pregunta||'').replace(/</g,'&lt;')}</div>${badge}</div>
+      ${barras}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span style="font-size:11px;color:var(--muted)">${total} voto(s)</span>${toggle}</div>
+    </div>`;
+  }).join('');
+}
+
+async function refrescarAdmin() {
+  const b = document.getElementById('btnRefreshAdmin');
+  if (b) { b.disabled = true; b.textContent = 'Actualizando…'; }
+  try {
+    const r = await fetch(`${URL}/rpc/admin_panel`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass }) });
+    const d = await r.json();
+    if (d && d.ok) {
+      allResidentes = d.residentes || []; allPagos = d.pagos || [];
+      allIncidencias = d.incidencias || []; allLlamadas = d.llamadas || [];
+      allEventos = d.eventos || []; allEncuestas = d.encuestas || [];
+      cmLoaded = false;
+      calcularMetricas(); poblarFiltros(); renderIncidenciasAdmin();
+      poblarSelectResidentes(); renderLlamadasAdmin();
+      if (typeof renderEventosAdmin === 'function') renderEventosAdmin();
+      if (typeof renderEncuestasAdmin === 'function') renderEncuestasAdmin();
+      await cargarCobranzaOverview();
+      await cargarAnalisis();
+      const pg = document.querySelector('.page.active');
+      if (pg && pg.id === 'page-cobranzames') { cmLoaded = false; cargarCobranzaMes(); }
+    }
+  } catch(e) {}
+  const u = document.getElementById('tb-ultima');
+  if (u) u.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
 }
 
 function go(id, el) {
@@ -1712,176 +1072,271 @@ function go(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
-  document.getElementById('portal').classList.remove('menu-abierto');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', inquilinos:'Mis inquilinos', incidencias:'Incidencias' };
-  document.getElementById('topbar-title').textContent = t[id] || id;
+  const t = { overview:'Resumen general', cartera:'Cartera vencida', morosos:'Lista de morosos', pagos:'Pagos recibidos', cobranzames:'Cobranza mensual', llamadasadmin:'Llamadas de atención recibidas', residentes:'Residentes', incidencias:'Incidencias', llamadas:'Llamadas de atención', comunidad:'Comunidad' };
+  document.getElementById('topbar-title').textContent = (t[id] || id) + ' — Manzana 80';
+  if (id === 'cobranzames') cargarCobranzaMes();
+  if (id === 'llamadasadmin') cargarLlamadasAdmin();
 }
 
-function doLogout() {
-  residente = null; pagos = []; incidencias = []; llamadas = []; eventos = []; encuestas = []; sesionUser = ''; sesionPass = ''; fotoBase64 = null;
-  mpAccessToken = null; mpAuthPromise = null; pagoEnProceso = false;
-  document.getElementById('portal').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('input-user').value = '';
-  document.getElementById('input-pass').value = '';
-  document.getElementById('btn-login').disabled = false;
-  document.getElementById('btn-login').textContent = 'Entrar al portal →';
-  document.getElementById('login-error').style.display = 'none';
+// ===== ANÁLISIS (misma fuente que Operaciones) =====
+let anData=null, anOrd='pct';
+const anMoney=n=>'$'+Number(n||0).toLocaleString('es-MX');
+async function cargarAnalisis(){
+  try{
+    const r=await fetch(`${URL}/rpc/pg_analisis`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user:adminUser,p_password:adminPass,p_anio:null,p_mes:null})});
+    const d=await r.json();
+    if(!d||d.ok===false)return;
+    anData=d; renderAnalisis();
+  }catch(e){}
+}
+function renderAnalisis(){
+  if(!anData)return;
+  const g=anData.global||{}, M=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const pe=document.getElementById('an-periodo'); if(pe)pe.textContent=M[anData.mes]+' '+anData.anio;
+  const k=document.getElementById('an-kpis');
+  if(k)k.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:11px">
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Recaudado</div>
+      <div style="font-size:20px;font-weight:800;color:var(--green)">${anMoney(g.cobrado_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)}</div></div>
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Pendiente</div>
+      <div style="font-size:20px;font-weight:800;color:var(--coral)">${anMoney(g.pendiente_mes)}</div>
+      <div style="font-size:11px;color:var(--muted)">del mes</div></div>
+    <div style="background:#F7F9FC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">% recaudación</div>
+      <div style="font-size:20px;font-weight:800;color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div>
+      <div style="font-size:11px;color:var(--muted)">${g.unidades} unidades</div></div>
+    <div style="background:#E7F5EC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#1B7A3D;font-weight:700;text-transform:uppercase">Al corriente</div>
+      <div style="font-size:20px;font-weight:800">${g.al_corriente||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${Number(g.pct_al_corriente||0).toFixed(1)}%</div></div>
+    <div style="background:#FBE9EC;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#B00020;font-weight:700;text-transform:uppercase">Con adeudo</div>
+      <div style="font-size:20px;font-weight:800">${g.con_adeudo||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${anMoney(g.adeudo_total)}</div></div>
+    <div style="background:#EEF3FF;border-radius:12px;padding:13px">
+      <div style="font-size:11px;color:#1847CC;font-weight:700;text-transform:uppercase">Convenios</div>
+      <div style="font-size:20px;font-weight:800">${g.en_convenio||0}</div>
+      <div style="font-size:11px;color:var(--muted)">${anMoney(g.saldo_convenios)}</div></div>
+  </div>`;
+  let ed=(anData.edificios||[]).slice();
+  if(anOrd==='pct')ed.sort((a,b)=>b.pct-a.pct);
+  else if(anOrd==='peor')ed.sort((a,b)=>a.pct-b.pct);
+  else if(anOrd==='adeudo')ed.sort((a,b)=>b.adeudo_total-a.adeudo_total);
+  else ed.sort((a,b)=>a.edificio.localeCompare(b.edificio));
+  const c=document.getElementById('an-edif');
+  if(c)c.innerHTML=ed.map(e=>{
+    const col=e.pct>=70?'var(--green)':e.pct>=45?'var(--yellow)':'var(--coral)';
+    return `<div style="padding:10px 0;border-bottom:1px solid #F1F3F7">
+      <div style="display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;font-size:13px;margin-bottom:5px">
+        <b>Edificio ${e.edificio} <span style="color:var(--muted);font-weight:400">· ${e.unidades} u. · ${e.al_corriente} al corriente · ${e.con_adeudo} con adeudo${e.en_convenio?' · '+e.en_convenio+' convenio':''}</span></b>
+        <span style="font-weight:800;color:${col}">${Number(e.pct).toFixed(1)}% · ${anMoney(e.cobrado)}</span></div>
+      <div style="height:7px;background:#F1F3F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:${Math.min(e.pct,100)}%;background:${col};border-radius:99px"></div></div>
+    </div>`;}).join('');
+  const so=document.getElementById('an-ord');
+  if(so&&!so.dataset.l){so.dataset.l='1';so.onchange=e=>{anOrd=e.target.value;renderAnalisis();};}
 }
 
-/* ============================================================
-   Reglamento interno — mismo contenido que la app móvil
-   (lib/communityResources.ts: pool-rules + building-rules)
-   ============================================================ */
-const REGLAMENTO_SECCIONES = {
-  alberca: {
-    titulo: 'Reglamento de alberca',
-    icono: '💧',
-    reglas: [
-      'El horario de uso de la alberca es de 10:00 a 22:00 horas.',
-      'Cuando la alberca se encuentre en mantenimiento y exista señalización informativa, queda estrictamente prohibido su uso, ya que los productos utilizados pueden causar daños severos en la piel y los ojos.',
-      'El uso de la alberca es exclusivo para propietarios, inquilinos y sus invitados, siempre y cuando respeten el presente reglamento.',
-      'Antes de ingresar a la alberca, los usuarios deberán ducharse para retirar del cuerpo el exceso de bloqueadores, bronceadores, tierra u otras sustancias.',
-      'Queda estrictamente prohibido utilizar la alberca con ropa no adecuada, como shorts, pantalones, playeras, ropa interior, sandalias, zapatos u otros similares.',
-      'Los niños menores de 3 años deberán utilizar calzón especial para alberca (no pañal).',
-      'Los menores de edad deberán permanecer siempre bajo la supervisión de un adulto.',
-      'Dentro de la alberca y en el andador perimetral queda estrictamente prohibido consumir alimentos o bebidas.',
-      'Se prohíbe instalar casas de campaña en las áreas comunes del condominio.'
-    ]
-  },
-  interno: {
-    titulo: 'Reglamento interno',
-    icono: '📋',
-    reglas: [
-      'No cambiar el color de la fachada, a no ser que sea un acuerdo de la asamblea.',
-      'No construir, destruir o modificar las fachadas y paredes de tu edificio.',
-      'Se prohíbe realizar construcciones no autorizadas por la A.C.',
-      'Evitar utilizar los balcones o barandales para colgar ropa o cualquier otro objeto.',
-      'Las mascotas deben permanecer dentro del departamento y, para sacarlas, deben portar correa. Es responsabilidad de cada persona recoger sus heces.',
-      'Atiende a tu mascota para que sus ladridos sean moderados y no molesten a los vecinos en horas inadecuadas. Cuídala dentro de tu propiedad.',
-      'Mantén limpio tu patio y evita acumular objetos que produzcan insectos. Si tienes mascota, limpia diariamente; puedes usar agua con cloro después de lavar para evitar aromas desagradables.',
-      'Cumplir las reglas del área de alberca cuando disfrutes de esta amenidad.',
-      'Dar a conocer el reglamento a los inquilinos y visitantes.',
-      'Las áreas comunes son de todos: no se podrán obstruir con construcciones, invadir o modificar instalando puntos de venta, tendederos en áreas verdes u otros objetos.',
-      'La basura de casa debe depositarse en los contenedores asignados y, de preferencia, separada en orgánica e inorgánica. Los botes del parque son solamente para la basura de esa área.',
-      'El horario de ruido por reparación o construcción es de 8:00 a 17:00 horas.',
-      'Las reuniones en los departamentos deben terminar a las 22:00 horas con música en volumen moderado. Después de esa hora se debe moderar el ruido; en caso contrario, se podrá llamar a las autoridades.',
-      'Evita tirar colillas, latas o cualquier basura en pasillos, escaleras o jardines. Utiliza siempre los botes de basura.',
-      'Ser un buen vecino implica mantener una actitud respetuosa y considerada hacia quienes viven cerca de ti.'
-    ]
-  }
-};
-
-function renderReglamento(tipo) {
-  const sec = REGLAMENTO_SECCIONES[tipo];
-  document.getElementById('reglamento-titulo').textContent = sec.icono + ' ' + sec.titulo;
-  const cont = document.getElementById('reglamento-body');
-  cont.innerHTML = `
-    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
-      ${sec.reglas.map(r => `<li style="font-size:13px;color:var(--body);line-height:1.5">${r.replace(/</g,'&lt;')}</li>`).join('')}
-    </ol>
-  `;
-}
-
-function abrirReglamento(tipo) {
-  renderReglamento(tipo);
-  document.getElementById('reglamento-modal').style.display = 'flex';
-}
-
-function cerrarReglamento() {
-  document.getElementById('reglamento-modal').style.display = 'none';
-}
-
-async function copiarClabe() {
-  const clabe = '012694001253016969';
+// ===== LLAMADAS RECIBIDAS =====
+async function cargarLlamadasAdmin() {
+  const cont = document.getElementById('lla-content');
   try {
-    await navigator.clipboard.writeText(clabe);
-  } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = clabe;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch (e2) {}
-    document.body.removeChild(ta);
-  }
-  const el = document.getElementById('clabe-valor');
-  const original = el.textContent;
-  el.textContent = '✓ Copiada';
-  setTimeout(() => { el.textContent = original; }, 1500);
-}
-
-function mostrarMsgPago(texto, tipo) {
-  const el = document.getElementById('pago-msg');
-  const estilos = {
-    info:  'background:var(--blue-light);color:var(--blue)',
-    error: 'background:#FDEDED;color:#C0392B',
-    ok:    'background:#E7F9EF;color:#1B8A4C'
-  };
-  el.style.cssText = 'display:block;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center;' + (estilos[tipo] || estilos.info);
-  el.textContent = texto;
-}
-
-async function doPago() {
-  if (pagoEnProceso) return;
-  const btn = document.getElementById('btn-pagar-mp');
-  const textoOriginal = btn.textContent;
-
-  if (!mpAccessToken && mpAuthPromise) {
-    btn.disabled = true; btn.textContent = 'Preparando sesión…';
-    mpAccessToken = await mpAuthPromise;
-  }
-
-  if (!mpAccessToken) {
-    btn.disabled = false; btn.textContent = textoOriginal;
-    mostrarMsgPago('No pudimos preparar tu sesión de pago. Cierra sesión, vuelve a entrar e inténtalo de nuevo. Si el problema sigue, contáctanos: echoadministrationmx@gmail.com', 'error');
-    return;
-  }
-
-  pagoEnProceso = true;
-  btn.disabled = true; btn.textContent = 'Preparando pago…';
-  document.getElementById('pago-msg').style.display = 'none';
-
-  try {
-    const ctrl = new AbortController();
-    const reloj = setTimeout(() => ctrl.abort(), 15000);
-    const r = await fetch(`${FUNCTIONS_URL}/crear-preferencia`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + mpAccessToken,
-        'apikey': KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ return_url: 'https://www.echoadministration.com/pago/' }),
-      signal: ctrl.signal
-    });
-    clearTimeout(reloj);
-    const d = await r.json().catch(() => null);
-
-    if (!r.ok || !d || !d.checkout_url) {
-      const mensajes = {
-        sin_adeudo: 'No tienes saldo pendiente por pagar. ¡Gracias!',
-        pago_en_proceso: 'Ya tienes un pago en proceso con Mercado Pago. Revisa la pestaña que se abrió o espera unos minutos.',
-        sesion_invalida: 'Tu sesión de pago expiró. Cierra sesión y vuelve a entrar.',
-        servicio_no_configurado: 'El pago en línea no está disponible por el momento. Contáctanos: echoadministrationmx@gmail.com'
-      };
-      mostrarMsgPago(mensajes[d && d.error] || 'No pudimos iniciar tu pago. Intenta de nuevo o contáctanos: echoadministrationmx@gmail.com', 'error');
+    const r = await fetch(`${URL}/rpc/pg_llamadas_admin`, { method:'POST', headers:H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass }) });
+    const d = await r.json();
+    document.getElementById('lla-loading').classList.add('hidden');
+    const ll = (d && d.llamadas) || [];
+    if (!ll.length) {
+      cont.innerHTML = '<div class="card" style="padding:36px;text-align:center;color:var(--muted)">Sin llamadas enviadas por Operaciones.</div>';
       return;
     }
-
-    window.open(d.checkout_url, '_blank', 'noopener');
-    mostrarMsgPago('Abrimos Mercado Pago en una pestaña nueva. Completa tu pago ahí; no cierres esta pantalla.', 'info');
-  } catch (e) {
-    mostrarMsgPago('Error de conexión al preparar tu pago. Intenta de nuevo.', 'error');
-  } finally {
-    pagoEnProceso = false;
-    btn.disabled = false; btn.textContent = textoOriginal;
+    cont.innerHTML = ll.map(l => `
+      <div class="card" style="margin-bottom:14px;padding:18px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span class="badge blue">${l.ident || '—'}</span>
+          <b style="font-size:15px">${l.motivo || 'General'}</b>
+          <span class="badge" style="background:#E7F5EC;color:#1B7A3D">${l.ocupante_tipo === 'rentero' ? 'Rentero' : 'Propietario'}</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--muted)">Enviada ${new Date(l.enviado_admin_at).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${l.nombre_completo || ''} · reportada ${new Date(l.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:14px;color:var(--body)">${l.descripcion || ''}</div>
+        ${l.evidencia_url ? `<div style="margin-top:8px"><a href="${l.evidencia_url}" target="_blank" style="color:var(--blue);font-size:13px;font-weight:600">📎 Ver evidencia</a></div>` : ''}
+        <div style="background:#EEF3FF;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px">
+          <b style="color:var(--blue)">Análisis de Operaciones (${l.revisado_por || '—'}):</b> ${l.observaciones_rosaura || 'Sin observaciones'}
+        </div>
+        ${l.fecha_seguimiento ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">Seguimiento programado: ${new Date(l.fecha_seguimiento+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('lla-loading').textContent = 'No se pudo cargar.';
   }
 }
 
-initComunidad();
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+// ===== COBRANZA MENSUAL =====
+let cmData = [], cmYear = 2026, cmLoaded = false;
+let edifMap = {};
+
+async function cargarCobranzaOverview() {
+  try {
+    if (!cmLoaded) {
+      const r = await fetch(`${URL}/rpc/pg_cobranza`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ p_user: adminUser, p_password: adminPass })
+      });
+      const d = await r.json();
+      if (!d || d.ok === false) return;
+      cmData = d.meses || [];
+      cmLoaded = true;
+    }
+    renderOvCobranza();
+  } catch (e) {}
+}
+
+function renderOvCobranza() {
+  const hoy = new Date();
+  const anio = hoy.getFullYear(), mesActual = hoy.getMonth() + 1;
+  const rows = cmData.filter(m => m.anio === anio && m.facturables > 0);
+
+  // Cobranza por mes (mismos % que la pestaña Cobranza mensual)
+  document.getElementById('ov-chart').innerHTML = rows.map(m => {
+    const p = Number(m.pct_ideal || 0);
+    const color = p >= 70 ? 'var(--green)' : p >= 45 ? 'var(--yellow)' : 'var(--coral)';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
+        <span>${CM_MESES[m.mes].slice(0,3).toUpperCase()} ${anio}</span>
+        <span style="font-weight:600;color:var(--ink)">${p.toFixed(1)}% — ${cmMoney(m.cobrado)} de ${cmMoney(m.ideal_monto)}</span>
+      </div>
+      <div style="height:7px;background:#F1F3F7;border-radius:100px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:100px"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="font-size:13px;color:var(--muted)">Sin meses facturados este año.</div>';
+
+  // Estado de cobranza — mes actual
+  const mAct = rows.find(m => m.mes === mesActual) || rows[rows.length - 1];
+  if (mAct) {
+    const pMes = Number(mAct.pct_ideal || 0);
+    const pPend = Math.max(0, 100 - pMes);
+    const totIdeal = rows.reduce((a,m)=>a+Number(m.ideal_monto),0);
+    const totCob = rows.reduce((a,m)=>a+Number(m.cobrado),0);
+    const pAnio = totIdeal ? 100*totCob/totIdeal : 0;
+    document.getElementById('ov-estado').innerHTML = `
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${CM_MESES[mAct.mes]} ${anio} · cuota ${cmMoney(mAct.cuota)} · ideal ${cmMoney(mAct.ideal_monto)}</div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Al corriente (cobrado del mes)</span><span style="font-weight:600;color:var(--green)">${pMes.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill green" style="width:${Math.min(pMes,100)}%"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Pendiente del mes</span><span style="font-weight:600;color:var(--coral)">${pPend.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill coral" style="width:${Math.min(pPend,100)}%"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span>Acumulado ${anio}</span><span style="font-weight:600;color:var(--blue)">${pAnio.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill blue" style="width:${Math.min(pAnio,100)}%"></div></div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">Cobrado del mes: <b style="color:var(--ink)">${cmMoney(mAct.cobrado)}</b> · Año: <b style="color:var(--ink)">${cmMoney(totCob)}</b> de ${cmMoney(totIdeal)}</div>`;
+  }
+
+  // Avance del año (resumen compacto)
+  const years=[...new Set(cmData.map(m=>m.anio))].sort();
+  document.getElementById('ov-anual').innerHTML = years.map(y=>{
+    const r=cmData.filter(m=>m.anio===y&&m.facturables>0);
+    const ti=r.reduce((a,m)=>a+Number(m.ideal_monto),0), tc=r.reduce((a,m)=>a+Number(m.cobrado),0);
+    const p=ti?100*tc/ti:0;
+    const color=p>=70?'var(--green)':p>=45?'var(--yellow)':'var(--coral)';
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px">
+        <span style="font-weight:600;color:var(--ink)">${y}</span>
+        <span style="font-weight:600;color:var(--ink)">${p.toFixed(1)}% — ${cmMoney(tc)} de ${cmMoney(ti)}</span>
+      </div>
+      <div style="height:7px;background:#F1F3F7;border-radius:100px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:100px"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const CM_MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const cmMoney = n => '$' + Number(n||0).toLocaleString('es-MX');
+
+async function cargarCobranzaMes() {
+  if (cmLoaded) {
+    document.getElementById('cm-loading').classList.add('hidden');
+    document.getElementById('cm-content').classList.remove('hidden');
+    renderCobranzaMes(); return;
+  }
+  try {
+    const r = await fetch(`${URL}/rpc/pg_cobranza`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ p_user: adminUser, p_password: adminPass })
+    });
+    const d = await r.json();
+    if (!d || d.ok === false) {
+      document.getElementById('cm-loading').textContent = 'No se pudo cargar la cobranza.';
+      return;
+    }
+    cmData = d.meses || [];
+    cmLoaded = true;
+    document.getElementById('cm-loading').classList.add('hidden');
+    document.getElementById('cm-content').classList.remove('hidden');
+    renderCobranzaMes();
+  } catch (e) {
+    document.getElementById('cm-loading').textContent = 'Error de conexión.';
+  }
+}
+
+function cmSetYear(y, el) {
+  cmYear = y;
+  document.querySelectorAll('#cm-years .detail-tab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderCobranzaMes();
+}
+
+function renderCobranzaMes() {
+  const years = [...new Set(cmData.map(m => m.anio))].sort();
+  const ys = document.getElementById('cm-years');
+  if (!ys.dataset.done) {
+    ys.innerHTML = years.map(y =>
+      `<button class="detail-tab${y === cmYear ? ' active' : ''}" onclick="cmSetYear(${y},this)">${y}</button>`
+    ).join('');
+    ys.dataset.done = '1';
+  }
+  const rows = cmData.filter(m => m.anio === cmYear);
+  const billed = rows.filter(m => m.facturables > 0);
+  const totIdeal = billed.reduce((a,m) => a + Number(m.ideal_monto), 0);
+  const totCob = billed.reduce((a,m) => a + Number(m.cobrado), 0);
+  const pct = totIdeal ? 100*totCob/totIdeal : 0;
+
+  document.getElementById('cm-kpis').innerHTML = `
+    <div class="kpi blue"><div class="kpi-label">Ideal del año</div><div class="kpi-val blue">${cmMoney(totIdeal)}</div><div class="kpi-sub">meses facturados</div></div>
+    <div class="kpi green"><div class="kpi-label">Cobrado</div><div class="kpi-val green">${cmMoney(totCob)}</div><div class="kpi-sub">${cmYear}</div></div>
+    <div class="kpi yellow"><div class="kpi-label">Recaudación</div><div class="kpi-val yellow">${pct.toFixed(1)}%</div><div class="kpi-sub">del ideal</div></div>`;
+
+  document.getElementById('cm-table').innerHTML = rows.map(m => {
+    const p = Number(m.pct_ideal || 0);
+    const color = p >= 70 ? 'var(--green)' : p >= 45 ? 'var(--yellow)' : 'var(--coral)';
+    const facturado = m.facturables > 0;
+    return `<div style="display:grid;grid-template-columns:110px 1fr 130px 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);${facturado?'':'opacity:.45'}">
+      <div style="font-weight:600;font-size:14px">${CM_MESES[m.mes]}
+        <div style="font-size:11px;color:var(--muted);font-weight:400">cuota ${cmMoney(m.cuota)}${facturado?'':' · no facturado'}</div></div>
+      <div style="height:20px;background:#F1F3F7;border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(p,100)}%;background:${color};border-radius:6px"></div></div>
+      <div style="text-align:right;font-size:13px">${cmMoney(m.cobrado)}
+        <div style="font-size:11px;color:var(--muted)">de ${cmMoney(m.ideal_monto)}</div></div>
+      <div style="text-align:right;font-weight:800;color:${color}">${facturado ? p.toFixed(1)+'%' : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function adminLogout() {
+  document.getElementById('admin').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('a-user').value = '';
+  document.getElementById('a-pass').value = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
 </script>
 </body>
 </html>
