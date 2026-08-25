@@ -292,7 +292,7 @@ async function vInicio(){
   const g=D.an.global||{}, ed=(D.an.edificios||[]);
   const llp=D.ll&&D.ll.resumen?Number(D.ll.resumen.pendiente_revision||0):0;
   const incp=(D.inc.incidencias||[]).filter(i=>i.estado==='pendiente').length;
-  const peor=ed.slice(-3).reverse();
+  const peor=ed.slice().sort((a,b)=>Number(b.adeudo_historico)-Number(a.adeudo_historico)).slice(0,3);
   $('vista').innerHTML=`
     <div class="card" style="background:linear-gradient(135deg,#1847CC,#3D6BE0);color:#fff;border:0">
       <div style="font-size:.76rem;opacity:.85;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Recaudación · ${MES[CORTE.mes]} ${CORTE.anio}</div>
@@ -301,20 +301,23 @@ async function vInicio(){
         <div style="opacity:.9;font-size:.9rem">${money(g.cobrado_mes)} de ${money(g.ideal_mes)}</div>
       </div>
       <div class="bar" style="background:#ffffff33;margin-top:11px"><i style="width:${Math.min(Number(g.pct_mes||0),100)}%;background:#fff"></i></div>
-      <div style="font-size:.8rem;opacity:.85;margin-top:9px">Falta cobrar ${money(g.pendiente_mes)} de este mes</div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:.8rem;opacity:.9;margin-top:11px;border-top:1px solid #ffffff2e;padding-top:9px">
+        <div><span style="opacity:.75">Pagaron ${MES[CORTE.mes]}:</span> <b>${g.pagaron_mes||0}</b> de ${g.unidades}</div>
+        <div><span style="opacity:.75">Falta del mes:</span> <b>${money(g.pendiente_mes)}</b></div>
+      </div>
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="l">Al corriente</div><div class="v" style="color:var(--ok)">${g.al_corriente||0}</div><div class="s">${Number(g.pct_al_corriente||0).toFixed(1)}% de ${g.unidades}</div></div>
-      <div class="kpi"><div class="l">Con adeudo</div><div class="v" style="color:var(--warn)">${g.con_adeudo||0}</div><div class="s">${money(g.adeudo_total)} total</div></div>
+      <div class="kpi"><div class="l">Al corriente</div><div class="v" style="color:var(--ok)">${g.al_corriente||0}</div><div class="s">sin ningún cargo vencido</div></div>
+      <div class="kpi"><div class="l">Cartera histórica</div><div class="v" style="color:var(--warn)">${money(g.adeudo_historico)}</div><div class="s">${g.con_historico||0} unidades · hasta ${g.antiguedad_max||0} meses</div></div>
       <div class="kpi"><div class="l">Con convenio</div><div class="v" style="color:var(--blue)">${g.en_convenio||0}</div><div class="s">${money(g.saldo_convenios)} bajo convenio</div></div>
       <div class="kpi"><div class="l">Por atender</div><div class="v" style="color:${(llp+incp)?'var(--amber)':'var(--ok)'}">${llp+incp}</div><div class="s">${llp} llamadas · ${incp} incidencias</div></div>
     </div>
     <div class="card">
-      <div class="chead"><h3>Edificios que necesitan atención</h3><button class="btn gh sm" onclick="ir('analisis')">Ver análisis</button></div>
+      <div class="chead"><h3>Edificios con mayor cartera vieja</h3><button class="btn gh sm" onclick="ir('analisis')">Ver análisis</button></div>
       ${peor.map(e=>`<div style="padding:9px 0;border-bottom:1px solid var(--silver)">
-        <div style="display:flex;justify-content:space-between;font-size:.87rem;margin-bottom:5px">
-          <b>Edificio ${e.edificio}</b><span class="mono">${Number(e.pct).toFixed(1)}% · ${e.con_adeudo} con adeudo</span></div>
-        <div class="bar"><i style="width:${Math.min(e.pct,100)}%;background:${e.pct>=70?'var(--ok)':e.pct>=45?'var(--amber)':'var(--warn)'}"></i></div>
+        <div style="display:flex;justify-content:space-between;font-size:.87rem;margin-bottom:5px;flex-wrap:wrap;gap:6px">
+          <b>Edificio ${e.edificio}</b><span class="mono">${money(e.adeudo_historico)} · ${e.antiguedad_max} meses de antigüedad</span></div>
+        <div style="font-size:.78rem;color:var(--muted)">Cobranza de ${MES[CORTE.mes]}: ${Number(e.pct).toFixed(1)}% · ${e.pagaron_mes}/${e.unidades} pagaron</div>
       </div>`).join('')}
     </div>
     <div class="card">
@@ -339,11 +342,25 @@ async function vAnalisis(){
   else ed.sort((a,b)=>a.edificio.localeCompare(b.edificio));
   $('vista').innerHTML=`
     <p class="sub" style="margin:-4px 0 12px">Periodo: <b>${MES[D.an.mes]} ${D.an.anio}</b> · se cambia en Cobranza mensual</p>
-    <div class="kpis">
-      <div class="kpi"><div class="l">Recaudado</div><div class="v" style="color:var(--ok)">${money(g.cobrado_mes)}</div><div class="s">de ${money(g.ideal_mes)}</div></div>
-      <div class="kpi"><div class="l">Pendiente del mes</div><div class="v" style="color:var(--warn)">${money(g.pendiente_mes)}</div><div class="s">${Number(100-Number(g.pct_mes||0)).toFixed(1)}% sin cobrar</div></div>
-      <div class="kpi"><div class="l">% recaudación</div><div class="v" style="color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div><div class="s">del mes</div></div>
-      <div class="kpi"><div class="l">Adeudo acumulado</div><div class="v" style="color:var(--warn)">${money(g.adeudo_total)}</div><div class="s">histórico vencido</div></div>
+    <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
+      <h3>Dos cosas distintas</h3>
+      <p class="sub"><b>Cobranza del mes</b> = si pagaron ${MES[D.an.mes]}. <b>Cartera histórica</b> = lo que arrastran de meses anteriores. Un edificio puede ir 100% en el mes y aun así traer deuda vieja.</p>
+    </div>
+    <div class="card">
+      <div class="chead"><h3>Cobranza de ${MES[D.an.mes]} ${D.an.anio}</h3></div>
+      <div class="kpis" style="margin:0">
+        <div class="kpi"><div class="l">Recaudado</div><div class="v" style="color:var(--ok)">${money(g.cobrado_mes)}</div><div class="s">de ${money(g.ideal_mes)}</div></div>
+        <div class="kpi"><div class="l">Falta del mes</div><div class="v" style="color:var(--warn)">${money(g.pendiente_mes)}</div><div class="s">${g.deben_mes||0} unidades</div></div>
+        <div class="kpi"><div class="l">% del mes</div><div class="v" style="color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div><div class="s">${g.pagaron_mes||0} pagaron</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chead"><h3>Cartera histórica (meses anteriores)</h3></div>
+      <div class="kpis" style="margin:0">
+        <div class="kpi"><div class="l">Adeudo histórico</div><div class="v" style="color:var(--warn)">${money(g.adeudo_historico)}</div><div class="s">${g.con_historico||0} unidades lo arrastran</div></div>
+        <div class="kpi"><div class="l">Antigüedad máxima</div><div class="v" style="color:var(--amber)">${g.antiguedad_max||0}</div><div class="s">meses del cargo más viejo</div></div>
+        <div class="kpi"><div class="l">Cartera total</div><div class="v">${money(g.adeudo_total)}</div><div class="s">histórico + mes en curso</div></div>
+      </div>
     </div>
     <div class="card">
       <div class="chead"><h3>Situación de los residentes</h3></div>
@@ -376,15 +393,14 @@ async function vAnalisis(){
         return `<div style="padding:12px 0;border-bottom:1px solid var(--silver)">
           <div style="display:flex;justify-content:space-between;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:6px">
             <b style="font-size:.95rem">Edificio ${e.edificio}<span style="color:var(--faint);font-weight:400;font-size:.8rem"> · ${e.unidades} unidades</span></b>
-            <span class="num" style="font-weight:800;color:${col}">${Number(e.pct).toFixed(1)}%</span>
+            <span class="num" style="font-weight:800;color:${col}">${Number(e.pct).toFixed(1)}% <span style="font-size:.72rem;color:var(--faint);font-weight:600">del mes</span></span>
           </div>
           <div class="bar"><i style="width:${Math.min(e.pct,100)}%;background:${col}"></i></div>
           <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
-            <span class="pill p-ok">${e.al_corriente} al corriente</span>
-            <span class="pill p-warn">${e.con_adeudo} con adeudo</span>
-            ${e.en_convenio?`<span class="pill p-blue">${e.en_convenio} convenio</span>`:''}
+            <span class="pill p-ok">${e.pagaron_mes}/${e.unidades} pagaron el mes</span>
             <span class="pill p-gray">Cobrado ${money(e.cobrado)}</span>
-            <span class="pill p-gray">Pendiente ${money(e.pendiente_mes)}</span>
+            ${Number(e.adeudo_historico)>0?`<span class="pill p-warn">Histórico ${money(e.adeudo_historico)} · ${e.antiguedad_max}m</span>`:'<span class="pill p-ok">Sin cartera vieja</span>'}
+            ${e.en_convenio?`<span class="pill p-blue">${e.en_convenio} convenio</span>`:''}
           </div>
         </div>`;}).join('')}
     </div>`;
