@@ -192,7 +192,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="main">
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">Resumen general — Manzana 80</span>
-      <div class="topbar-right"><span class="tb-badge" id="tb-fecha">Cargando...</span></div>
+      <div class="topbar-right">
+        <span id="tb-ultima" style="font-size:11px;color:var(--muted)"></span>
+        <button id="btnRefreshAdmin" onclick="refrescarAdmin()" title="Actualizar datos"
+          style="background:var(--blue);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">↻ Actualizar</button>
+        <span class="tb-badge" id="tb-fecha">Cargando...</span>
+      </div>
     </div>
     <div class="content">
 
@@ -248,7 +253,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           </div>
 
           <div class="card" style="margin-top:16px">
-            <div class="card-hdr"><span class="card-title">🏢 Desempeño por edificio</span>
+            <div class="card-hdr"><span class="card-title">🏢 Desempeño por edificio</span><span style="font-size:11.5px;color:var(--muted);margin-left:8px" id="an-edif-per"></span>
               <select id="an-ord" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit">
                 <option value="pct">Mejor recaudación</option>
                 <option value="peor">Peor recaudación</option>
@@ -1092,6 +1097,7 @@ function renderAnalisis(){
   if(!anData)return;
   const g=anData.global||{}, M=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const pe=document.getElementById('an-periodo'); if(pe)pe.textContent=M[anData.mes]+' '+anData.anio;
+  const pe2=document.getElementById('an-edif-per'); if(pe2)pe2.textContent='cobranza de '+M[anData.mes]+' '+anData.anio;
   // KPIs superiores: misma fuente, sin contradicciones
   const set=(id,v)=>{const e=document.getElementById(id); if(e)e.textContent=v;};
   set('ov-total', g.unidades||0);
@@ -1099,18 +1105,22 @@ function renderAnalisis(){
   set('ov-alcorriente-pct', Number(g.pct_al_corriente||0).toFixed(1)+'% del total');
   set('ov-morosos', g.con_adeudo||0);
   set('ov-morosos-pct', Number(g.pct_con_adeudo||0).toFixed(1)+'% del total');
-  set('ov-cartera', anMoney(g.adeudo_total));
-  set('ov-cartera-hist', (g.en_convenio||0)+' con convenio · '+anMoney(g.saldo_convenios));
+  set('ov-cartera', anMoney(g.adeudo_historico));
+  set('ov-cartera-hist', (g.con_historico||0)+' unidades · hasta '+(g.antiguedad_max||0)+' meses');
   const k=document.getElementById('an-kpis');
   if(k)k.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
     <div style="background:#F7F9FC;border-radius:12px;padding:14px">
       <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Recaudado del mes</div>
       <div style="font-size:22px;font-weight:800;color:var(--green)">${anMoney(g.cobrado_mes)}</div>
-      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)} · ${Number(g.pct_mes||0).toFixed(1)}%</div></div>
+      <div style="font-size:11px;color:var(--muted)">de ${anMoney(g.ideal_mes)} · ${Number(g.pct_mes||0).toFixed(1)}% · ${g.pagaron_mes||0} pagaron</div></div>
     <div style="background:#F7F9FC;border-radius:12px;padding:14px">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Pendiente del mes</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Falta del mes</div>
       <div style="font-size:22px;font-weight:800;color:var(--coral)">${anMoney(g.pendiente_mes)}</div>
-      <div style="font-size:11px;color:var(--muted)">cartera histórica ${anMoney(g.adeudo_total)}</div></div>
+      <div style="font-size:11px;color:var(--muted)">${g.deben_mes||0} unidades no han pagado</div></div>
+    <div style="background:#FEF6E7;border-radius:12px;padding:14px">
+      <div style="font-size:11px;color:#B87503;font-weight:700;text-transform:uppercase">Cartera histórica</div>
+      <div style="font-size:22px;font-weight:800;color:#B87503">${anMoney(g.adeudo_historico)}</div>
+      <div style="font-size:11px;color:var(--muted)">de meses anteriores · ${g.antiguedad_max||0}m máx</div></div>
     <div style="background:#E7F5EC;border-radius:12px;padding:14px">
       <div style="font-size:11px;color:#1B7A3D;font-weight:700;text-transform:uppercase">Al corriente</div>
       <div style="font-size:22px;font-weight:800">${g.al_corriente||0} <span style="font-size:13px;color:var(--muted);font-weight:600">/ ${g.unidades}</span></div>
@@ -1138,19 +1148,19 @@ function renderAnalisis(){
         const p=Number(e.pct)||0;
         const col=p>=70?'#059669':p>=45?'#D97706':'#DC2626';
         const h=Math.max(4,Math.round(150*p/max));
-        return `<div title="Edificio ${e.edificio} · ${p.toFixed(1)}% · cobrado ${anMoney(e.cobrado)} · pendiente ${anMoney(e.pendiente_mes)} · ${e.con_adeudo} con adeudo"
+        return `<div title="Edificio ${e.edificio}&#10;Cobranza del mes: ${p.toFixed(1)}% (${e.pagaron_mes} de ${e.unidades} pagaron)&#10;Cobrado: ${anMoney(e.cobrado)} · Falta: ${anMoney(e.pendiente_mes)}&#10;Cartera histórica: ${anMoney(e.adeudo_historico)} (hasta ${e.antiguedad_max} meses)"
           style="flex:1 0 44px;display:flex;flex-direction:column;align-items:center;gap:5px">
           <div style="font-size:10.5px;font-weight:800;color:${col}">${p.toFixed(0)}%</div>
           <div style="width:100%;height:${h}px;background:${col};border-radius:5px 5px 0 0;transition:height .3s"></div>
           <div style="font-size:11px;font-weight:700;color:var(--ink)">${e.edificio}</div>
-          <div style="font-size:9.5px;color:var(--muted);line-height:1.25;text-align:center">${anMoney(e.cobrado)}<br><span style="color:#DC2626">${e.con_adeudo} mor.</span></div>
+          <div style="font-size:9.5px;color:var(--muted);line-height:1.25;text-align:center">${e.pagaron_mes}/${e.unidades}<br><span style="color:#B87503">${Number(e.adeudo_historico)>0?anMoney(e.adeudo_historico):'—'}</span></div>
         </div>`;}).join('')}
     </div>`;
     const lg=document.getElementById('an-edif-leyenda');
     if(lg){
       const mejor=ed.reduce((a,b)=>Number(a.pct)>=Number(b.pct)?a:b,ed[0]||{});
       const peor=ed.reduce((a,b)=>Number(a.pct)<=Number(b.pct)?a:b,ed[0]||{});
-      lg.innerHTML=`🟢 ≥70% &nbsp;·&nbsp; 🟠 45–69% &nbsp;·&nbsp; 🔴 &lt;45% &nbsp;&nbsp;|&nbsp;&nbsp; Mejor: <b>${mejor.edificio||'—'}</b> (${Number(mejor.pct||0).toFixed(1)}%) &nbsp;·&nbsp; Requiere atención: <b>${peor.edificio||'—'}</b> (${Number(peor.pct||0).toFixed(1)}%)`;
+      lg.innerHTML=`Barra = <b>% de cobranza del mes en curso</b>. Abajo: unidades que pagaron / total y cartera histórica.<br>🟢 ≥70% &nbsp;·&nbsp; 🟠 45–69% &nbsp;·&nbsp; 🔴 &lt;45% &nbsp;&nbsp;|&nbsp;&nbsp; Mejor: <b>${mejor.edificio||'—'}</b> (${Number(mejor.pct||0).toFixed(1)}%) &nbsp;·&nbsp; Requiere atención: <b>${peor.edificio||'—'}</b> (${Number(peor.pct||0).toFixed(1)}%)`;
     }
   }
   const so=document.getElementById('an-ord');
