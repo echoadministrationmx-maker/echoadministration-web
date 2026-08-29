@@ -177,7 +177,7 @@ const SB="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let C={p_user:'',p_password:''}, V='inicio', CORTE={anio:2026,mes:8};
-let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null};
+let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null};
 const $=id=>document.getElementById(id);
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 const fecha=s=>s?new Date(String(s).length<=10?s+'T12:00:00':s).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'—';
@@ -201,6 +201,8 @@ const MENU=[
   {k:'inicio',t:'Resumen',i:'📊'},
   {k:'cobranza',t:'Cobranza mensual',i:'📈'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
+  {k:'historico',t:'Histórico por edificio',i:'🗓️'},
+  {k:'recibos',t:'Recibos emitidos',i:'🧾'},
   {k:'pagos',t:'Registrar pago',i:'💳'},
   {g:'Comunidad'},
   {k:'residentes',t:'Residentes',i:'👥'},
@@ -270,6 +272,8 @@ async function render(){
     if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
     else if(V==='analisis')   await vAnalisis();
+    else if(V==='historico')  await vHistorico();
+    else if(V==='recibos')    await vRecibos();
     else if(V==='pagos')      await vPagos();
     else if(V==='residentes') await vResidentes();
     else if(V==='llamadas')   await vLlamadas();
@@ -289,21 +293,30 @@ async function vInicio(){
   if(!D.an){D.an=await rpc('pg_analisis',{...C,p_anio:CORTE.anio,p_mes:CORTE.mes});}
   if(!D.ll){D.ll=await rpc('pg_llamadas',{...C,p_flujo:null});}
   if(!D.inc){D.inc=await rpc('pg_incidencias',C);}
-  const g=D.an.global||{}, ed=(D.an.edificios||[]);
+  const g=D.an.global||{}, ed=(D.an.edificios||[]), cj=D.an.caja||{};
   const llp=D.ll&&D.ll.resumen?Number(D.ll.resumen.pendiente_revision||0):0;
   const incp=(D.inc.incidencias||[]).filter(i=>i.estado==='pendiente').length;
   const peor=ed.slice().sort((a,b)=>Number(b.adeudo_historico)-Number(a.adeudo_historico)).slice(0,3);
   $('vista').innerHTML=`
     <div class="card" style="background:linear-gradient(135deg,#1847CC,#3D6BE0);color:#fff;border:0">
-      <div style="font-size:.76rem;opacity:.85;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Recaudación · ${MES[CORTE.mes]} ${CORTE.anio}</div>
+      <div style="font-size:.76rem;opacity:.85;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Dinero recibido · ${MES[CORTE.mes]} ${CORTE.anio}</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px">
-        <div class="num" style="font-size:2.4rem;font-weight:800">${Number(g.pct_mes||0).toFixed(1)}%</div>
-        <div style="opacity:.9;font-size:.9rem">${money(g.cobrado_mes)} de ${money(g.ideal_mes)}</div>
+        <div class="num" style="font-size:2.4rem;font-weight:800">${money(cj.total)}</div>
+        <div style="opacity:.9;font-size:.9rem">${cj.movimientos||0} pagos · ${cj.unidades||0} unidades</div>
       </div>
-      <div class="bar" style="background:#ffffff33;margin-top:11px"><i style="width:${Math.min(Number(g.pct_mes||0),100)}%;background:#fff"></i></div>
-      <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:.8rem;opacity:.9;margin-top:11px;border-top:1px solid #ffffff2e;padding-top:9px">
-        <div><span style="opacity:.75">Pagaron ${MES[CORTE.mes]}:</span> <b>${g.pagaron_mes||0}</b> de ${g.unidades}</div>
-        <div><span style="opacity:.75">Falta del mes:</span> <b>${money(g.pendiente_mes)}</b></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:13px">
+        <div style="background:#ffffff26;border-radius:11px;padding:10px 13px;flex:1;min-width:135px">
+          <div style="font-size:.7rem;opacity:.8;font-weight:700;text-transform:uppercase">Cuotas del mes</div>
+          <div class="num" style="font-size:1.25rem;font-weight:800">${money(cj.del_mes)}</div></div>
+        <div style="background:#ffffff26;border-radius:11px;padding:10px 13px;flex:1;min-width:135px">
+          <div style="font-size:.7rem;opacity:.8;font-weight:700;text-transform:uppercase">Cartera recuperada</div>
+          <div class="num" style="font-size:1.25rem;font-weight:800">${money(cj.recuperado)}</div>
+          <div style="font-size:.68rem;opacity:.75">${cj.mov_recuperado||0} pagos de meses viejos</div></div>
+      </div>
+      <div style="margin-top:14px;border-top:1px solid #ffffff2e;padding-top:11px">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;opacity:.9;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+          <span>Cobranza del mes devengado</span><b>${Number(g.pct_mes||0).toFixed(1)}% · ${g.pagaron_mes||0}/${g.unidades} pagaron</b></div>
+        <div class="bar" style="background:#ffffff33"><i style="width:${Math.min(Number(g.pct_mes||0),100)}%;background:#fff"></i></div>
       </div>
     </div>
     <div class="kpis">
@@ -335,7 +348,7 @@ async function vInicio(){
 let anOrden='pct';
 async function vAnalisis(){
   if(!D.an){D.an=await rpc('pg_analisis',{...C,p_anio:CORTE.anio,p_mes:CORTE.mes});}
-  const g=D.an.global||{}; let ed=(D.an.edificios||[]).slice();
+  const g=D.an.global||{}, cj=D.an.caja||{}; let ed=(D.an.edificios||[]).slice();
   if(anOrden==='pct')ed.sort((a,b)=>b.pct-a.pct);
   else if(anOrden==='peor')ed.sort((a,b)=>a.pct-b.pct);
   else if(anOrden==='adeudo')ed.sort((a,b)=>b.adeudo_total-a.adeudo_total);
@@ -344,10 +357,19 @@ async function vAnalisis(){
     <p class="sub" style="margin:-4px 0 12px">Periodo: <b>${MES[D.an.mes]} ${D.an.anio}</b> · se cambia en Cobranza mensual</p>
     <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
       <h3>Dos cosas distintas</h3>
-      <p class="sub"><b>Cobranza del mes</b> = si pagaron ${MES[D.an.mes]}. <b>Cartera histórica</b> = lo que arrastran de meses anteriores. Un edificio puede ir 100% en el mes y aun así traer deuda vieja.</p>
+      <p class="sub"><b>Dinero recibido</b> = todo lo que entró en ${MES[D.an.mes]}, incluida cartera vieja. <b>Cobranza del mes devengado</b> = solo las cuotas de ${MES[D.an.mes]}; es la base del Bono Operativo. <b>Cartera histórica</b> = lo que sigue pendiente de meses anteriores.</p>
     </div>
     <div class="card">
-      <div class="chead"><h3>Cobranza de ${MES[D.an.mes]} ${D.an.anio}</h3></div>
+      <div class="chead"><h3>Dinero recibido en ${MES[D.an.mes]} ${D.an.anio}</h3></div>
+      <div class="kpis" style="margin:0">
+        <div class="kpi"><div class="l">Total recibido</div><div class="v" style="color:var(--ok)">${money(cj.total)}</div><div class="s">${cj.movimientos||0} pagos · ${cj.unidades||0} unidades</div></div>
+        <div class="kpi"><div class="l">Cuotas del mes</div><div class="v">${money(cj.del_mes)}</div><div class="s">corresponden a ${MES[D.an.mes]}</div></div>
+        <div class="kpi"><div class="l">Cartera recuperada</div><div class="v" style="color:var(--blue)">${money(cj.recuperado)}</div><div class="s">${cj.mov_recuperado||0} pagos de meses anteriores</div></div>
+      </div>
+      <p class="sub" style="margin-top:11px">Flujo real de caja del mes. Incluye recuperación de cartera vencida, que es trabajo de cobranza y no entra en el % del mes devengado.</p>
+    </div>
+    <div class="card">
+      <div class="chead"><h3>Cobranza del mes devengado (${MES[D.an.mes]})</h3></div>
       <div class="kpis" style="margin:0">
         <div class="kpi"><div class="l">Recaudado</div><div class="v" style="color:var(--ok)">${money(g.cobrado_mes)}</div><div class="s">de ${money(g.ideal_mes)}</div></div>
         <div class="kpi"><div class="l">Falta del mes</div><div class="v" style="color:var(--warn)">${money(g.pendiente_mes)}</div><div class="s">${g.deben_mes||0} unidades</div></div>
@@ -454,6 +476,119 @@ async function vCobranza(){
   };
 }
 
+/* ---------- HISTÓRICO POR EDIFICIO ---------- */
+let hiAnio=2026, hiVista='pct';
+async function vHistorico(){
+  if(!D.hi||D.hi.anio!==hiAnio){D.hi=await rpc('pg_historico_edificios',{...C,p_anio:hiAnio});}
+  const eds=D.hi.edificios||[], tot=D.hi.totales||[];
+  const col=p=>p>=70?'var(--ok)':p>=45?'var(--amber)':p>0?'var(--warn)':'#E6EAF2';
+  const val=(m)=>hiVista==='pct'?Number(m.pct).toFixed(0)+'%':hiVista==='recibido'?money(m.recibido):money(m.pendiente);
+  $('vista').innerHTML=`
+    <div class="card">
+      <div class="chead">
+        <div style="flex:1;min-width:180px"><h3>Cobranza mes a mes por edificio</h3>
+          <p class="sub">Cada celda es un mes. Toca para ver el detalle.</p></div>
+        <select id="hiA" style="max-width:120px">${[2023,2024,2025,2026].map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
+      </div>
+      <div class="seg">
+        ${[['pct','% cobranza'],['recibido','Dinero recibido'],['pendiente','Pendiente']].map(([k,t])=>`<button class="${hiVista===k?'on':''}" data-v="${k}">${t}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="overflow-x:auto">
+      <table style="border-collapse:separate;border-spacing:3px;width:100%;min-width:640px">
+        <thead><tr>
+          <th style="text-align:left;font-size:.72rem;color:var(--faint);padding:4px 6px;position:sticky;left:0;background:#fff">EDIF</th>
+          ${MES.slice(1).map(m=>`<th style="font-size:.68rem;color:var(--faint);text-transform:uppercase;padding:4px 2px">${m.slice(0,3)}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+        ${eds.map((e,i)=>`<tr>
+          <td style="font-weight:800;font-size:.8rem;padding:4px 6px;position:sticky;left:0;background:#fff;white-space:nowrap">${e.edificio}<span style="color:var(--faint);font-weight:500"> ·${e.unidades}</span></td>
+          ${(e.meses||[]).map(m=>{
+            const p=Number(m.pct)||0, sinDatos=Number(m.ideal)===0;
+            return `<td style="padding:0"><button class="hiCel" data-e="${i}" data-m="${m.mes}"
+              style="width:100%;min-width:42px;border:0;border-radius:7px;padding:9px 2px;cursor:pointer;font-family:inherit;
+              font-size:.68rem;font-weight:800;background:${sinDatos?'#F4F6FA':col(p)};color:${p>=45||p<45&&p>0?'#fff':'#94A0B0'};
+              opacity:${p===0?'.45':'1'}">${sinDatos?'—':val(m)}</button></td>`;}).join('')}
+        </tr>`).join('')}
+        </tbody>
+        <tfoot><tr>
+          <td style="font-weight:800;font-size:.8rem;padding:8px 6px;position:sticky;left:0;background:#fff">TOTAL</td>
+          ${tot.map(m=>`<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${Number(m.pct)>=70?'var(--ok)':Number(m.pct)>=45?'var(--amber)':'var(--warn)'}">${Number(m.pct).toFixed(0)}%</td>`).join('')}
+        </tr></tfoot>
+      </table>
+      <div class="sub" style="margin-top:12px">🟢 ≥70% · 🟠 45–69% · 🔴 &lt;45% · gris: sin cargos ese mes</div>
+    </div>`;
+  $('hiA').onchange=e=>{hiAnio=Number(e.target.value);D.hi=null;vHistorico();};
+  $('vista').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{hiVista=b.dataset.v;vHistorico();});
+  $('vista').querySelectorAll('.hiCel').forEach(b=>b.onclick=()=>{
+    const e=eds[Number(b.dataset.e)], m=(e.meses||[]).find(x=>x.mes==b.dataset.m);
+    sheet(`<h3>Edificio ${e.edificio} · ${MES[m.mes]} ${hiAnio}</h3>
+      <p class="sub">${e.unidades} unidades</p>
+      <div class="kpis" style="margin-top:13px">
+        <div class="kpi"><div class="l">% cobranza</div><div class="v" style="color:${col(m.pct)}">${Number(m.pct).toFixed(1)}%</div></div>
+        <div class="kpi"><div class="l">Cobrado</div><div class="v">${money(m.cobrado)}</div><div class="s">de ${money(m.ideal)}</div></div>
+        <div class="kpi"><div class="l">Pendiente</div><div class="v" style="color:var(--warn)">${money(m.pendiente)}</div></div>
+        <div class="kpi"><div class="l">Recibido en el mes</div><div class="v" style="color:var(--ok)">${money(m.recibido)}</div><div class="s">${money(m.recuperado)} de cartera vieja</div></div>
+      </div>
+      <div class="acts"><button class="btn gh wide" onclick="cerrarSheet()">Cerrar</button></div>`);
+  });
+}
+
+/* ---------- RECIBOS EMITIDOS ---------- */
+async function vRecibos(){
+  D.rc=await rpc('pg_recibos',{...C,p_limite:60});
+  const rs=D.rc.recibos||[], bit=D.rc.bitacora||[];
+  $('vista').innerHTML=`
+    <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
+      <h3>Recibos emitidos</h3>
+      <p class="sub">Si emitiste un comprobante por error, cancélalo aquí. Puedes además regresar sus meses a "pendiente" para volver a registrarlos bien.</p>
+    </div>
+    ${rs.length?rs.map((r,i)=>`
+      <div class="item" style="${r.estado==='cancelado'?'opacity:.6':''}">
+        <div class="ihead"><span class="tag">#${r.folio}</span><span class="iname">${esc(r.ident)} · ${esc(r.nombre)}</span>
+          <span class="pill ${r.estado==='cancelado'?'p-warn':'p-ok'}">${r.estado==='cancelado'?'Cancelado':'Activo'}</span></div>
+        <p class="sub">${fecha(r.created_at)} · ${esc(r.forma_pago)} · por ${esc(r.creado_por)}${r.email_enviado_a?' · enviado a '+esc(r.email_enviado_a):''}</p>
+        <div style="font-weight:800;font-size:1.05rem;margin-top:5px">${money(r.total)}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
+          ${(r.conceptos||[]).map(c=>`<span class="pill p-gray">${esc(c.c)} · ${money(c.m)}</span>`).join('')}
+        </div>
+        ${r.estado==='cancelado'?`<div style="background:var(--warnbg);border-radius:9px;padding:9px 11px;margin-top:9px;font-size:.82rem">
+          <b style="color:var(--warn)">Cancelado</b> por ${esc(r.cancelado_por)} el ${fecha(r.cancelado_at)} · ${esc(r.motivo_cancelacion)}</div>`:
+          `<div class="acts"><button class="btn gh sm" data-c="${i}">✕ Cancelar recibo</button></div>`}
+      </div>`).join(''):'<div class="empty"><div class="e">🧾</div><div class="t">Sin recibos emitidos</div></div>'}
+    ${bit.length?`<div class="card" style="margin-top:6px">
+      <div class="chead"><h3>Movimientos revertidos</h3></div>
+      ${bit.map(b=>`<div style="padding:9px 0;border-bottom:1px solid var(--silver);font-size:.85rem">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <b>${esc(b.ident)} · ${esc(b.concepto)}</b><span class="mono">${money(b.monto)}</span></div>
+        <div class="sub">${fecha(b.created_at)} · ${esc(b.usuario)} · ${esc(b.motivo)}</div>
+      </div>`).join('')}</div>`:''}`;
+  $('vista').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>cancelarRecibo(rs[Number(b.dataset.c)]));
+}
+function cancelarRecibo(r){
+  sheet(`<h3>Cancelar recibo #${r.folio}</h3>
+    <p class="sub">${esc(r.ident)} · ${esc(r.nombre)} · ${money(r.total)}</p>
+    <div style="margin-top:13px"><label>Motivo de la cancelación *</label>
+      <textarea id="rcM" placeholder="Ej. se emitió a la unidad equivocada / el pago no se confirmó en el banco"></textarea></div>
+    <label style="display:flex;align-items:center;gap:9px;margin-top:12px;font-weight:600;font-size:.88rem">
+      <input type="checkbox" id="rcRev" checked style="width:18px;height:18px;accent-color:var(--blue)">
+      Regresar los meses de este recibo a "pendiente"</label>
+    <p class="sub">Si lo dejas marcado, esos meses volverán a aparecer como adeudo para registrarlos de nuevo.</p>
+    <div class="acts"><button class="btn dan" id="rcGo">Cancelar recibo</button><button class="btn gh" onclick="cerrarSheet()">Volver</button></div>`);
+  $('rcGo').onclick=async()=>{
+    const m=$('rcM').value.trim();
+    if(!m){toast('Escribe el motivo.','err');return;}
+    const b=$('rcGo');b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    try{
+      const d=await rpc('pg_cancelar_recibo',{...C,p_folio:r.folio,p_motivo:m,p_revertir:$('rcRev').checked});
+      if(d&&d.ok){toast('Recibo cancelado'+(d.revertidos?' · '+d.revertidos+' meses reabiertos':''),'good');
+        cerrarSheet();D.units=null;D.dir=null;D.an=null;D.hi=null;vRecibos();}
+      else{toast('No se pudo cancelar.','err');b.disabled=false;b.textContent='Cancelar recibo';}
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Cancelar recibo';}
+  };
+}
+
 /* ---------- REGISTRAR PAGO ---------- */
 let uSel=null, uFiltro={q:'',edif:'',orden:'ident'};
 async function vPagos(){
@@ -525,8 +660,13 @@ async function abrirUnidad(u){
       <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:10px"><span>Seleccionado</span><span class="num" id="selT">$0</span></div>
       <button class="btn ok wide" id="marcar" disabled>Marcar como pagados</button>
     </div>`:''}
+    <div style="margin-top:14px;border-top:1px solid var(--mid);padding-top:12px">
+      <button class="btn gh sm" id="verPagados">↩ Corregir un pago ya registrado</button>
+      <div id="pagadosZone"></div>
+    </div>
     <div id="reciboZone"></div>
     <input type="hidden" id="uMail" value="${esc(mail)}">`);
+  const vp=$('verPagados'); if(vp)vp.onclick=()=>zonaPagados(u);
   const box=$('sheetBox');
   box.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{
     const cbs=[...box.querySelectorAll('input[type=checkbox]')].filter(c=>c.dataset.c.includes(b.dataset.y));
@@ -640,6 +780,37 @@ function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
   <div style="font-weight:600;color:#2563EB;margin-top:7px;font-size:13px">ALDEAMZ80@GMAIL.COM</div></div>
   </div></div></body></html>`);
   w.document.close();
+}
+
+async function zonaPagados(u){
+  const z=$('pagadosZone');
+  if(z.innerHTML){z.innerHTML='';return;}
+  z.innerHTML='<p class="sub">Cargando…</p>';
+  const d=await rpc('pg_pagados_unidad',{...C,p_id_residente:u.id_residente});
+  const pg=(d.pagados||[]);
+  if(!pg.length){z.innerHTML='<p class="sub">Esta unidad no tiene pagos registrados.</p>';return;}
+  z.innerHTML=`<p class="sub" style="margin-top:9px">Marca los que se registraron por error para regresarlos a pendiente.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-top:8px">
+      ${pg.map(p=>`<label style="display:flex;align-items:center;gap:8px;border:1px solid var(--mid);border-radius:10px;padding:9px 11px;font-size:.82rem;cursor:pointer">
+        <input type="checkbox" class="rvChk" value="${p.id_pago}" style="width:17px;height:17px;accent-color:var(--warn);flex:none">
+        <span style="flex:1">${esc(String(p.concepto).replace('Cuota ',''))}<br><span style="color:var(--faint);font-size:.72rem">${p.fecha_pago?fecha(p.fecha_pago):'sin fecha'} · ${esc(p.origen||'')}</span></span>
+        <b class="mono">${money(p.monto)}</b></label>`).join('')}
+    </div>
+    <div style="margin-top:11px"><label>Motivo *</label><input id="rvM" placeholder="Ej. se marcó la unidad equivocada"></div>
+    <button class="btn dan sm" id="rvGo" style="margin-top:10px">Regresar a pendiente</button>`;
+  $('rvGo').onclick=async()=>{
+    const ids=[...z.querySelectorAll('.rvChk:checked')].map(c=>Number(c.value));
+    const m=$('rvM').value.trim();
+    if(!ids.length){toast('Selecciona al menos un pago.','err');return;}
+    if(!m){toast('Escribe el motivo.','err');return;}
+    const b=$('rvGo');b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    try{
+      const r=await rpc('pg_revertir_pagos',{...C,p_ids:ids,p_motivo:m});
+      if(r&&r.ok){toast(r.revertidos+' pago(s) regresados a pendiente','good');
+        D.units=null;D.dir=null;D.an=null;D.hi=null;cerrarSheet();vPagos();}
+      else{toast('No se pudo revertir.','err');b.disabled=false;b.textContent='Regresar a pendiente';}
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Regresar a pendiente';}
+  };
 }
 
 /* ---------- RESIDENTES ---------- */
@@ -1231,7 +1402,7 @@ $('btnNotif').onclick=async()=>{
 /* ---------- ACTUALIZAR ---------- */
 $('btnRef').onclick=async()=>{
   const b=$('btnRef'); b.disabled=true; b.innerHTML='<span class="sp" style="border-color:#0003;border-top-color:var(--blue)"></span>';
-  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null};
+  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null};
   await cargarNotifs(); await render();
   toast('Datos actualizados','good');
   b.disabled=false; b.textContent='↻';
