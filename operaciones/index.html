@@ -177,7 +177,7 @@ const SB="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let C={p_user:'',p_password:''}, V='inicio', CORTE={anio:2026,mes:8};
-let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null};
+let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null};
 const $=id=>document.getElementById(id);
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 const fecha=s=>s?new Date(String(s).length<=10?s+'T12:00:00':s).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'—';
@@ -203,6 +203,7 @@ const MENU=[
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
+  {k:'constancias',t:'Constancias de no adeudo',i:'📄'},
   {k:'pagos',t:'Registrar pago',i:'💳'},
   {g:'Comunidad'},
   {k:'residentes',t:'Residentes',i:'👥'},
@@ -274,6 +275,7 @@ async function render(){
     else if(V==='analisis')   await vAnalisis();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
+    else if(V==='constancias')await vConstancias();
     else if(V==='pagos')      await vPagos();
     else if(V==='residentes') await vResidentes();
     else if(V==='llamadas')   await vLlamadas();
@@ -490,8 +492,18 @@ let hiAnio=2026, hiVista='pct';
 async function vHistorico(){
   if(!D.hi||D.hi.anio!==hiAnio){D.hi=await rpc('pg_historico_edificios',{...C,p_anio:hiAnio});}
   const eds=D.hi.edificios||[], tot=D.hi.totales||[];
-  const col=p=>p>=70?'var(--ok)':p>=45?'var(--amber)':p>0?'var(--warn)':'#E6EAF2';
-  const val=(m)=>hiVista==='pct'?Number(m.pct).toFixed(0)+'%':hiVista==='recibido'?money(m.recibido):money(m.pendiente);
+  const col=p=>p>=70?'var(--ok)':p>=45?'var(--amber)':p>0?'var(--warn)':'#C9D2E0';
+  const EST={sin_cargos:['#F4F6FA','#94A0B0','Sin facturar'],futuro:['#F4F6FA','#C3CAD6','Aún no facturado'],
+             por_vencer:['#EEF3FF','#1847CC','Por vencer'],normal:['','','']};
+  const cel=(m)=>{
+    if(m.estado_mes==='sin_cargos'||m.estado_mes==='futuro')
+      return {txt:'—',bg:'#F4F6FA',fg:'#B7C0CE',t:'Sin cargos generados para este mes'};
+    const p=Number(m.pct)||0;
+    const txt = hiVista==='pct' ? p.toFixed(0)+'%' : hiVista==='recibido' ? money(m.recibido) : money(m.pendiente);
+    if(m.estado_mes==='por_vencer')
+      return {txt:txt,bg:'#E4EBFF',fg:'#1847CC',t:'Facturado pero aún no vence'};
+    return {txt:txt,bg:col(p),fg:p>0?'#fff':'#8794A6',t:''};
+  };
   $('vista').innerHTML=`
     <div class="card">
       <div class="chead">
@@ -513,33 +525,45 @@ async function vHistorico(){
         <tbody>
         ${eds.map((e,i)=>`<tr>
           <td style="font-weight:800;font-size:.8rem;padding:4px 6px;position:sticky;left:0;background:#fff;white-space:nowrap">${e.edificio}<span style="color:var(--faint);font-weight:500"> ·${e.unidades}</span></td>
-          ${(e.meses||[]).map(m=>{
-            const p=Number(m.pct)||0, sinDatos=Number(m.ideal)===0;
-            return `<td style="padding:0"><button class="hiCel" data-e="${i}" data-m="${m.mes}"
+          ${(e.meses||[]).map(m=>{const c=cel(m);
+            return `<td style="padding:0"><button class="hiCel" data-e="${i}" data-m="${m.mes}" title="${c.t}"
               style="width:100%;min-width:42px;border:0;border-radius:7px;padding:9px 2px;cursor:pointer;font-family:inherit;
-              font-size:.68rem;font-weight:800;background:${sinDatos?'#F4F6FA':col(p)};color:${p>=45||p<45&&p>0?'#fff':'#94A0B0'};
-              opacity:${p===0?'.45':'1'}">${sinDatos?'—':val(m)}</button></td>`;}).join('')}
+              font-size:.68rem;font-weight:800;background:${c.bg};color:${c.fg}">${c.txt}</button></td>`;}).join('')}
         </tr>`).join('')}
         </tbody>
         <tfoot><tr>
           <td style="font-weight:800;font-size:.8rem;padding:8px 6px;position:sticky;left:0;background:#fff">TOTAL</td>
-          ${tot.map(m=>`<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${Number(m.pct)>=70?'var(--ok)':Number(m.pct)>=45?'var(--amber)':'var(--warn)'}">${Number(m.pct).toFixed(0)}%</td>`).join('')}
+          ${tot.map(m=>{
+            const sin = m.estado_mes==='sin_cargos'||m.estado_mes==='futuro';
+            const p=Number(m.pct)||0;
+            return `<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${sin?'#B7C0CE':(p>=70?'var(--ok)':p>=45?'var(--amber)':'var(--warn)')}">${sin?'—':p.toFixed(0)+'%'}</td>`;}).join('')}
         </tr></tfoot>
       </table>
-      <div class="sub" style="margin-top:12px">🟢 ≥70% · 🟠 45–69% · 🔴 &lt;45% · gris: sin cargos ese mes</div>
+      <div class="sub" style="margin-top:12px;line-height:1.7">
+        🟢 ≥70% &nbsp;·&nbsp; 🟠 45–69% &nbsp;·&nbsp; 🔴 &lt;45% &nbsp;·&nbsp;
+        <span style="background:#E4EBFF;color:#1847CC;border-radius:5px;padding:2px 7px;font-weight:700">azul</span> facturado pero aún no vence &nbsp;·&nbsp;
+        <b style="color:#B7C0CE">—</b> sin cargos generados (no cuenta como cobrado)
+      </div>
     </div>`;
   $('hiA').onchange=e=>{hiAnio=Number(e.target.value);D.hi=null;vHistorico();};
   $('vista').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{hiVista=b.dataset.v;vHistorico();});
   $('vista').querySelectorAll('.hiCel').forEach(b=>b.onclick=()=>{
     const e=eds[Number(b.dataset.e)], m=(e.meses||[]).find(x=>x.mes==b.dataset.m);
+    const sin = m.estado_mes==='sin_cargos'||m.estado_mes==='futuro';
     sheet(`<h3>Edificio ${e.edificio} · ${MES[m.mes]} ${hiAnio}</h3>
-      <p class="sub">${e.unidades} unidades</p>
+      <p class="sub">${e.unidades} unidades · ${m.cargos} cargos generados</p>
+      ${sin?`<div style="background:var(--silver);border-radius:12px;padding:18px;margin-top:13px;text-align:center">
+          <div style="font-size:1.8rem">📭</div>
+          <div style="font-weight:700;margin-top:5px">Sin cargos en este mes</div>
+          <div class="sub">No se ha generado la cuota de ${MES[m.mes]} para estas unidades, así que no hay cobranza que medir.</div>
+        </div>`:`
       <div class="kpis" style="margin-top:13px">
-        <div class="kpi"><div class="l">% cobranza</div><div class="v" style="color:${col(m.pct)}">${Number(m.pct).toFixed(1)}%</div></div>
-        <div class="kpi"><div class="l">Cobrado</div><div class="v">${money(m.cobrado)}</div><div class="s">de ${money(m.ideal)}</div></div>
+        <div class="kpi"><div class="l">% cobranza</div><div class="v" style="color:${col(Number(m.pct)||0)}">${Number(m.pct||0).toFixed(1)}%</div></div>
+        <div class="kpi"><div class="l">Cobrado</div><div class="v">${money(m.cobrado)}</div><div class="s">de ${money(m.facturado)} facturado</div></div>
         <div class="kpi"><div class="l">Pendiente</div><div class="v" style="color:var(--warn)">${money(m.pendiente)}</div></div>
         <div class="kpi"><div class="l">Recibido en el mes</div><div class="v" style="color:var(--ok)">${money(m.recibido)}</div><div class="s">${money(m.recuperado)} de cartera vieja</div></div>
       </div>
+      ${m.estado_mes==='por_vencer'?'<p class="sub" style="margin-top:10px;color:var(--blue);font-weight:600">Este mes ya está facturado pero aún no vence.</p>':''}`}
       <div class="acts"><button class="btn gh wide" onclick="cerrarSheet()">Cerrar</button></div>`);
   });
 }
@@ -822,6 +846,135 @@ async function zonaPagados(u){
   };
 }
 
+/* ---------- CONSTANCIAS DE NO ADEUDO ---------- */
+function formConstancia(r){
+  sheet(`<h3>Constancia de no adeudo</h3>
+    <p class="sub">${esc(r.ident)} · ${esc(r.nombre_completo)}</p>
+    <div style="background:var(--okbg);border-radius:11px;padding:12px 14px;margin-top:12px;font-size:.86rem;color:var(--ok);font-weight:600">
+      ✓ Sin adeudos vencidos al cierre de ${MES[CORTE.mes]} ${CORTE.anio}
+    </div>
+    <div class="grid" style="margin-top:13px">
+      <div><label>Motivo / uso de la constancia (opcional)</label>
+        <input id="cnM" placeholder="Ej. trámite de venta, solicitud del propietario"></div>
+      <div><label>Vigencia</label>
+        <select id="cnV"><option value="30">30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></div>
+    </div>
+    <div class="acts"><button class="btn ok" id="cnGo">Emitir constancia</button><button class="btn gh" onclick="cerrarSheet()">Cancelar</button></div>`);
+  $('cnGo').onclick=async()=>{
+    const b=$('cnGo');b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    try{
+      const d=await rpc('pg_emitir_constancia',{...C,p_id_residente:r.id_residente,
+        p_motivo:$('cnM').value.trim()||null,p_dias_vigencia:Number($('cnV').value)});
+      if(d&&d.ok){ abrirConstancia(d); toast('Constancia #'+d.folio+' emitida','good'); cerrarSheet(); D.cn=null; }
+      else if(d&&d.error==='con_adeudo'){
+        toast('No se puede: debe '+money(d.adeudo),'err');
+        b.disabled=false;b.textContent='Emitir constancia';
+      } else { toast('No se pudo emitir.','err'); b.disabled=false;b.textContent='Emitir constancia'; }
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Emitir constancia';}
+  };
+}
+
+function abrirConstancia(d){
+  const w=window.open('','_blank'); if(!w){toast('Permite ventanas emergentes.','err');return;}
+  w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>Constancia de no adeudo #${d.folio}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'DM Sans',sans-serif;background:#F3F4F6;margin:0;padding:24px;color:#0C1320}
+    .pb{max-width:780px;margin:0 auto 12px;text-align:right}
+    .pb button{background:#1847CC;color:#fff;border:0;border-radius:9px;padding:11px 19px;font-family:inherit;font-weight:700;cursor:pointer}
+    .doc{max-width:780px;margin:0 auto;background:#fff;border:1px solid #DBEAFE;border-radius:12px;overflow:hidden}
+    .hd{background:#1E40AF;color:#fff;padding:30px 40px;display:flex;justify-content:space-between;align-items:center}
+    .hd h1{font-family:'Bricolage Grotesque';font-size:28px;margin:0}
+    .hd .c{font-size:11px;letter-spacing:3px;color:#BFDBFE;font-weight:600}
+    .hd .f{text-align:right} .hd .f .l{font-size:10px;letter-spacing:2px;color:#BFDBFE}
+    .hd .f .n{font-size:20px;font-weight:700}
+    .b{padding:40px}
+    h2{font-family:'Bricolage Grotesque';font-size:21px;text-align:center;margin:0 0 6px;letter-spacing:.02em}
+    .sub{text-align:center;color:#6B7280;font-size:13px;margin-bottom:30px}
+    p{line-height:1.85;font-size:15px;margin:0 0 16px;text-align:justify}
+    .datos{background:#F7F9FC;border-radius:11px;padding:20px;margin:22px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+    .datos .k{font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+    .datos .v{font-weight:600;font-size:15px;margin-top:2px}
+    .sello{background:#E7F5EC;border:1px solid #1B7A3D33;border-radius:11px;padding:16px 20px;margin:22px 0;text-align:center}
+    .sello b{color:#1B7A3D;font-size:16px;font-family:'Bricolage Grotesque'}
+    .firma{margin-top:56px;text-align:center}
+    .firma .ln{border-top:1px solid #0C1320;width:290px;margin:0 auto 8px}
+    .firma .n{font-weight:700} .firma .p{font-size:12px;color:#6B7280}
+    .pie{margin-top:34px;padding-top:16px;border-top:1px solid #E5E7EB;text-align:center;font-size:11px;color:#9CA3AF;line-height:1.7}
+    @media print{body{background:#fff;padding:0}.pb{display:none}.doc{border:0;border-radius:0}}
+    @page{margin:14mm}
+  </style></head><body>
+  <div class="pb"><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button></div>
+  <div class="doc">
+    <div class="hd">
+      <div><div class="c">ECHO ADMINISTRACIÓN</div><h1>MANZANA 80</h1>
+        <div style="color:#BFDBFE;font-size:13px">Aldea Tulum · Tulum, Quintana Roo</div></div>
+      <div class="f"><div class="l">FOLIO</div><div class="n">CNA-${String(d.folio).padStart(4,'0')}</div></div>
+    </div>
+    <div class="b">
+      <h2>CONSTANCIA DE NO ADEUDO</h2>
+      <div class="sub">Expedida el ${d.fecha_larga}</div>
+
+      <p>La administración del Condominio <b>Manzana 80</b>, ubicado en Aldea Tulum, Tulum, Quintana Roo, por conducto de <b>Echo Administración</b>, hace constar que:</p>
+
+      <div class="datos">
+        <div><div class="k">Propietario</div><div class="v">${d.nombre}</div></div>
+        <div><div class="k">Unidad privativa</div><div class="v">${d.ident}</div></div>
+        <div><div class="k">Edificio</div><div class="v">${d.edificio}</div></div>
+        <div><div class="k">Departamento</div><div class="v">${d.departamento}</div></div>
+      </div>
+
+      <p>A la fecha de expedición del presente documento, la unidad privativa señalada <b>se encuentra al corriente en el pago de sus cuotas ordinarias de mantenimiento</b>, sin registrar adeudo alguno correspondiente al periodo comprendido hasta el mes de <b>${d.periodo_cubierto}</b> inclusive.</p>
+
+      <div class="sello"><b>SIN ADEUDOS PENDIENTES</b><div style="font-size:12.5px;color:#0E5C2C;margin-top:3px">Cuotas ordinarias cubiertas al ${d.periodo_cubierto}</div></div>
+
+      ${d.motivo?`<p><b>Se expide para:</b> ${d.motivo}.</p>`:'<p>Se expide la presente a petición del interesado, para los fines legales y administrativos a que haya lugar.</p>'}
+
+      <p style="font-size:13.5px;color:#4B5563">Esta constancia ampara exclusivamente las cuotas ordinarias de mantenimiento administradas a través de la plataforma del Condominio, y <b>tiene vigencia hasta el ${d.vigencia}</b>. No comprende cuotas extraordinarias no facturadas a la fecha, servicios de consumo individual, ni obligaciones ajenas a la administración condominal.</p>
+
+      <div class="firma">
+        <div class="ln"></div>
+        <div class="n">Echo Administración</div>
+        <div class="p">Administración del Condominio Manzana 80</div>
+      </div>
+
+      <div class="pie">
+        Documento emitido electrónicamente por la plataforma de Echo Administración · Folio CNA-${String(d.folio).padStart(4,'0')}<br>
+        Para verificar su autenticidad, contacte a la administración · ALDEAMZ80@GMAIL.COM
+      </div>
+    </div>
+  </div></body></html>`);
+  w.document.close();
+}
+
+async function vConstancias(){
+  D.cn=await rpc('pg_constancias',{...C,p_limite:60});
+  const cs=D.cn.constancias||[];
+  $('vista').innerHTML=`
+    <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
+      <h3>Constancias de no adeudo</h3>
+      <p class="sub">Se emiten desde la ficha de cada residente, en <b>Residentes</b>. El botón aparece solo si la unidad está al corriente.</p>
+      <button class="btn gh" style="margin-top:11px" onclick="rFiltro.ver='ok';ir('residentes')">Ver residentes al corriente</button>
+    </div>
+    ${cs.length?cs.map((c,i)=>`
+      <div class="item" style="${c.estado==='cancelada'?'opacity:.6':''}">
+        <div class="ihead"><span class="tag">CNA-${String(c.folio).padStart(4,'0')}</span>
+          <span class="iname">${esc(c.ident)} · ${esc(c.nombre)}</span>
+          <span class="pill ${c.estado==='cancelada'?'p-warn':(c.vencida?'p-gray':'p-ok')}">${c.estado==='cancelada'?'Cancelada':(c.vencida?'Vencida':'Vigente')}</span></div>
+        <p class="sub">Emitida ${fecha(c.fecha)} · vigencia al ${fecha(c.vigencia)} · por ${esc(c.emitido_por)}</p>
+        ${c.motivo?`<p class="sub">Uso: ${esc(c.motivo)}</p>`:''}
+        ${c.estado!=='cancelada'?`<div class="acts"><button class="btn gh sm" data-cc="${i}">✕ Cancelar</button></div>`:''}
+      </div>`).join(''):'<div class="empty"><div class="e">📄</div><div class="t">Sin constancias emitidas</div><div>Se generan desde la ficha del residente.</div></div>'}`;
+  $('vista').querySelectorAll('[data-cc]').forEach(b=>b.onclick=async()=>{
+    const c=cs[Number(b.dataset.cc)];
+    const m=prompt('Motivo de la cancelación:');
+    if(!m)return;
+    const r=await rpc('pg_cancelar_constancia',{...C,p_folio:c.folio,p_motivo:m});
+    if(r&&r.ok){toast('Constancia cancelada','good');vConstancias();}
+  });
+}
+
 /* ---------- RESIDENTES ---------- */
 let rFiltro={q:'',orden:'ident',ver:''};
 async function vResidentes(){
@@ -870,7 +1023,7 @@ async function vResidentes(){
   $('ro').onchange=e=>{rFiltro.orden=e.target.value;vResidentes();};
   $('rlist').querySelectorAll('[data-act]').forEach(b=>{
     const r=it[Number(b.dataset.i)];
-    b.onclick=()=>({wa:()=>whats(r),ed:()=>editarRes(r),ll:()=>formLlamada(r),oc:()=>cambiarOcupante(r),ver:()=>verificar(r)})[b.dataset.act]();
+    b.onclick=()=>({wa:()=>whats(r),ed:()=>editarRes(r),ll:()=>formLlamada(r),oc:()=>cambiarOcupante(r),ver:()=>verificar(r),cn:()=>formConstancia(r)})[b.dataset.act]();
   });
 }
 function resumenAnios(meses){
@@ -920,6 +1073,7 @@ function tarjetaResidente(r,i){
       <button class="btn gh sm" data-act="ed" data-i="${i}">✎ Datos</button>
       <button class="btn gh sm" data-act="oc" data-i="${i}">${rent?'🔑 Es propietario':'🏠 Es rentero'}</button>
       <button class="btn gh sm" data-act="ll" data-i="${i}">⚠️ Llamada</button>
+      ${deb?'':`<button class="btn ok sm" data-act="cn" data-i="${i}">📄 No adeudo</button>`}
       ${verif?'':`<button class="btn gh sm" data-act="ver" data-i="${i}">✓ Verificar</button>`}
     </div></div>`;
 }
@@ -1411,7 +1565,7 @@ $('btnNotif').onclick=async()=>{
 /* ---------- ACTUALIZAR ---------- */
 $('btnRef').onclick=async()=>{
   const b=$('btnRef'); b.disabled=true; b.innerHTML='<span class="sp" style="border-color:#0003;border-top-color:var(--blue)"></span>';
-  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null};
+  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null};
   await cargarNotifs(); await render();
   toast('Datos actualizados','good');
   b.disabled=false; b.textContent='↻';
