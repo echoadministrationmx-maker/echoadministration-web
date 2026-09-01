@@ -203,7 +203,7 @@ const MENU=[
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
-  {k:'constancias',t:'Constancias de no adeudo',i:'📄'},
+  {k:'constancias',t:'Estados sin adeudo',i:'📄'},
   {k:'pagos',t:'Registrar pago',i:'💳'},
   {g:'Comunidad'},
   {k:'residentes',t:'Residentes',i:'👥'},
@@ -228,7 +228,7 @@ function pintarNav(){
 function pintarBadges(){
   const set=(k,n)=>{const e=$('cnt-'+k); if(!e)return; if(n>0){e.textContent=n;e.classList.remove('hide');}else e.classList.add('hide');};
   set('llamadas', D.ll&&D.ll.resumen ? Number(D.ll.resumen.pendiente_revision||0) : 0);
-  set('incidencias', D.inc ? (D.inc.incidencias||[]).filter(i=>i.estado==='pendiente').length : 0);
+  set('incidencias', D.inc ? (D.inc.incidencias||[]).filter(i=>String(i.estado||'').toLowerCase()==='pendiente').length : 0);
   const n=D.nt?Number(D.nt.pendientes||0):0;
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
@@ -306,7 +306,7 @@ async function vInicio(){
   if(!D.inc){D.inc=await rpc('pg_incidencias',C);}
   const g=D.an.global||{}, ed=(D.an.edificios||[]), cj=D.an.caja||{};
   const llp=D.ll&&D.ll.resumen?Number(D.ll.resumen.pendiente_revision||0):0;
-  const incp=(D.inc.incidencias||[]).filter(i=>i.estado==='pendiente').length;
+  const incp=(D.inc.incidencias||[]).filter(i=>String(i.estado||'').toLowerCase()==='pendiente').length;
   const peor=ed.slice().sort((a,b)=>Number(b.adeudo_historico)-Number(a.adeudo_historico)).slice(0,3);
   $('vista').innerHTML=`
     <div class="card" style="background:linear-gradient(135deg,#1847CC,#3D6BE0);color:#fff;border:0">
@@ -848,60 +848,60 @@ async function zonaPagados(u){
 
 /* ---------- CONSTANCIAS DE NO ADEUDO ---------- */
 function formConstancia(r){
-  sheet(`<h3>Constancia de no adeudo</h3>
+  sheet(`<h3>Estado de cuenta sin adeudo</h3>
     <p class="sub">${esc(r.ident)} · ${esc(r.nombre_completo)}</p>
     <div style="background:var(--okbg);border-radius:11px;padding:12px 14px;margin-top:12px;font-size:.86rem;color:var(--ok);font-weight:600">
       ✓ Sin adeudos vencidos al cierre de ${MES[CORTE.mes]} ${CORTE.anio}
     </div>
     <div class="grid" style="margin-top:13px">
-      <div><label>Motivo / uso de la constancia (opcional)</label>
+      <div><label>Motivo / uso del documento (opcional)</label>
         <input id="cnM" placeholder="Ej. trámite de venta, solicitud del propietario"></div>
       <div><label>Vigencia</label>
         <select id="cnV"><option value="30">30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></div>
     </div>
-    <div class="acts"><button class="btn ok" id="cnGo">Emitir constancia</button><button class="btn gh" onclick="cerrarSheet()">Cancelar</button></div>`);
+    <div class="acts"><button class="btn ok" id="cnGo">Emitir documento</button><button class="btn gh" onclick="cerrarSheet()">Cancelar</button></div>`);
   $('cnGo').onclick=async()=>{
     const b=$('cnGo');b.disabled=true;b.innerHTML='<span class="sp"></span>';
     try{
       const d=await rpc('pg_emitir_constancia',{...C,p_id_residente:r.id_residente,
         p_motivo:$('cnM').value.trim()||null,p_dias_vigencia:Number($('cnV').value)});
-      if(d&&d.ok){ abrirConstancia(d); toast('Constancia #'+d.folio+' emitida','good'); cerrarSheet(); D.cn=null; }
+      if(d&&d.ok){ abrirConstancia(d); toast('Documento CNA-'+d.folio+' emitido','good'); cerrarSheet(); D.cn=null; }
       else if(d&&d.error==='con_adeudo'){
         toast('No se puede: debe '+money(d.adeudo),'err');
-        b.disabled=false;b.textContent='Emitir constancia';
-      } else { toast('No se pudo emitir.','err'); b.disabled=false;b.textContent='Emitir constancia'; }
-    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Emitir constancia';}
+        b.disabled=false;b.textContent='Emitir documento';
+      } else { toast('No se pudo emitir.','err'); b.disabled=false;b.textContent='Emitir documento'; }
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Emitir documento';}
   };
 }
 
 function abrirConstancia(d){
   const w=window.open('','_blank'); if(!w){toast('Permite ventanas emergentes.','err');return;}
   w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-  <title>Constancia de no adeudo #${d.folio}</title>
+  <title>Estado de cuenta sin adeudo · ${d.ident}</title>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <style>
     body{font-family:'DM Sans',sans-serif;background:#F3F4F6;margin:0;padding:24px;color:#0C1320}
     .pb{max-width:780px;margin:0 auto 12px;text-align:right}
     .pb button{background:#1847CC;color:#fff;border:0;border-radius:9px;padding:11px 19px;font-family:inherit;font-weight:700;cursor:pointer}
     .doc{max-width:780px;margin:0 auto;background:#fff;border:1px solid #DBEAFE;border-radius:12px;overflow:hidden}
-    .hd{background:#1E40AF;color:#fff;padding:30px 40px;display:flex;justify-content:space-between;align-items:center}
+    .hd{background:#1E40AF;color:#fff;padding:30px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
     .hd h1{font-family:'Bricolage Grotesque';font-size:28px;margin:0}
     .hd .c{font-size:11px;letter-spacing:3px;color:#BFDBFE;font-weight:600}
     .hd .f{text-align:right} .hd .f .l{font-size:10px;letter-spacing:2px;color:#BFDBFE}
     .hd .f .n{font-size:20px;font-weight:700}
     .b{padding:40px}
-    h2{font-family:'Bricolage Grotesque';font-size:21px;text-align:center;margin:0 0 6px;letter-spacing:.02em}
-    .sub{text-align:center;color:#6B7280;font-size:13px;margin-bottom:30px}
+    h2{font-family:'Bricolage Grotesque';font-size:20px;text-align:center;margin:0 0 6px}
+    .sub{text-align:center;color:#6B7280;font-size:13px;margin-bottom:28px}
     p{line-height:1.85;font-size:15px;margin:0 0 16px;text-align:justify}
     .datos{background:#F7F9FC;border-radius:11px;padding:20px;margin:22px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
     .datos .k{font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
     .datos .v{font-weight:600;font-size:15px;margin-top:2px}
     .sello{background:#E7F5EC;border:1px solid #1B7A3D33;border-radius:11px;padding:16px 20px;margin:22px 0;text-align:center}
     .sello b{color:#1B7A3D;font-size:16px;font-family:'Bricolage Grotesque'}
-    .firma{margin-top:56px;text-align:center}
-    .firma .ln{border-top:1px solid #0C1320;width:290px;margin:0 auto 8px}
-    .firma .n{font-weight:700} .firma .p{font-size:12px;color:#6B7280}
-    .pie{margin-top:34px;padding-top:16px;border-top:1px solid #E5E7EB;text-align:center;font-size:11px;color:#9CA3AF;line-height:1.7}
+    .aviso{background:#FBF1DF;border:1px solid #B8750333;border-radius:11px;padding:18px 20px;margin-top:26px}
+    .aviso .t{font-weight:800;color:#B87503;font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .aviso ul{margin:0;padding-left:19px;color:#4B5563;font-size:13px;line-height:1.75}
+    .pie{margin-top:28px;padding-top:16px;border-top:1px solid #E5E7EB;text-align:center;font-size:11px;color:#9CA3AF;line-height:1.7}
     @media print{body{background:#fff;padding:0}.pb{display:none}.doc{border:0;border-radius:0}}
     @page{margin:14mm}
   </style></head><body>
@@ -913,10 +913,10 @@ function abrirConstancia(d){
       <div class="f"><div class="l">FOLIO</div><div class="n">CNA-${String(d.folio).padStart(4,'0')}</div></div>
     </div>
     <div class="b">
-      <h2>CONSTANCIA DE NO ADEUDO</h2>
-      <div class="sub">Expedida el ${d.fecha_larga}</div>
+      <h2>ESTADO DE CUENTA SIN ADEUDO</h2>
+      <div class="sub">Documento informativo · Expedido el ${d.fecha_larga}</div>
 
-      <p>La administración del Condominio <b>Manzana 80</b>, ubicado en Aldea Tulum, Tulum, Quintana Roo, por conducto de <b>Echo Administración</b>, hace constar que:</p>
+      <p><b>Echo Administración</b> hace constar que:</p>
 
       <div class="datos">
         <div><div class="k">Propietario</div><div class="v">${d.nombre}</div></div>
@@ -925,23 +925,26 @@ function abrirConstancia(d){
         <div><div class="k">Departamento</div><div class="v">${d.departamento}</div></div>
       </div>
 
-      <p>A la fecha de expedición del presente documento, la unidad privativa señalada <b>se encuentra al corriente en el pago de sus cuotas ordinarias de mantenimiento</b>, sin registrar adeudo alguno correspondiente al periodo comprendido hasta el mes de <b>${d.periodo_cubierto}</b> inclusive.</p>
+      <p>De acuerdo con los registros de la plataforma de administración, la unidad privativa señalada <b>no presenta adeudos de cuotas ordinarias de mantenimiento</b> correspondientes al periodo comprendido hasta el mes de <b>${d.periodo_cubierto}</b> inclusive.</p>
 
-      <div class="sello"><b>SIN ADEUDOS PENDIENTES</b><div style="font-size:12.5px;color:#0E5C2C;margin-top:3px">Cuotas ordinarias cubiertas al ${d.periodo_cubierto}</div></div>
+      <div class="sello"><b>SIN ADEUDOS REGISTRADOS</b><div style="font-size:12.5px;color:#0E5C2C;margin-top:3px">Cuotas de mantenimiento cubiertas al ${d.periodo_cubierto}</div></div>
 
-      ${d.motivo?`<p><b>Se expide para:</b> ${d.motivo}.</p>`:'<p>Se expide la presente a petición del interesado, para los fines legales y administrativos a que haya lugar.</p>'}
+      ${d.motivo?`<p><b>Se emite para:</b> ${d.motivo}.</p>`:'<p>Se emite a solicitud del interesado, con fines meramente informativos.</p>'}
 
-      <p style="font-size:13.5px;color:#4B5563">Esta constancia ampara exclusivamente las cuotas ordinarias de mantenimiento administradas a través de la plataforma del Condominio, y <b>tiene vigencia hasta el ${d.vigencia}</b>. No comprende cuotas extraordinarias no facturadas a la fecha, servicios de consumo individual, ni obligaciones ajenas a la administración condominal.</p>
-
-      <div class="firma">
-        <div class="ln"></div>
-        <div class="n">Echo Administración</div>
-        <div class="p">Administración del Condominio Manzana 80</div>
+      <div class="aviso">
+        <div class="t">⚠ Alcance de este documento</div>
+        <ul>
+          <li><b>No constituye un documento con validez oficial ni legal</b>, ni certificación de autoridad alguna.</li>
+          <li><b>No ampara ni garantiza</b> obligación, situación jurídica, fiscal o patrimonial alguna del propietario o del inmueble.</li>
+          <li>Refleja <b>exclusivamente las cuotas de mantenimiento administradas a través de la plataforma digital</b> de Echo Administración, conforme a los registros disponibles a la fecha de emisión.</li>
+          <li>No comprende cuotas extraordinarias no registradas, servicios de consumo individual, adeudos ante terceros, impuestos ni obligaciones ajenas a la administración condominal.</li>
+          <li>Documento generado automáticamente. <b>Válido sin firma autógrafa.</b> Vigencia informativa hasta el ${d.vigencia}.</li>
+        </ul>
       </div>
 
       <div class="pie">
-        Documento emitido electrónicamente por la plataforma de Echo Administración · Folio CNA-${String(d.folio).padStart(4,'0')}<br>
-        Para verificar su autenticidad, contacte a la administración · ALDEAMZ80@GMAIL.COM
+        Generado electrónicamente por la plataforma de Echo Administración · Folio CNA-${String(d.folio).padStart(4,'0')}<br>
+        Para cualquier aclaración, contacte a la administración · ALDEAMZ80@GMAIL.COM
       </div>
     </div>
   </div></body></html>`);
@@ -953,8 +956,8 @@ async function vConstancias(){
   const cs=D.cn.constancias||[];
   $('vista').innerHTML=`
     <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
-      <h3>Constancias de no adeudo</h3>
-      <p class="sub">Se emiten desde la ficha de cada residente, en <b>Residentes</b>. El botón aparece solo si la unidad está al corriente.</p>
+      <h3>Estados de cuenta sin adeudo</h3>
+      <p class="sub">Documento informativo, sin validez oficial. Se emite desde la ficha de cada residente en <b>Residentes</b>; el botón aparece solo si la unidad está al corriente.</p>
       <button class="btn gh" style="margin-top:11px" onclick="rFiltro.ver='ok';ir('residentes')">Ver residentes al corriente</button>
     </div>
     ${cs.length?cs.map((c,i)=>`
@@ -1219,32 +1222,43 @@ let iF='todas';
 async function vIncidencias(){
   D.inc=await rpc('pg_incidencias',C);
   const all=D.inc.incidencias||[];
-  const it=iF==='todas'?all:all.filter(i=>i.estado===iF);
+  const it=iF==='todas'?all:all.filter(i=>String(i.estado||'').toLowerCase()===iF);
   const LBL={pendiente:['Pendiente','p-warn'],en_proceso:['En proceso','p-amb'],resuelta:['Resuelta','p-ok']};
+  const lbl=e=>LBL[String(e||'').toLowerCase()]||['Pendiente','p-warn'];
   $('vista').innerHTML=`
     <div class="seg" style="margin-bottom:13px">
-      ${['todas','pendiente','en_proceso','resuelta'].map(f=>`<button class="${iF===f?'on':''}" data-f="${f}">${f==='todas'?'Todas':LBL[f][0]}</button>`).join('')}
+      ${['todas','pendiente','en_proceso','resuelta'].map(f=>`<button class="${iF===f?'on':''}" data-f="${f}">${f==='todas'?'Todas':lbl(f)[0]}</button>`).join('')}
     </div>
     ${it.length?it.map((i,n)=>{
-      const d=(i.descripcion||''), corta=d.length>190;
+      const d=(i.descripcion||''), corta=i.descripcion_larga||d.length>190;
       return `<div class="item">
         <div class="ihead"><span class="tag">${esc(i.ident||i.departamento||'—')}</span><span class="iname">${esc(i.categoria||'Incidencia')}</span>
-          <span class="pill ${LBL[i.estado][1]}">${LBL[i.estado][0]}</span></div>
+          <span class="pill ${lbl(i.estado)[1]}">${lbl(i.estado)[0]}</span></div>
         <p class="sub" style="margin-top:5px">${esc(i.nombre)} · ${fecha(i.created_at)}${i.telefono?' · '+esc(i.telefono):''}</p>
         <div style="font-size:.88rem;margin-top:8px" id="d${n}">${esc(corta?d.slice(0,190)+'…':d)}</div>
-        ${corta||i.foto?`<button class="btn gh sm" style="margin-top:7px" data-mas="${n}">Ver completa</button>`:''}
+        ${corta||i.tiene_foto?`<button class="btn gh sm" style="margin-top:7px" data-mas="${n}">${i.tiene_foto?'📷 Ver completa':'Ver completa'}</button>`:''}
         ${i.respuesta?`<div style="background:#EEF3FF;border-radius:9px;padding:9px 11px;margin-top:9px;font-size:.83rem"><b style="color:var(--blue)">Respuesta:</b> ${esc(i.respuesta)}</div>`:''}
         <div class="acts">
           <button class="btn gh sm" data-rp="${n}">✎ Responder</button>
-          ${i.estado!=='en_proceso'?`<button class="btn gh sm" data-st="${i.id}" data-v="en_proceso">En proceso</button>`:''}
-          ${i.estado!=='resuelta'?`<button class="btn ok sm" data-st="${i.id}" data-v="resuelta">Resuelta</button>`:''}
+          ${String(i.estado).toLowerCase()!=='en_proceso'?`<button class="btn gh sm" data-st="${i.id}" data-v="en_proceso">En proceso</button>`:''}
+          ${String(i.estado).toLowerCase()!=='resuelta'?`<button class="btn ok sm" data-st="${i.id}" data-v="resuelta">Resuelta</button>`:''}
         </div></div>`;}).join(''):'<div class="empty"><div class="e">✅</div><div class="t">Sin incidencias</div></div>'}`;
   $('vista').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{iF=b.dataset.f;vIncidencias();});
-  $('vista').querySelectorAll('[data-mas]').forEach(b=>b.onclick=()=>{
-    const i=it[Number(b.dataset.mas)]; sheet(`<h3>${esc(i.categoria)}</h3><p class="sub">${esc(i.ident)} · ${fecha(i.created_at)}</p>
+  $('vista').querySelectorAll('[data-mas]').forEach(b=>b.onclick=async()=>{
+    const i=it[Number(b.dataset.mas)];
+    sheet(`<h3>${esc(i.categoria)}</h3><p class="sub">${esc(i.ident)} · ${fecha(i.created_at)}</p>
       <div style="margin-top:11px;white-space:pre-wrap;font-size:.9rem">${esc(i.descripcion)}</div>
-      ${i.foto?`<img src="${esc(i.foto)}" style="max-width:100%;border-radius:11px;margin-top:12px">`:''}
+      ${i.tiene_foto?'<div class="empty" style="margin-top:12px"><div class="e">⏳</div><div class="t">Cargando foto…</div></div>':''}
       <div class="acts"><button class="btn gh" onclick="cerrarSheet()">Cerrar</button></div>`);
+    if(!i.tiene_foto)return;
+    try{
+      const d=await rpc('pg_incidencia_detalle',{...C,p_id:i.id});
+      const box=$('sheetBox'); if(!box)return;
+      box.innerHTML=`<h3>${esc(i.categoria)}</h3><p class="sub">${esc(i.ident)} · ${fecha(i.created_at)}</p>
+        <div style="margin-top:11px;white-space:pre-wrap;font-size:.9rem">${esc(d.descripcion||i.descripcion)}</div>
+        ${d.foto?`<img src="${d.foto}" style="max-width:100%;border-radius:11px;margin-top:12px">`:'<p class="sub">La foto no se pudo cargar.</p>'}
+        <div class="acts"><button class="btn gh" onclick="cerrarSheet()">Cerrar</button></div>`;
+    }catch(e){}
   });
   $('vista').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{
     const r=await rpc('pg_actualizar_incidencia',{...C,p_id:Number(b.dataset.st),p_estado:b.dataset.v});
