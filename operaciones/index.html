@@ -200,6 +200,7 @@ const MENU=[
   {g:'Cobranza'},
   {k:'inicio',t:'Resumen',i:'📊'},
   {k:'cobranza',t:'Cobranza mensual',i:'📈'},
+  {k:'regularizacion',t:'Regularización y WhatsApp',i:'💬'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
@@ -236,6 +237,7 @@ function pintarBadges(){
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
 function ir(k){
+  if(k==='regularizacion'){ cerrarMenu(); location.href='/operaciones/regularizacion'; return; }
   V=k; cerrarMenu();
   const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
