@@ -177,7 +177,7 @@ const SB="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
 const MES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let C={p_user:'',p_password:''}, V='inicio', CORTE={anio:2026,mes:8};
-let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null};
+let D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null,ab:null,sc:null};
 const $=id=>document.getElementById(id);
 const money=n=>'$'+Number(n||0).toLocaleString('es-MX');
 const fecha=s=>s?new Date(String(s).length<=10?s+'T12:00:00':s).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}):'—';
@@ -216,6 +216,7 @@ const MENU=[
   {g:'Servicios'},
   {k:'rentas',t:'Rentas',i:'🏖️'},
   {k:'convenios',t:'Convenios de pago',i:'🤝'},
+  {k:'alberca',t:'Reservas de alberca',i:'🏊'},
   {k:'descuentos',t:'Descuentos',i:'🏷️'}
 ];
 function pintarNav(){
@@ -228,6 +229,8 @@ function pintarNav(){
 function pintarBadges(){
   const set=(k,n)=>{const e=$('cnt-'+k); if(!e)return; if(n>0){e.textContent=n;e.classList.remove('hide');}else e.classList.add('hide');};
   set('llamadas', D.ll&&D.ll.resumen ? Number(D.ll.resumen.pendiente_revision||0) : 0);
+  set('alberca', D.ab&&D.ab.resumen ? Number(D.ab.resumen.solicitadas||0) : 0);
+  set('constancias', D.sc ? (D.sc.solicitudes||[]).filter(x=>x.estado==='pendiente').length : 0);
   set('incidencias', D.inc ? (D.inc.incidencias||[]).filter(i=>String(i.estado||'').toLowerCase()==='pendiente').length : 0);
   const n=D.nt?Number(D.nt.pendientes||0):0;
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
@@ -285,6 +288,7 @@ async function render(){
     else if(V==='servicios')  await vServicios();
     else if(V==='rentas')     await vRentas();
     else if(V==='convenios')  await vConvenios();
+    else if(V==='alberca')    await vAlberca();
     else if(V==='descuentos') await vDescuentos();
     pintarBadges();
   }catch(e){
@@ -953,8 +957,24 @@ function abrirConstancia(d){
 
 async function vConstancias(){
   D.cn=await rpc('pg_constancias',{...C,p_limite:60});
-  const cs=D.cn.constancias||[];
+  D.sc=await rpc('pg_solicitudes_constancia',C);
+  const cs=D.cn.constancias||[], sol=(D.sc.solicitudes||[]);
+  const pend=sol.filter(x=>x.estado==='pendiente');
   $('vista').innerHTML=`
+    ${pend.length?`<div class="card" style="border-color:var(--amber);background:#FEF9F0">
+      <div class="chead"><h3>Solicitudes de residentes</h3><span class="pill p-amb">${pend.length} por atender</span></div>
+      ${pend.map((x,i)=>`<div style="border-top:1px solid var(--mid);padding:12px 0">
+        <div class="ihead"><span class="tag">${esc(x.ident)}</span><span class="iname">${esc(x.nombre)}</span>
+          <span class="pill ${Number(x.adeudo_actual)>0?'p-warn':'p-ok'}">${Number(x.adeudo_actual)>0?'Debe '+money(x.adeudo_actual):'Al corriente ✓'}</span></div>
+        <p class="sub">${fecha(x.created_at)}${x.motivo?' · '+esc(x.motivo):''}</p>
+        <div class="acts">
+          ${Number(x.adeudo_actual)>0
+            ? `<button class="btn gh sm" data-sr="${i}">✕ Rechazar por adeudo</button>`
+            : `<button class="btn ok sm" data-se="${i}">📄 Emitir y entregar</button>
+               <button class="btn gh sm" data-sr="${i}">Rechazar</button>`}
+        </div></div>`).join('')}
+    </div>`:''}
+  ` + `
     <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
       <h3>Estados de cuenta sin adeudo</h3>
       <p class="sub">Documento informativo, sin validez oficial. Se emite desde la ficha de cada residente en <b>Residentes</b>; el botón aparece solo si la unidad está al corriente.</p>
@@ -969,6 +989,25 @@ async function vConstancias(){
         ${c.motivo?`<p class="sub">Uso: ${esc(c.motivo)}</p>`:''}
         ${c.estado!=='cancelada'?`<div class="acts"><button class="btn gh sm" data-cc="${i}">✕ Cancelar</button></div>`:''}
       </div>`).join(''):'<div class="empty"><div class="e">📄</div><div class="t">Sin constancias emitidas</div><div>Se generan desde la ficha del residente.</div></div>'}`;
+  $('vista').querySelectorAll('[data-se]').forEach(b=>b.onclick=async()=>{
+    const x=pend[Number(b.dataset.se)];
+    b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    try{
+      const d=await rpc('pg_emitir_constancia',{...C,p_id_residente:x.id_residente,p_motivo:x.motivo||'Solicitud del residente',p_dias_vigencia:30});
+      if(d&&d.ok){
+        await rpc('pg_resolver_solicitud_constancia',{...C,p_id:x.id,p_folio:d.folio,p_rechazo:null});
+        abrirConstancia(d); toast('Documento CNA-'+d.folio+' emitido','good'); cargarNotifs(); vConstancias();
+      } else if(d&&d.error==='con_adeudo'){ toast('No se puede: debe '+money(d.adeudo),'err'); vConstancias(); }
+      else { toast('No se pudo emitir.','err'); b.disabled=false;b.textContent='📄 Emitir y entregar'; }
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='📄 Emitir y entregar';}
+  });
+  $('vista').querySelectorAll('[data-sr]').forEach(b=>b.onclick=async()=>{
+    const x=pend[Number(b.dataset.sr)];
+    const m=prompt('Motivo del rechazo (lo verá el residente):', Number(x.adeudo_actual)>0?('Presenta adeudo de '+money(x.adeudo_actual)):'');
+    if(m===null)return;
+    const r=await rpc('pg_resolver_solicitud_constancia',{...C,p_id:x.id,p_folio:null,p_rechazo:m});
+    if(r&&r.ok){toast('Solicitud rechazada','good');cargarNotifs();vConstancias();}
+  });
   $('vista').querySelectorAll('[data-cc]').forEach(b=>b.onclick=async()=>{
     const c=cs[Number(b.dataset.cc)];
     const m=prompt('Motivo de la cancelación:');
@@ -1498,7 +1537,9 @@ async function vConvenios(){
           <div><b>Término</b> ${c.fecha_fin?fecha(c.fecha_fin):'sin fecha'}</div></div>
         ${c.condiciones?`<div style="background:var(--silver);border-radius:9px;padding:9px 11px;margin-top:8px;font-size:.83rem"><b>Condiciones:</b> ${esc(c.condiciones)}</div>`:''}
         ${c.notas?`<p class="sub">${esc(c.notas)}</p>`:''}
-        <div class="acts">${['activo','cumplido','incumplido','cancelado'].filter(e=>e!==c.estado).map(e=>`<button class="btn gh sm" data-ce="${c.id}" data-v="${e}">${LBL[e][0]}</button>`).join('')}</div>
+        <div class="acts">
+          <button class="btn sm" data-ed="${cs.indexOf(c)}">✎ Editar convenio</button>
+          ${['activo','cumplido','incumplido','cancelado'].filter(e=>e!==c.estado).map(e=>`<button class="btn gh sm" data-ce="${c.id}" data-v="${e}">${LBL[e][0]}</button>`).join('')}</div>
       </div>`).join(''):'<div class="empty"><div class="e">🤝</div><div class="t">Sin convenios</div><div>Documenta los acuerdos con deudores.</div></div>'}`;
   $('cG').onclick=async()=>{
     const t=Number($('cT').value), a=Number($('cA').value);
@@ -1510,7 +1551,110 @@ async function vConvenios(){
   };
   $('vista').querySelectorAll('[data-ce]').forEach(b=>b.onclick=async()=>{
     const r=await rpc('pg_actualizar_convenio_pago',{...C,p_id:Number(b.dataset.ce),p_estado:b.dataset.v});
-    if(r&&r.ok){toast('Actualizado','good');vConvenios();}
+    if(r&&r.ok){toast('Actualizado','good');D.dir=null;D.an=null;vConvenios();}
+  });
+  $('vista').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editarConvenio(cs[Number(b.dataset.ed)]));
+}
+
+function editarConvenio(c){
+  const f=x=>x?String(x).slice(0,10):'';
+  sheet(`<h3>Editar convenio · ${esc(c.ident)}</h3>
+    <p class="sub">${esc(c.nombre)} · pagado ${money(c.pagado_bajo_convenio)} de ${money(c.monto_total)}</p>
+    <div class="grid g2" style="margin-top:13px">
+      <div><label>Monto total acordado *</label><input id="evT" type="number" step="0.01" value="${c.monto_total||''}"></div>
+      <div><label>Abono mensual *</label><input id="evA" type="number" step="0.01" value="${c.abono_mensual||''}"></div>
+      <div><label>Día de pago</label><input id="evD" type="number" min="1" max="28" value="${c.dia_pago||5}"></div>
+      <div><label>Tipo</label><input id="evTi" value="${esc(c.tipo)}" placeholder="Pago en parcialidades"></div>
+      <div><label>Fecha de inicio</label><input id="evI" type="date" value="${f(c.fecha_inicio)}"></div>
+      <div><label>Fecha de término</label><input id="evF" type="date" value="${f(c.fecha_fin)}"></div>
+      <div><label>Estado</label><select id="evE">
+        ${['activo','cumplido','incumplido','cancelado'].map(e=>`<option value="${e}"${c.estado===e?' selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
+      </select></div>
+      <div><label>Notas internas</label><input id="evN" value="${esc(c.notas)}"></div>
+    </div>
+    <div style="margin-top:11px"><label>Condiciones (las ve el residente)</label><textarea id="evC">${esc(c.condiciones)}</textarea></div>
+    <p class="sub">Los cambios se reflejan de inmediato en el portal del residente y en sus recibos.</p>
+    <div class="acts"><button class="btn" id="evG">Guardar cambios</button><button class="btn gh" onclick="cerrarSheet()">Cancelar</button></div>`);
+  $('evG').onclick=async()=>{
+    const t=Number($('evT').value), a=Number($('evA').value);
+    if(!t||!a){toast('Monto total y abono son obligatorios.','err');return;}
+    const b=$('evG');b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    try{
+      const r=await rpc('pg_editar_convenio',{...C,p_id:c.id,p_monto_total:t,p_abono_mensual:a,
+        p_dia_pago:Number($('evD').value)||5,p_fecha_inicio:$('evI').value||null,p_fecha_fin:$('evF').value||null,
+        p_condiciones:$('evC').value.trim()||null,p_tipo:$('evTi').value.trim()||null,
+        p_notas:$('evN').value.trim()||null,p_estado:$('evE').value});
+      if(r&&r.ok){toast('Convenio actualizado','good');cerrarSheet();D.dir=null;D.an=null;vConvenios();}
+      else{toast('No se pudo guardar.','err');b.disabled=false;b.textContent='Guardar cambios';}
+    }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Guardar cambios';}
+  };
+}
+
+/* ---------- RESERVAS DE ALBERCA ---------- */
+let abF='';
+async function vAlberca(){
+  D.ab=await rpc('pg_alberca',{...C,p_estado:abF||null});
+  const a=D.ab, r=a.resumen||{}, rs=a.reservas||[];
+  const EST={solicitada:['Por autorizar','p-amb'],aprobada:['Aprobada','p-ok'],rechazada:['Rechazada','p-warn'],cancelada:['Cancelada','p-gray']};
+  $('vista').innerHTML=`
+    <div class="kpis">
+      <div class="kpi"><div class="l">Por autorizar</div><div class="v" style="color:${r.solicitadas?'var(--amber)':'var(--ok)'}">${r.solicitadas||0}</div></div>
+      <div class="kpi"><div class="l">Próximas aprobadas</div><div class="v" style="color:var(--ok)">${r.aprobadas||0}</div></div>
+      <div class="kpi"><div class="l">Ingreso del mes</div><div class="v">${money(r.ingreso_mes)}</div><div class="s">${r.cobradas||0} cobradas</div></div>
+    </div>
+
+    <details class="acc"><summary>Tarifa y reglas de la alberca</summary>
+      <div class="grid g2" style="margin-top:12px">
+        <div><label>Cuota por bloque</label><input id="abT" type="number" step="0.01" value="${a.tarifa||0}"></div>
+        <div><label>Horas por bloque</label><input id="abH" type="number" min="1" max="12" value="${a.horas||4}"></div>
+      </div>
+      <div style="margin-top:11px"><label>Leyenda que ve el residente</label><textarea id="abR">${esc(a.reglas)}</textarea></div>
+      <button class="btn wide" id="abG" style="margin-top:12px">Guardar tarifa</button>
+      <div class="hint">Hoy: <b>${money(a.tarifa)}</b> por bloque de <b>${a.horas} horas</b>.</div>
+    </details>
+
+    <div class="seg" style="margin-bottom:13px">
+      ${[['','Todas'],['solicitada','Por autorizar'],['aprobada','Aprobadas'],['rechazada','Rechazadas']].map(([k,t])=>`<button class="${abF===k?'on':''}" data-f="${k}">${t}</button>`).join('')}
+    </div>
+
+    ${rs.length?rs.map((x,i)=>`
+      <div class="item">
+        <div class="ihead"><span class="tag">${esc(x.ident)}</span><span class="iname">${esc(x.nombre)}</span>
+          <span class="pill ${EST[x.estado][1]}">${EST[x.estado][0]}</span></div>
+        <div class="dl">
+          <div><b>Fecha</b> ${fecha(x.fecha)}</div>
+          <div><b>Horario</b> ${String(x.hora_inicio).slice(0,5)} · ${x.horas} h</div>
+          <div><b>Personas</b> ${x.personas||'—'}</div>
+          <div><b>Cuota</b> ${money(x.monto)} ${x.pagada?'<span class="pill p-ok">Pagada</span>':'<span class="pill p-warn">Por cobrar</span>'}</div>
+        </div>
+        ${x.notas?`<p class="sub">Nota: ${esc(x.notas)}</p>`:''}
+        ${x.motivo_resolucion?`<p class="sub">Resolución: ${esc(x.motivo_resolucion)} (${esc(x.resuelto_por)})</p>`:''}
+        <div class="acts">
+          ${x.estado==='solicitada'?`<button class="btn ok sm" data-ap="${x.id}">✓ Autorizar</button>
+            <button class="btn gh sm" data-rc="${x.id}">✕ Rechazar</button>`:''}
+          ${x.estado==='aprobada'?`<button class="btn ${x.pagada?'gh':''} sm" data-pg="${x.id}" data-v="${x.pagada?0:1}">${x.pagada?'Marcar por cobrar':'Marcar pagada'}</button>
+            <button class="btn gh sm" data-rc="${x.id}">Cancelar</button>`:''}
+          ${x.telefono?`<a class="btn sm" style="background:#25D366;text-decoration:none" href="https://wa.me/${String(x.telefono).replace(/[^0-9]/g,'').replace(/^(\d{10})$/,'52$1')}" target="_blank">💬</a>`:''}
+        </div>
+      </div>`).join(''):'<div class="empty"><div class="e">🏊</div><div class="t">Sin reservas</div><div>Los residentes la apartan desde su portal.</div></div>'}`;
+  $('vista').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{abF=b.dataset.f;vAlberca();});
+  $('abG').onclick=async()=>{
+    const b=$('abG');b.disabled=true;b.innerHTML='<span class="sp"></span>';
+    const r2=await rpc('pg_set_tarifa_alberca',{...C,p_tarifa:Number($('abT').value)||0,p_horas:Number($('abH').value)||4,p_reglas:$('abR').value.trim()||null});
+    if(r2&&r2.ok){toast('Tarifa actualizada','good');vAlberca();}else{toast('No se pudo guardar.','err');b.disabled=false;b.textContent='Guardar tarifa';}
+  };
+  $('vista').querySelectorAll('[data-ap]').forEach(b=>b.onclick=async()=>{
+    const r2=await rpc('pg_resolver_alberca',{...C,p_id:Number(b.dataset.ap),p_estado:'aprobada',p_motivo:null});
+    if(r2&&r2.ok){toast('Reserva autorizada','good');cargarNotifs();vAlberca();}
+  });
+  $('vista').querySelectorAll('[data-rc]').forEach(b=>b.onclick=async()=>{
+    const m=prompt('Motivo (lo verá el residente):'); if(m===null)return;
+    const r2=await rpc('pg_resolver_alberca',{...C,p_id:Number(b.dataset.rc),p_estado:'rechazada',p_motivo:m});
+    if(r2&&r2.ok){toast('Reserva rechazada','good');cargarNotifs();vAlberca();}
+  });
+  $('vista').querySelectorAll('[data-pg]').forEach(b=>b.onclick=async()=>{
+    const r2=await rpc('pg_alberca_pagada',{...C,p_id:Number(b.dataset.pg),p_pagada:b.dataset.v==='1'});
+    if(r2&&r2.ok){toast('Actualizado','good');vAlberca();}
   });
 }
 
@@ -1579,7 +1723,7 @@ $('btnNotif').onclick=async()=>{
 /* ---------- ACTUALIZAR ---------- */
 $('btnRef').onclick=async()=>{
   const b=$('btnRef'); b.disabled=true; b.innerHTML='<span class="sp" style="border-color:#0003;border-top-color:var(--blue)"></span>';
-  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null};
+  D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null,ab:null,sc:null};
   await cargarNotifs(); await render();
   toast('Datos actualizados','good');
   b.disabled=false; b.textContent='↻';
