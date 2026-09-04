@@ -237,7 +237,6 @@ function pintarBadges(){
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
 function ir(k){
-  if(k==='regularizacion'){ cerrarMenu(); location.href='/operaciones/regularizacion'; return; }
   V=k; cerrarMenu();
   const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
@@ -277,6 +276,7 @@ async function render(){
   try{
     if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
+    else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
@@ -817,7 +817,8 @@ function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
   <div style="text-align:center;margin-top:22px;padding-top:15px;border-top:1px solid #E5E7EB">
   <div style="font-style:italic;font-size:12px;color:#9CA3AF">"Juntarse es el principio, mantenerse juntos el progreso, trabajar en equipo el éxito"</div>
   <div style="font-weight:600;color:#2563EB;margin-top:7px;font-size:13px">ALDEAMZ80@GMAIL.COM</div></div>
-  </div></div></body></html>`);
+  </div></div><script src="/operaciones/regularizacion-inline.js"></script>
+</body></html>`);
   w.document.close();
 }
 
