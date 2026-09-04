@@ -237,7 +237,6 @@ function pintarBadges(){
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
 function ir(k){
-  if(k==='regularizacion'){ cerrarMenu(); location.href='/operaciones/regularizacion'; return; }
   V=k; cerrarMenu();
   const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
