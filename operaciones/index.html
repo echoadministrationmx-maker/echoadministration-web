@@ -277,6 +277,7 @@ async function render(){
   try{
     if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
+    else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
@@ -1731,5 +1732,6 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
+<script src="/operaciones/regularizacion-inline.js"></script>
 </body>
 </html>
