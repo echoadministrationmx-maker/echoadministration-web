@@ -1255,6 +1255,16 @@ async function cargarEstadoCuenta(){
       ? (ant>0?('Debes '+$m(ant)+' de meses anteriores'):'Estás al corriente')
       : ('Este mes: '+$m(cuota)+(ant>0?(' + '+$m(ant)+' anterior'):''));
     const kd=document.getElementById('kpi-deuda'); if(kd)kd.textContent=$m(tot);
+    const nExig=Number(d.meses_exigibles||0);
+    const kpm=document.getElementById('kpi-pendientes');
+    if(kpm)kpm.textContent=nExig;
+    const kpp=document.getElementById('kpi-pend-pill');
+    if(kpp){
+      kpp.textContent = nExig>0 ? (nExig===1?'Solo '+d.mes_nombre.split(' ')[0]:nExig+' meses por pagar') : '✓ Al día';
+      kpp.className = 'kpi-pill '+(nExig>0?'warn':'success');
+    }
+    const kps=document.getElementById('kpi-pagados');
+    if(kps)kps.textContent=Number(d.pagados_num||0);
     const kp=document.getElementById('kpi-deuda-pill');
     if(kp)kp.textContent = tot>0 ? (pagado?'Adeudo anterior':'Incluye este mes') : '✓ Al corriente';
   }catch(e){}
@@ -1580,8 +1590,6 @@ function pintarDatos() {
   // El saldo lo define exclusivamente cargarEstadoCuenta() — fuente única de verdad
   const deuda = 0;
   document.getElementById('kpi-pagados').textContent = pags.length;
-  document.getElementById('kpi-pendientes').textContent = pends.length;
-  document.getElementById('kpi-pend-pill').textContent = pends.length > 0 ? 'Por pagar' : '✓ Al día';
   document.getElementById('ec-sub').textContent = residente.nombre_completo + ' · Depto ' + residente.departamento + ' · Manzana 80';
 
   renderMovimientos(pagos.slice(0, 6));
