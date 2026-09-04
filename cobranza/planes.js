@@ -8,6 +8,7 @@ window.ECHO_PLANES={
  calcular(adeudoHistorico,mesesVencidos=0,cuota=515){const original=Math.max(0,Number(adeudoHistorico)||0),actual=Math.max(0,Number(cuota)||this.cuotaOrdinaria),pct=this.obtenerDescuento(mesesVencidos),desc=Math.round(original*pct)/100,saldo=Math.max(0,Math.round((original-desc)*100)/100);return this.planes.map(plan=>{const abono=Math.ceil(saldo/plan.meses*100)/100,total=Math.ceil((abono+actual)*100)/100;return{...plan,mesesVencidos:Math.max(0,Number(mesesVencidos)||0),adeudoOriginal:original,descuentoPct:pct,descuentoMonto:desc,adeudoConDescuento:saldo,cuotaCorriente:actual,abonoDeuda:abono,totalMensual:total,totalQuincenal:Math.ceil(total/2*100)/100}})},
  social(adeudoHistorico,mesesVencidos,abonoDeuda,cuota=515){const p=this.calcular(adeudoHistorico,mesesVencidos,cuota)[0],abono=Math.max(0,Number(abonoDeuda)||0),actual=Math.max(0,Number(cuota)||this.cuotaOrdinaria);return{id:'social',nombre:'Echo Social',mesesVencidos:p.mesesVencidos,adeudoOriginal:p.adeudoOriginal,descuentoPct:p.descuentoPct,descuentoMonto:p.descuentoMonto,adeudoConDescuento:p.adeudoConDescuento,cuotaCorriente:actual,abonoDeuda:abono,totalMensual:actual+abono,totalQuincenal:Math.ceil((actual+abono)/2*100)/100,requiereAprobacion:true}}
 };
+// Extiende el envío manual: primero deja una bitácora de la oferta y después conserva el flujo actual de WhatsApp.
 window.addEventListener('load',()=>{
  if(typeof sendOffer!=='function'||typeof rpc!=='function')return;
  const abrir=sendOffer;
