@@ -196,6 +196,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Mi renta
       </button>
+      <button class="nav-item" onclick="go('alberca',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M2 17h20"/><path d="M6 12V6a2 2 0 0 1 4 0v6"/><path d="M14 12V6a2 2 0 0 1 4 0v6"/></svg>
+        Apartar alberca
+      </button>
       <button class="nav-item" onclick="go('inquilinos',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Mis inquilinos
@@ -447,6 +451,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div id="renta-cont" style="max-width:760px"><div style="color:var(--muted);font-size:13px">Cargando…</div></div>
       </div>
 
+      <div class="page" id="page-alberca">
+        <div id="ab-load" style="color:var(--muted);font-size:14px">Cargando…</div>
+        <div id="ab-cont" style="display:none">
+          <div style="background:linear-gradient(135deg,#1847CC,#7BA8FF);color:#fff;border-radius:18px;padding:24px;margin-bottom:16px">
+            <h2 style="margin:0 0 5px;font-size:19px">Apartar la alberca</h2>
+            <p style="margin:0;opacity:.92;font-size:13.5px;line-height:1.6" id="ab-leyenda"></p>
+          </div>
+
+          <div class="card" style="max-width:640px">
+            <h3 style="margin:0 0 4px;font-size:17px">Nueva solicitud</h3>
+            <p style="color:var(--muted);font-size:12.5px;margin:0 0 16px">Tu solicitud pasa a revisión de la administración. Te confirmamos en cuanto se autorice.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">Fecha</label>
+                <input id="ab-fecha" type="date" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px"></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">Hora de inicio</label>
+                <input id="ab-hora" type="time" value="12:00" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px"></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">Personas</label>
+                <input id="ab-pers" type="number" min="1" placeholder="15" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px"></div>
+              <div><label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">Motivo (opcional)</label>
+                <input id="ab-notas" placeholder="Cumpleaños, reunión familiar…" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px"></div>
+            </div>
+            <div id="ab-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-top:13px"></div>
+            <button id="ab-btn" onclick="solicitarAlberca()" style="margin-top:15px;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Solicitar reserva</button>
+          </div>
+
+          <div class="card" style="max-width:640px;margin-top:16px">
+            <h3 style="margin:0 0 14px;font-size:17px">Mis reservas</h3>
+            <div id="ab-mias"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-inquilinos">
         <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:16px;max-width:760px">
           <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -583,6 +619,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           <div id="md-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-bottom:14px"></div>
           <button id="md-btn" onclick="guardarMisDatos()" style="background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Confirmar mis datos</button>
           <div id="md-conf" style="font-size:12px;color:var(--muted);margin-top:12px"></div>
+
+          <div style="border-top:1px solid var(--border);margin-top:22px;padding-top:20px">
+            <h3 style="margin:0 0 4px;font-size:16px">Estado de cuenta sin adeudo</h3>
+            <p style="color:var(--muted);font-size:12.5px;margin:0 0 13px">Documento informativo que muestra que no tienes adeudos de mantenimiento. Solo se emite si estás al corriente.</p>
+            <label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">¿Para qué lo necesitas? (opcional)</label>
+            <input id="cn-motivo" placeholder="Trámite de venta, requisito personal…" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px">
+            <div id="cn-msg" style="display:none;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;margin-top:12px"></div>
+            <button id="cn-btn" onclick="solicitarConstancia()" style="margin-top:13px;background:#fff;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Solicitar documento</button>
+            <div id="cn-lista" style="margin-top:14px"></div>
+          </div>
         </div>
       </div>
 
@@ -1018,6 +1064,8 @@ async function refrescarPortal() {
     await cargarInquilinos();
     await cargarEstadoCuenta();
     await cargarConvenio();
+    await cargarAlberca();
+    await cargarSolicitudesCn();
     if (typeof cargarMiRenta === 'function') await cargarMiRenta();
   } catch(e) {}
   if (b) { b.disabled = false; b.textContent = '↻ Actualizar'; }
@@ -1278,6 +1326,107 @@ function pintarConvenio(){
     </div>`;
 }
 
+// ===== APARTAR ALBERCA =====
+let AB=null;
+const abM=n=>'$'+Number(n||0).toLocaleString('es-MX');
+async function cargarAlberca(){
+  try{
+    const r=await fetch(`${URL}/rpc/mis_reservas_alberca`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
+    const d=await r.json();
+    document.getElementById('ab-load').style.display='none';
+    if(!d||!d.ok)return;
+    AB=d; document.getElementById('ab-cont').style.display='block';
+    document.getElementById('ab-leyenda').innerHTML=
+      `Se cobra una cuota de renta de <b>${abM(d.tarifa)}</b> por bloque de <b>${d.horas} horas</b>.`+
+      (d.reglas?`<br><span style="font-size:12.5px;opacity:.9">${d.reglas}</span>`:'');
+    document.getElementById('ab-fecha').min=new Date().toISOString().slice(0,10);
+    pintarMisReservas();
+  }catch(e){}
+}
+const AB_EST={solicitada:['⏳ En revisión','#FBF1DF','#B87503'],aprobada:['✓ Aprobada','#E7F5EC','#1B7A3D'],
+  rechazada:['✕ Rechazada','#FBE9EC','#B00020'],cancelada:['Cancelada','#F1F3F7','#6B7280']};
+function pintarMisReservas(){
+  const m=(AB.mias||[]);
+  document.getElementById('ab-mias').innerHTML = m.length ? m.map(x=>{
+    const [t,bg,c]=AB_EST[x.estado]||AB_EST.solicitada;
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <b style="font-size:14.5px">${new Date(x.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})}</b>
+        <span style="background:${bg};color:${c};border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700">${t}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:5px">
+        ${String(x.hora_inicio).slice(0,5)} · ${x.horas} horas${x.personas?' · '+x.personas+' personas':''} · Cuota ${abM(x.monto)}
+        ${x.pagada?' · <b style="color:#1B7A3D">Pagada</b>':''}
+      </div>
+      ${x.motivo_resolucion?`<div style="font-size:12.5px;color:${c};margin-top:6px">${x.motivo_resolucion}</div>`:''}
+      ${['solicitada','aprobada'].includes(x.estado)?`<button onclick="cancelarAlberca(${x.id})" style="margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 13px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Cancelar</button>`:''}
+    </div>`;}).join('') : '<div style="color:var(--muted);font-size:13.5px">Aún no has apartado la alberca.</div>';
+}
+async function solicitarAlberca(){
+  const f=document.getElementById('ab-fecha').value, h=document.getElementById('ab-hora').value;
+  const msg=document.getElementById('ab-msg'), btn=document.getElementById('ab-btn');
+  const err=(t)=>{msg.style.display='block';msg.style.background='#FBE9EC';msg.style.color='#B00020';msg.textContent=t;};
+  if(!f||!h){err('Elige fecha y hora.');return;}
+  btn.disabled=true;btn.textContent='Enviando…';msg.style.display='none';
+  try{
+    const r=await fetch(`${URL}/rpc/solicitar_alberca`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_fecha:f,p_hora:h,
+        p_personas:Number(document.getElementById('ab-pers').value)||null,
+        p_notas:document.getElementById('ab-notas').value.trim()||null})});
+    const d=await r.json();
+    if(d&&d.ok){
+      msg.style.display='block';msg.style.background='#E7F5EC';msg.style.color='#1B7A3D';
+      msg.textContent='Solicitud enviada. La administración te confirmará. Cuota: '+abM(d.monto)+' por '+d.horas+' horas.';
+      document.getElementById('ab-notas').value='';
+      await cargarAlberca();
+    } else if(d&&d.error==='adeudo'){ err('Tienes un adeudo de '+abM(d.adeudo)+'. Regulariza tu cuenta para apartar la alberca.'); }
+    else if(d&&d.error==='ocupado'){ err('Ese horario ya está apartado. Elige otro.'); }
+    else { err(d&&d.error?d.error:'No se pudo enviar la solicitud.'); }
+  }catch(e){err('Error de conexión.');}
+  btn.disabled=false;btn.textContent='Solicitar reserva';
+}
+async function cancelarAlberca(id){
+  if(!confirm('¿Cancelar esta reserva?'))return;
+  try{
+    await fetch(`${URL}/rpc/cancelar_mi_alberca`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_id:id})});
+    cargarAlberca();
+  }catch(e){}
+}
+
+// ===== SOLICITAR ESTADO SIN ADEUDO =====
+async function solicitarConstancia(){
+  const btn=document.getElementById('cn-btn'), msg=document.getElementById('cn-msg');
+  const show=(t,ok)=>{msg.style.display='block';msg.style.background=ok?'#E7F5EC':'#FBE9EC';msg.style.color=ok?'#1B7A3D':'#B00020';msg.textContent=t;};
+  btn.disabled=true;btn.textContent='Enviando…';
+  try{
+    const r=await fetch(`${URL}/rpc/solicitar_constancia`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass,p_motivo:document.getElementById('cn-motivo').value.trim()||null})});
+    const d=await r.json();
+    if(d&&d.ok){show('Solicitud enviada. La administración la revisará y te la hará llegar.',true);cargarSolicitudesCn();}
+    else if(d&&d.error==='adeudo')show('Tienes un adeudo de $'+Number(d.adeudo).toLocaleString('es-MX')+'. El documento solo se emite si estás al corriente.',false);
+    else if(d&&d.error==='duplicada')show('Ya tienes una solicitud en revisión.',false);
+    else show('No se pudo enviar.',false);
+  }catch(e){show('Error de conexión.',false);}
+  btn.disabled=false;btn.textContent='Solicitar documento';
+}
+async function cargarSolicitudesCn(){
+  try{
+    const r=await fetch(`${URL}/rpc/mis_solicitudes_constancia`,{method:'POST',headers:H,
+      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
+    const d=await r.json(); if(!d||!d.ok)return;
+    const box=document.getElementById('cn-lista'); if(!box)return;
+    const EST={pendiente:['En revisión','#FBF1DF','#B87503'],emitida:['Emitido','#E7F5EC','#1B7A3D'],rechazada:['Rechazado','#FBE9EC','#B00020']};
+    box.innerHTML=(d.solicitudes||[]).map(x=>{const[t,bg,c]=EST[x.estado]||EST.pendiente;
+      return `<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid #F1F3F7;font-size:13px">
+        <div>${new Date(x.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'long'})}${x.motivo?' · '+x.motivo:''}
+          ${x.motivo_rechazo?`<div style="color:${c};font-size:12px">${x.motivo_rechazo}</div>`:''}</div>
+        <span style="background:${bg};color:${c};border-radius:999px;padding:3px 11px;font-size:11.5px;font-weight:700">${t}${x.folio_emitido?' CNA-'+String(x.folio_emitido).padStart(4,'0'):''}</span>
+      </div>`;}).join('')||'<div style="color:var(--muted);font-size:13px">Sin solicitudes.</div>';
+  }catch(e){}
+}
+
 async function cargarAviso() {
   try {
     const r = await fetch(`${URL}/rpc/aviso_activo`, { method:'POST', headers:H,
@@ -1414,6 +1563,8 @@ async function doLogin() {
     cargarInquilinos();
     cargarEstadoCuenta();
     cargarConvenio();
+    cargarAlberca();
+    cargarSolicitudesCn();
     cargarMiRenta();
 
   } catch(e) {
@@ -1723,7 +1874,7 @@ function go(id, el) {
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('portal').classList.remove('menu-abierto');
-  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', inquilinos:'Mis inquilinos', incidencias:'Incidencias' };
+  const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', inquilinos:'Mis inquilinos', alberca:'Apartar alberca', incidencias:'Incidencias' };
   document.getElementById('topbar-title').textContent = t[id] || id;
 }
 
