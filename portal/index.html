@@ -335,7 +335,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           </div>
           <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Abrir Mercado Pago e ingresar monto</button>
           <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
-          <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Cifrado SSL</p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin:4px 0 10px;text-align:center">
+            <div style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:8px">Temporalmente, envía tu comprobante para aplicar el pago a tu departamento.</div>
+            <button type="button" onclick="enviarComprobantePago()" style="background:#25D366;color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">💬 Enviar comprobante por WhatsApp</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);text-align:center">Procesado por Mercado Pago · Verificación manual temporal</p>
         </div>
 
         <div id="card-transferencia" class="card" style="max-width:420px;margin:16px auto 0">
@@ -1987,21 +1991,28 @@ async function copiarClabe() {
 function mostrarMsgPago(texto, tipo) {
   const el = document.getElementById('pago-msg');
   const estilos = {
+    info:  'background:var(--blue-light);color:var(--blue)',
+    error: 'background:#FDEDED;color:#C0392B',
+    ok:    'background:#E7F9EF;color:#1B8A4C'
+  };
+  el.style.cssText = 'display:block;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center;' + (estilos[tipo] || estilos.info);
+  el.textContent = texto;
+}
+
+function enviarComprobantePago() {
+  const monto = document.getElementById('pago-total2')?.textContent || 'el monto indicado';
+  const unidad = residente?.departamento || residente?.clave || 'mi departamento';
+  const texto = 'Hola Echo Administration, realicé un pago por Mercado Pago de ' + monto + ' para el departamento ' + unidad + '. Adjunto mi comprobante para que puedan aplicarlo a mi cuenta.';
+  window.open('https://wa.me/' + SOPORTE_NUMERO + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
+}
+
 function doPago() {
   const btn = document.getElementById('btn-pagar-mp');
   if (!btn || btn.disabled) return;
 
   const monto = document.getElementById('pago-total2')?.textContent || 'el total mostrado';
   window.open('https://link.mercadopago.com.mx/echo', '_blank', 'noopener');
-  mostrarMsgPago('Mercado Pago se abrió en una pestaña nueva. Escribe exactamente ' + monto + ' como monto del pago.', 'info');
-}k', 'noopener');
-    mostrarMsgPago('Abrimos Mercado Pago en una pestaña nueva. Completa tu pago ahí; no cierres esta pantalla.', 'info');
-  } catch (e) {
-    mostrarMsgPago('Error de conexión al preparar tu pago. Intenta de nuevo.', 'error');
-  } finally {
-    pagoEnProceso = false;
-    btn.disabled = false; btn.textContent = textoOriginal;
-  }
+  mostrarMsgPago('Mercado Pago se abrió en una pestaña nueva. Escribe exactamente ' + monto + ' como monto del pago y después envía tu comprobante.', 'info');
 }
 
 initComunidad();
