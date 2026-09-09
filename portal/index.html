@@ -331,7 +331,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:15px"><span style="font-weight:700">Total a pagar</span><span style="font-weight:800;color:var(--green);font-size:20px" id="pago-total2">$0</span></div>
           </div>
           <div style="background:var(--yellow-light);border:1px solid #FDE68A;border-radius:8px;padding:11px 12px;margin-bottom:12px;font-size:12.5px;line-height:1.5;color:#92400E">
-            <strong>Antes de continuar:</strong> en Mercado Pago escribe exactamente el <strong>Total a pagar</strong> mostrado arriba.
+            <strong>Antes de continuar:</strong> si tienes saldo pendiente, escribe exactamente el total mostrado arriba. Si aparece $0, puedes ingresar el monto que deseas abonar o anticipar.
           </div>
           <button id="btn-pagar-mp" onclick="doPago()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">🔒 Abrir Mercado Pago e ingresar monto</button>
           <div id="pago-msg" style="display:none;font-size:12.5px;padding:9px 11px;border-radius:8px;margin-bottom:8px;text-align:center"></div>
@@ -1256,7 +1256,7 @@ async function cargarEstadoCuenta(){
 
     ['pago-total','pago-total2','pago-saldo','kpi-deuda'].forEach(id=>{const e=document.getElementById(id); if(e)e.textContent=$m(tot);});
     const btnPagar=document.getElementById('btn-pagar-mp');
-    if(btnPagar){ btnPagar.disabled = tot<=0; btnPagar.style.opacity = tot<=0?'.5':'1'; }
+    if(btnPagar){ btnPagar.disabled = false; btnPagar.style.opacity = '1'; }
     const dm=document.getElementById('ec-detMes');
     if(dm) dm.textContent = pagado
       ? (ant>0?('Debes '+$m(ant)+' de meses anteriores'):'Estás al corriente')
@@ -2010,9 +2010,12 @@ function doPago() {
   const btn = document.getElementById('btn-pagar-mp');
   if (!btn || btn.disabled) return;
 
-  const monto = document.getElementById('pago-total2')?.textContent || 'el total mostrado';
+  const monto = document.getElementById('pago-total2')?.textContent || '$0';
   window.open('https://link.mercadopago.com.mx/echo', '_blank', 'noopener');
-  mostrarMsgPago('Mercado Pago se abrió en una pestaña nueva. Escribe exactamente ' + monto + ' como monto del pago y después envía tu comprobante.', 'info');
+  const instruccion = monto === '$0'
+    ? 'Ingresa el monto que deseas abonar o anticipar.'
+    : 'Escribe exactamente ' + monto + ' como monto del pago.';
+  mostrarMsgPago('Mercado Pago se abrió en una pestaña nueva. ' + instruccion + ' Después envía tu comprobante.', 'info');
 }
 
 initComunidad();
