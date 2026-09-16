@@ -200,7 +200,6 @@ const MENU=[
   {g:'Cobranza'},
   {k:'inicio',t:'Resumen',i:'📊'},
   {k:'cobranza',t:'Cobranza mensual',i:'📈'},
-  {k:'regularizacion',t:'Regularización y WhatsApp',i:'💬'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
@@ -276,7 +275,6 @@ async function render(){
   try{
     if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
-    else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
@@ -332,7 +330,7 @@ async function vInicio(){
       </div>
       <div style="margin-top:14px;border-top:1px solid #ffffff2e;padding-top:11px">
         <div style="display:flex;justify-content:space-between;font-size:.8rem;opacity:.9;margin-bottom:6px;flex-wrap:wrap;gap:6px">
-          <span>Cobranza del mes devengado</span><b>${Number(g.pct_mes||0).toFixed(1)}% · ${g.pagaron_mes||0}/${g.unidades} pagaron</b></div>
+          <span>Cobranza del mes devengado</span><b>${Number(g.pct_mes||0).toFixed(1)}% · ${g.pagaron_mes||0}/${g.facturadas||g.unidades} pagaron</b></div>
         <div class="bar" style="background:#ffffff33"><i style="width:${Math.min(Number(g.pct_mes||0),100)}%;background:#fff"></i></div>
       </div>
     </div>
@@ -390,7 +388,7 @@ async function vAnalisis(){
       <div class="kpis" style="margin:0">
         <div class="kpi"><div class="l">Recaudado</div><div class="v" style="color:var(--ok)">${money(g.cobrado_mes)}</div><div class="s">de ${money(g.ideal_mes)}</div></div>
         <div class="kpi"><div class="l">Falta del mes</div><div class="v" style="color:var(--warn)">${money(g.pendiente_mes)}</div><div class="s">${g.deben_mes||0} unidades</div></div>
-        <div class="kpi"><div class="l">% del mes</div><div class="v" style="color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div><div class="s">${g.pagaron_mes||0} pagaron</div></div>
+        <div class="kpi"><div class="l">% del mes</div><div class="v" style="color:var(--blue)">${Number(g.pct_mes||0).toFixed(1)}%</div><div class="s">${g.pagaron_mes||0} de ${g.facturadas||g.unidades} pagaron</div></div>
       </div>
     </div>
     <div class="card">
@@ -1020,11 +1018,12 @@ async function vConstancias(){
 }
 
 /* ---------- RESIDENTES ---------- */
-let rFiltro={q:'',orden:'ident',ver:''};
+let rFiltro={q:'',edif:'',orden:'ident',ver:''};
 async function vResidentes(){
   if(!D.dir){const d=await rpc('pg_directorio',C); D.dir=d.residentes||[];}
   let it=D.dir.slice();
   if(rFiltro.q){const q=rFiltro.q.toLowerCase();it=it.filter(r=>[r.ident,r.nombre_completo,r.email,r.telefono,r.clave,r.chip].some(v=>(v||'').toString().toLowerCase().includes(q)));}
+  if(rFiltro.edif)it=it.filter(r=>(r.edificio||'').toUpperCase()===rFiltro.edif);
   if(rFiltro.ver==='deben')it=it.filter(r=>Number(r.adeudo)>0);
   else if(rFiltro.ver==='ok')it=it.filter(r=>Number(r.adeudo)===0);
   else if(rFiltro.ver==='sintel')it=it.filter(r=>!r.telefono);
@@ -1038,10 +1037,15 @@ async function vResidentes(){
   else if(rFiltro.orden==='nombre')it.sort((a,b)=>(a.nombre_completo||'').localeCompare(b.nombre_completo||''));
   else it.sort((a,b)=>(a.ident||'').localeCompare(b.ident||'',undefined,{numeric:true}));
   const cM=D.dir.filter(r=>r.email).length,cT=D.dir.filter(r=>r.telefono).length,cC=D.dir.filter(r=>r.chip).length;
+  const edificios=[...new Set(D.dir.map(r=>(r.edificio||'').toUpperCase()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   $('vista').innerHTML=`
     <div class="card">
       <div class="grid g3">
         <div><label>Buscar</label><input id="rq" value="${esc(rFiltro.q)}" placeholder="Nombre, unidad, chip, correo"></div>
+        <div><label>Edificio</label><select id="re">
+          <option value="">Todos</option>
+          ${edificios.map(e=>`<option value="${e}"${rFiltro.edif===e?' selected':''}>${e}</option>`).join('')}
+        </select></div>
         <div><label>Mostrar</label><select id="rv">
           <option value="">Todos</option><option value="deben"${rFiltro.ver==='deben'?' selected':''}>Con adeudo</option>
           <option value="ok"${rFiltro.ver==='ok'?' selected':''}>Al corriente</option>
@@ -1063,6 +1067,7 @@ async function vResidentes(){
       ${it.length>50?'<p class="sub">Mostrando 50. Afina la búsqueda.</p>':''}
       ${it.length===0?'<div class="empty"><div class="e">🔍</div><div class="t">Sin coincidencias</div></div>':''}</div>`;
   $('rq').oninput=e=>{rFiltro.q=e.target.value;clearTimeout(window._r);window._r=setTimeout(vResidentes,300);};
+  $('re').onchange=e=>{rFiltro.edif=e.target.value;vResidentes();};
   $('rv').onchange=e=>{rFiltro.ver=e.target.value;vResidentes();};
   $('ro').onchange=e=>{rFiltro.orden=e.target.value;vResidentes();};
   $('rlist').querySelectorAll('[data-act]').forEach(b=>{
@@ -1731,6 +1736,5 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/regularizacion-inline.js"></script>
 </body>
 </html>
