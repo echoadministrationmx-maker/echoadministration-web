@@ -505,7 +505,7 @@ async function vHistorico(){
     if(m.estado_mes==='sin_cargos'||m.estado_mes==='futuro')
       return {txt:'—',bg:'#F4F6FA',fg:'#B7C0CE',t:'Sin cargos generados para este mes'};
     const p=Number(m.pct)||0;
-    const txt = hiVista==='pct' ? p.toFixed(0)+'%' : hiVista==='recibido' ? money(m.recibido) : money(m.pendiente);
+    const txt = hiVista==='pct' ? p.toFixed(0)+'%' : hiVista==='cobrado' ? money(m.cobrado) : money(m.pendiente);
     if(m.estado_mes==='por_vencer')
       return {txt:txt,bg:'#E4EBFF',fg:'#1847CC',t:'Facturado pero aún no vence'};
     return {txt:txt,bg:col(p),fg:p>0?'#fff':'#8794A6',t:''};
@@ -518,7 +518,7 @@ async function vHistorico(){
         <select id="hiA" style="max-width:120px">${[2023,2024,2025,2026].map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
       </div>
       <div class="seg">
-        ${[['pct','% cobranza'],['recibido','Dinero recibido'],['pendiente','Pendiente']].map(([k,t])=>`<button class="${hiVista===k?'on':''}" data-v="${k}">${t}</button>`).join('')}
+        ${[['pct','% cobranza'],['cobrado','Cobrado del periodo'],['pendiente','Pendiente']].map(([k,t])=>`<button class="${hiVista===k?'on':''}" data-v="${k}">${t}</button>`).join('')}
       </div>
     </div>
 
