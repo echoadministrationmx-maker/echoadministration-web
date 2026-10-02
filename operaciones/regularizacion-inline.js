@@ -1,9 +1,10 @@
 /* Regularización Echo integrada en Panel de Operaciones */
-let REG={residentes:[],convenios:[],filtro:'deuda',q:''};
+let REG={residentes:[],convenios:[],filtro:'deuda',edificio:'todos',q:''};
 const REG_CUOTA=515;
 function regMeses(r){return Array.isArray(r.meses_debe)?r.meses_debe.length:Number(r.meses_debe||0)}
 function regHist(r){return Math.max(0,Number(r.adeudo||0))}
 function regTel(r){return String(r.telefono||'').replace(/\D/g,'')}
+function regEdificio(r){return String(r.edificio||'').trim().toUpperCase()}
 function regWaTel(r){let n=regTel(r);if(n.length===10)n='52'+n;return n}
 function regActivo(r){return REG.convenios.find(c=>String(c.estado||'').toLowerCase()==='activo'&&(Number(c.id_residente)===Number(r.id_residente)||String(c.ident||'')===String(r.ident||'')))}
 function regDesc(m){return m>=13?20:m>=7?10:0}
@@ -15,20 +16,22 @@ async function vRegularizacion(){
   renderRegularizacion();
 }
 function renderRegularizacion(){
-  let rows=REG.residentes.filter(r=>regHist(r)>0||regActivo(r));
+  const edificios=[...new Set(REG.residentes.map(regEdificio).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true,sensitivity:'base'}));
+  let scope=REG.edificio==='todos'?REG.residentes:REG.residentes.filter(r=>regEdificio(r)===REG.edificio);
+  let rows=scope.filter(r=>regHist(r)>0||regActivo(r));
   const q=(REG.q||'').toLowerCase().trim();
-  if(q)rows=rows.filter(r=>[r.ident,r.nombre_completo,r.telefono].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(q)rows=rows.filter(r=>[r.ident,r.edificio,r.nombre_completo,r.telefono].some(v=>String(v||'').toLowerCase().includes(q)));
   rows=rows.filter(r=>{const a=regActivo(r),m=regMeses(r),d=regDesc(m),f=REG.filtro;if(f==='activo')return !!a;if(a)return false;if(f==='20')return d===20;if(f==='10')return d===10;if(f==='uno')return m===1;if(f==='corto')return m>=3&&m<=6;if(f==='sin_tel')return !regTel(r);return regHist(r)>0});
   rows.sort((a,b)=>regMeses(b)-regMeses(a)||regHist(b)-regHist(a));
-  const deuda=REG.residentes.filter(r=>regHist(r)>0).length, contactables=REG.residentes.filter(r=>regHist(r)>0&&regTel(r)).length, cartera=REG.residentes.reduce((s,r)=>s+regHist(r),0), activos=REG.residentes.filter(regActivo).length;
+  const deuda=scope.filter(r=>regHist(r)>0).length, contactables=scope.filter(r=>regHist(r)>0&&regTel(r)).length, cartera=scope.reduce((s,r)=>s+regHist(r),0), activos=scope.filter(regActivo).length;
   $('vista').innerHTML=`
     <div class="card" style="background:linear-gradient(135deg,#EEF3FF,#fff);border-color:#B8CCFF">
       <div class="chead"><div><h2>💬 Regularización Echo</h2><p class="sub">Paga el presente + arregla el pasado · gestión directa desde el panel de Rosaura</p></div></div>
       <div class="kpis"><div class="kpi"><div class="l">Con adeudo</div><div class="v">${deuda}</div></div><div class="kpi"><div class="l">Contactables</div><div class="v">${contactables}</div></div><div class="kpi"><div class="l">Cartera histórica</div><div class="v">${money(cartera)}</div></div><div class="kpi"><div class="l">Convenios activos</div><div class="v">${activos}</div></div></div>
     </div>
-    <div class="card tight"><div class="grid g2"><div><label>Buscar residente</label><input id="regQ" placeholder="Unidad, nombre o teléfono" value="${esc(REG.q||'')}"></div><div><label>Segmento</label><select id="regF"><option value="deuda">Todos con adeudo</option><option value="uno">Deben 1 mes</option><option value="20">20% beneficio</option><option value="10">10% beneficio</option><option value="corto">3–6 meses</option><option value="activo">Convenio activo</option><option value="sin_tel">Sin teléfono</option></select></div></div></div>
+    <div class="card tight"><div class="grid g3"><div><label>Buscar residente</label><input id="regQ" placeholder="Unidad, nombre o teléfono" value="${esc(REG.q||'')}"></div><div><label>Edificio</label><select id="regE"><option value="todos">Todos los edificios</option>${edificios.map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div><div><label>Segmento</label><select id="regF"><option value="deuda">Todos con adeudo</option><option value="uno">Deben 1 mes</option><option value="20">20% beneficio</option><option value="10">10% beneficio</option><option value="corto">3–6 meses</option><option value="activo">Convenio activo</option><option value="sin_tel">Sin teléfono</option></select></div></div></div>
     <div id="regList">${rows.length?rows.slice(0,120).map(regCard).join(''):'<div class="card empty"><div class="t">Sin residentes para este filtro.</div></div>'}</div>`;
-  $('regF').value=REG.filtro;$('regF').onchange=e=>{REG.filtro=e.target.value;renderRegularizacion()};$('regQ').oninput=e=>{REG.q=e.target.value;renderRegularizacion()};
+  $('regE').value=REG.edificio;$('regE').onchange=e=>{REG.edificio=e.target.value;renderRegularizacion()};$('regF').value=REG.filtro;$('regF').onchange=e=>{REG.filtro=e.target.value;renderRegularizacion()};$('regQ').oninput=e=>{REG.q=e.target.value;renderRegularizacion()};
   document.querySelectorAll('[data-reg-offer]').forEach(b=>b.onclick=()=>regOpenOffer(Number(b.dataset.regOffer)));
   document.querySelectorAll('[data-reg-active]').forEach(b=>b.onclick=()=>regOpenActive(Number(b.dataset.regActive)));
 }
