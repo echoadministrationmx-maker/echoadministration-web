@@ -140,7 +140,7 @@ details.acc[open] summary::before{content:'− '}
 <div id="login">
   <div class="card" style="text-align:center;padding:28px">
     <div class="logo" style="width:46px;height:46px;font-size:1.3rem;margin:0 auto 14px">E</div>
-    <h2>Panel de Operaciones</h2>
+    <h2>Panel de Operaciones</h2><p class="sub" style="color:var(--blue);font-weight:700">Actualizado 16 oct 2026 · Seguimiento anual y fondo de reserva</p>
     <p class="sub" style="margin-bottom:20px">Echo Administración · Manzana 80</p>
     <div style="text-align:left"><label>Usuario</label><input id="u" autocomplete="username"></div>
     <div style="text-align:left;margin-top:12px"><label>Contraseña</label><input id="p" type="password" autocomplete="current-password"></div>
@@ -161,7 +161,7 @@ details.acc[open] summary::before{content:'− '}
   <div class="main">
     <header class="top">
       <button class="burger" id="burger">☰</button>
-      <h1 id="titulo">Resumen</h1>
+      <h1 id="titulo">Resumen</h1><small style="color:var(--faint);font-size:.65rem">16 oct · Fondo $1,000</small>
       <button class="iconbtn" id="btnNotif" title="Notificaciones">🔔<span class="dot hide" id="notifDot"></span></button>
       <button class="iconbtn" id="btnRef" title="Actualizar">↻</button>
     </header>
@@ -172,7 +172,7 @@ details.acc[open] summary::before{content:'− '}
 <div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="/operaciones/cobranza-report.js"></script>
+<script src="/operaciones/cobranza-report.js?v=20261016-fondo"></script>
 <script>
 const SB="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
@@ -204,6 +204,7 @@ const MENU=[
   {k:'regularizacion',t:'Regularización y WhatsApp',i:'💬'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
   {k:'comparativa',t:'Seguimiento anual',i:'🔄'},
+  {k:'fondo',t:'Fondo de reserva · $1,000',i:'🛟'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
   {k:'constancias',t:'Estados sin adeudo',i:'📄'},
@@ -239,7 +240,7 @@ function pintarBadges(){
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
 function ir(k){
-  V=k; cerrarMenu();
+  V=k; history.replaceState(null,'','#'+k); cerrarMenu();
   const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
   $('nav').querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
@@ -263,7 +264,7 @@ async function entrar(){
     $('quien').textContent=u;
     const cfg=await rpc('pg_config',C); if(cfg&&cfg.ok)CORTE={anio:cfg.anio,mes:cfg.mes};
     cargarNotifs();
-    pintarNav(); ir('inicio');
+    pintarNav(); ir(MENU.some(x=>x.k===location.hash.slice(1))?location.hash.slice(1):'inicio');
   }catch(e){$('lerr').textContent='Sin conexión. Revisa tu internet.';}
   b.disabled=false;b.textContent='Entrar';
 }
@@ -281,6 +282,7 @@ async function render(){
     else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='comparativa') await vComparativa();
+    else if(V==='fondo') await vFondo();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
     else if(V==='constancias')await vConstancias();
@@ -318,6 +320,7 @@ async function vInicio(){
   const incp=(D.inc.incidencias||[]).filter(i=>String(i.estado||'').toLowerCase()==='pendiente').length;
   const peor=ed.slice().sort((a,b)=>Number(b.adeudo_historico)-Number(a.adeudo_historico)).slice(0,3);
   $('vista').innerHTML=`
+    <div class="card" style="border:2px solid var(--blue)"><h3>Nuevo · Control de cobranza y fondo de reserva</h3><p class="sub">Consulta el año completo, prioriza seguimientos y registra la cuota única del fondo.</p><div class="grid g3"><button class="btn" onclick="ir('comparativa')">🔄 Ver seguimiento anual</button><button class="btn" onclick="ir('fondo')">🛟 Fondo de reserva · $1,000</button><button class="btn gh" onclick="ir('historico')">🗓 Histórico por edificio</button></div></div>
     <div class="card" style="background:linear-gradient(135deg,#1847CC,#3D6BE0);color:#fff;border:0">
       <div style="font-size:.76rem;opacity:.85;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Dinero recibido · ${MES[CORTE.mes]} ${CORTE.anio}</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px">
@@ -1773,5 +1776,7 @@ $('btnRef').onclick=async()=>{
 };
 </script>
 <script src="/operaciones/regularizacion-inline.js"></script>
+<script src="/operaciones/fondo-reserva.js?v=20261016-fondo"></script>
+<script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&MENU.some(x=>x.k===k)&&V!==k)ir(k);});</script>
 </body>
 </html>

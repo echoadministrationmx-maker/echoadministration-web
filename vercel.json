@@ -1,15 +1,74 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/portal", "destination": "/portal/index.html" },
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/gestion", "destination": "/gestion/index.html" },
-    { "source": "/rentas", "destination": "/rentas/index.html" },
-    { "source": "/convenios", "destination": "/convenios/index.html" },
-    { "source": "/operaciones", "destination": "/operaciones/index.html" },
-    { "source": "/operaciones/regularizacion", "destination": "/operaciones/regularizacion.html" },
-    { "source": "/privacidad", "destination": "/privacidad.html" },
-    { "source": "/alberca", "destination": "/alberca/index.html" },
-    { "source": "/terminos", "destination": "/terminos.html" }
+    {
+      "source": "/portal",
+      "destination": "/portal/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/gestion",
+      "destination": "/gestion/index.html"
+    },
+    {
+      "source": "/rentas",
+      "destination": "/rentas/index.html"
+    },
+    {
+      "source": "/convenios",
+      "destination": "/convenios/index.html"
+    },
+    {
+      "source": "/operaciones",
+      "destination": "/operaciones/index.html"
+    },
+    {
+      "source": "/operaciones/regularizacion",
+      "destination": "/operaciones/regularizacion.html"
+    },
+    {
+      "source": "/privacidad",
+      "destination": "/privacidad.html"
+    },
+    {
+      "source": "/alberca",
+      "destination": "/alberca/index.html"
+    },
+    {
+      "source": "/terminos",
+      "destination": "/terminos.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/operaciones",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/operaciones/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/operaciones/:file*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    }
   ]
 }
