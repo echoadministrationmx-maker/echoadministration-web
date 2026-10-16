@@ -1,0 +1,10 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {meses,totales}=require('./cobranza-report.js');
+test('months keep their calendar columns even when unordered or missing',()=>{const a=meses([{mes:10,cobrado:515},{mes:2,cobrado:100}]);assert.equal(a.length,12);assert.equal(a[9].cobrado,515);assert.equal(a[1].cobrado,100);assert.equal(a[0].estado_mes,'sin_cargos');});
+test('totals use sums and weighted collection, not average percentages',()=>{const t=totales([{meses:[{mes:9,cargos:1,facturado:515,cobrado:515,pendiente:0}]},{meses:[{mes:9,cargos:3,facturado:1545,cobrado:0,pendiente:1545}]}])[8];assert.equal(t.pct,25);assert.equal(t.cobrado,515);assert.equal(t.pendiente,1545);});
+const {seguimiento}=require('./cobranza-report.js');
+const row=(months)=>({meses:months.map(([mes,estado,saldo=0,pagado_fuera_mes=false])=>({mes,estado,saldo,pagado_fuera_mes}))});
+test('a new unpaid month after a covered month gets preventive follow-up',()=>{const r=seguimiento(row([[9,'pagado'],[10,'pendiente',515]]),10);assert.equal(r.interrumpio,true);assert.equal(r.nivel,'preventiva');assert.equal(r.saldo,515);});
+test('two previous pending months take priority over a current payment',()=>{const r=seguimiento(row([[7,'pendiente',515],[8,'pendiente',515],[10,'pagado']]),10);assert.equal(r.nivel,'alta');assert.equal(r.saldo,1030);});
+test('future charges do not raise priority or inflate annual pending balance',()=>{const r=seguimiento(row([[10,'pagado'],[11,'pendiente',515]]),10);assert.equal(r.saldo,0);assert.equal(r.pendientes,0);});
+test('missing charges are a data issue and never a debt',()=>{const r=seguimiento(row([[9,'pagado'],[10,'sin_registro']]),10);assert.equal(r.nivel,'revisar');assert.equal(r.interrumpio,false);assert.equal(r.saldo,0);});
+test('repeated payments after the covered month merit a preventive reminder',()=>{const r=seguimiento(row([[8,'pagado',0,true],[9,'pagado',0,true],[10,'pagado']]),10);assert.equal(r.nivel,'preventiva');assert.equal(r.fuera,2);});

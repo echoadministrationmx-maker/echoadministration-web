@@ -172,6 +172,7 @@ details.acc[open] summary::before{content:'− '}
 <div class="sheet" id="sheet"><div class="box" id="sheetBox"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="/operaciones/cobranza-report.js"></script>
 <script>
 const SB="https://nwqigjkmlkwyyblgqppm.supabase.co";
 const KEY="sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU";
@@ -202,6 +203,7 @@ const MENU=[
   {k:'cobranza',t:'Cobranza mensual',i:'📈'},
   {k:'regularizacion',t:'Regularización y WhatsApp',i:'💬'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
+  {k:'comparativa',t:'Seguimiento anual',i:'🔄'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Recibos emitidos',i:'🧾'},
   {k:'constancias',t:'Estados sin adeudo',i:'📄'},
@@ -278,6 +280,7 @@ async function render(){
     else if(V==='cobranza')   await vCobranza();
     else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
+    else if(V==='comparativa') await vComparativa();
     else if(V==='historico')  await vHistorico();
     else if(V==='recibos')    await vRecibos();
     else if(V==='constancias')await vConstancias();
@@ -489,15 +492,45 @@ async function vCobranza(){
   $('corte').onchange=async e=>{
     const [y,m]=e.target.value.split('-').map(Number);
     const r=await rpc('pg_set_mes_corte',{...C,p_anio:y,p_mes:m});
-    if(r&&r.ok){CORTE={anio:y,mes:m};D={...D,cob:null,units:null,dir:null,ga:null,an:null};toast('Mes actualizado: '+MES[m]+' '+y,'good');vCobranza();}
+    if(r&&r.ok){CORTE={anio:y,mes:m};D={...D,cob:null,units:null,dir:null,ga:null,an:null,hi:null};toast('Mes actualizado: '+MES[m]+' '+y,'good');vCobranza();}
   };
+}
+
+/* Comparison is read-only; never changes the operating cutoff. */
+let cmpPeriodo='',cmpEdificio='',cmpQuery='',cmpNivel='';
+let cmpRequest=0;
+async function vComparativa(){
+ const request=++cmpRequest;
+ const value=cmpPeriodo||`${CORTE.anio}-${String(CORTE.mes).padStart(2,'0')}`;
+ const [y,m]=value.split('-').map(Number);
+ const report=await rpc('pg_reporte_cobranza',{...C,p_anio:y,p_mes:m});
+ if(!report?.ok)throw new Error('No se pudo consultar el seguimiento autorizado');
+ if(V!=='comparativa'||request!==cmpRequest)return;
+ const rows=(report.seguimiento||[]).map(r=>EchoReport.seguimiento(r,m)).sort((a,b)=>a.orden-b.orden||b.saldo-a.saldo||`${a.edificio} ${a.departamento}`.localeCompare(`${b.edificio} ${b.departamento}`,undefined,{numeric:true}));
+ const labels={alta:'Prioridad alta',media:'Seguimiento',preventiva:'Preventivo',revisar:'Verificar datos',al_dia:'Sin pendientes registrados'};
+ const estados={pagado:['✓','Pagado según registro','#E7F5EC','#1B7A3D'],pendiente:['$','Pendiente','#FBE9EC','#B00020'],sin_registro:['?','Sin cargo registrado','#F2F4F8','#6A7382'],revisar:['!','Revisar estado','#FBF1DF','#B87503'],futuro:['—','Fuera del corte','#F2F4F8','#94A0B0']};
+ $('vista').innerHTML=`<div class="card"><h3>Seguimiento anual · ${y}</h3><p class="sub">Situación actual de las cuotas de enero a ${MES[m]}. El corte de análisis no cambia el mes de operación ni reconstruye saldos de una fecha pasada. Mantenimiento separado del fondo de reserva.</p>
+ <div class="grid g3"><div><label for="cmpMes">Año y mes hasta el que comparar</label><input type="month" id="cmpMes" value="${value}" max="${CORTE.anio}-${String(CORTE.mes).padStart(2,'0')}"></div><div><label for="cmpEdif">Edificio</label><select id="cmpEdif"><option value="">Todos</option>${[...new Set(rows.map(r=>r.edificio))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div><div><label for="cmpQ">Buscar unidad o residente</label><input id="cmpQ" value="${esc(cmpQuery)}"></div></div>
+ <label for="cmpNivel" style="margin-top:12px">A quién dar seguimiento</label><select id="cmpNivel"><option value="">Todos</option><option value="interrumpio">Pagaron el mes anterior y este no</option>${Object.entries(labels).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+ <button class="btn gh sm" id="cmpRefresh" style="margin-top:12px">↻ Actualizar</button></div><div id="cmpRows"></div>`;
+ $('cmpMes').onchange=e=>{if(e.target.validity.valid&&e.target.value){cmpPeriodo=e.target.value;render();}};
+ const paint=()=>{
+ const found=rows.filter(r=>(!cmpEdificio||r.edificio===cmpEdificio)&&(!cmpNivel||(cmpNivel==='interrumpio'?r.interrumpio:r.nivel===cmpNivel))&&`${r.edificio} ${r.departamento} ${r.nombre_completo}`.toLowerCase().includes(cmpQuery.toLowerCase()));
+ $('cmpRows').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Unidades filtradas</div><div class="v">${found.length}</div></div><div class="kpi"><div class="l">Saldo pendiente del año</div><div class="v">${money(found.reduce((s,r)=>s+r.saldo,0))}</div></div><div class="kpi"><div class="l">Pagaron el mes anterior; este no</div><div class="v">${found.filter(r=>r.interrumpio).length}</div></div><div class="kpi"><div class="l">Con información por verificar</div><div class="v">${found.filter(r=>r.faltantes).length}</div></div></div>`+found.map(r=>`<div class="item"><div class="ihead"><b>${esc(r.edificio)} · ${esc(r.departamento)} · ${esc(r.nombre_completo)}</b><span class="pill ${r.nivel==='alta'?'p-warn':r.nivel==='al_dia'?'p-ok':'p-gray'}">${labels[r.nivel]}</span></div><p class="sub">${esc(r.motivo)} · ${r.pendientes} meses pendientes · ${money(r.saldo)}</p>
+ <div style="display:grid;grid-template-columns:repeat(6,minmax(38px,1fr));gap:5px;margin:12px 0" aria-label="Cuotas por mes">${EchoReport.meses(r.meses||[]).map(x=>{const state=estados[x.estado]||estados.revisar;return `<div title="${MES[x.mes]}: ${state[1]}${x.pagado_fuera_mes?' · pagado después de su mes':''}" style="text-align:center;border-radius:7px;padding:7px 2px;background:${state[2]};color:${state[3]}"><small>${MES[x.mes].slice(0,3)}</small><div style="font-weight:800">${state[0]}${x.pagado_fuera_mes?' ⏱':''}</div><span style="font-size:.65rem">${state[1]}</span></div>`;}).join('')}</div>
+ <p style="font-size:.86rem"><b>Siguiente acción:</b> ${esc(r.accion)}</p></div>`).join('')+(!found.length?'<div class="empty">Sin unidades para estos filtros.</div>':'')+`<div class="card"><p class="sub">✓ Pagado según registro · $ Pendiente · ? Sin cargo · ⏱ Pagado después de su mes. Las prioridades se basan en cuotas registradas, no son una predicción. Confirma comprobantes y convenios antes de cobrar; un cargo ausente no acredita pago ni adeudo.</p></div>`;
+ };
+ $('cmpEdif').value=cmpEdificio;$('cmpEdif').onchange=e=>{cmpEdificio=e.target.value;paint();};
+ $('cmpNivel').value=cmpNivel;$('cmpNivel').onchange=e=>{cmpNivel=e.target.value;paint();};
+ $('cmpQ').oninput=e=>{cmpQuery=e.target.value;paint();};
+ $('cmpRefresh').onclick=()=>render();paint();
 }
 
 /* ---------- HISTÓRICO POR EDIFICIO ---------- */
 let hiAnio=2026, hiVista='pct';
 async function vHistorico(){
-  if(!D.hi||D.hi.anio!==hiAnio){D.hi=await rpc('pg_historico_edificios',{...C,p_anio:hiAnio});}
-  const eds=D.hi.edificios||[], tot=D.hi.totales||[];
+  if(!D.hi||D.hi.anio!==hiAnio){D.hi=await rpc('pg_reporte_cobranza',{...C,p_anio:hiAnio,p_mes:CORTE.mes});if(!D.hi?.ok)throw new Error('No se pudo consultar el reporte autorizado');}
+  const eds=(D.hi.edificios||[]).map(e=>({...e,meses:EchoReport.meses(e.meses||[])})).sort((a,b)=>a.edificio.localeCompare(b.edificio,undefined,{numeric:true})), tot=EchoReport.totales(eds);
   const col=p=>p>=70?'var(--ok)':p>=45?'var(--amber)':p>0?'var(--warn)':'#C9D2E0';
   const EST={sin_cargos:['#F4F6FA','#94A0B0','Sin facturar'],futuro:['#F4F6FA','#C3CAD6','Aún no facturado'],
              por_vencer:['#EEF3FF','#1847CC','Por vencer'],normal:['','','']};
@@ -508,15 +541,16 @@ async function vHistorico(){
     const txt = hiVista==='pct' ? p.toFixed(0)+'%' : hiVista==='cobrado' ? money(m.cobrado) : money(m.pendiente);
     if(m.estado_mes==='por_vencer')
       return {txt:txt,bg:'#E4EBFF',fg:'#1847CC',t:'Facturado pero aún no vence'};
-    return {txt:txt,bg:col(p),fg:p>0?'#fff':'#8794A6',t:''};
+    return {txt:txt,bg:col(p),fg:p>0?'#fff':'#8794A6',t:(m.sin_registro||0)+' unidades sin cargo registrado'};
   };
   $('vista').innerHTML=`
     <div class="card">
       <div class="chead">
         <div style="flex:1;min-width:180px"><h3>Cobranza mes a mes por edificio</h3>
-          <p class="sub">Cada celda es un mes. Toca para ver el detalle.</p></div>
-        <select id="hiA" style="max-width:120px">${[2023,2024,2025,2026].map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
+          <p class="sub">Cuotas registradas por periodo. Los cargos ausentes no se consideran pagados. Toca una celda para revisar; el fondo de reserva no se incluye.</p></div>
+        <select id="hiA" style="max-width:120px">${Array.from({length:Math.max(4,CORTE.anio-2022)},(_,i)=>2023+i).map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
       </div>
+      <p class="sub">${tot.reduce((a,m)=>a+Number(m.sin_registro||0),0)} registros unidad/mes sin cargo: requieren verificación y no se consideran pagos.</p>
       <div class="seg">
         ${[['pct','% cobranza'],['cobrado','Cobrado del periodo'],['pendiente','Pendiente']].map(([k,t])=>`<button class="${hiVista===k?'on':''}" data-v="${k}">${t}</button>`).join('')}
       </div>
@@ -542,7 +576,7 @@ async function vHistorico(){
           ${tot.map(m=>{
             const sin = m.estado_mes==='sin_cargos'||m.estado_mes==='futuro';
             const p=Number(m.pct)||0;
-            return `<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${sin?'#B7C0CE':(p>=70?'var(--ok)':p>=45?'var(--amber)':'var(--warn)')}">${sin?'—':p.toFixed(0)+'%'}</td>`;}).join('')}
+            return `<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${sin?'#B7C0CE':(p>=70?'var(--ok)':p>=45?'var(--amber)':'var(--warn)')}">${sin?'—':hiVista==='pct'?p.toFixed(0)+'%':money(m[hiVista])}</td>`;}).join('')}
         </tr></tfoot>
       </table>
       <div class="sub" style="margin-top:12px;line-height:1.7">
@@ -557,7 +591,7 @@ async function vHistorico(){
     const e=eds[Number(b.dataset.e)], m=(e.meses||[]).find(x=>x.mes==b.dataset.m);
     const sin = m.estado_mes==='sin_cargos'||m.estado_mes==='futuro';
     sheet(`<h3>Edificio ${e.edificio} · ${MES[m.mes]} ${hiAnio}</h3>
-      <p class="sub">${e.unidades} unidades · ${m.cargos} cargos generados</p>
+      <p class="sub">${e.unidades} unidades · ${m.cargos} cargos registrados · ${m.sin_registro||0} sin cargo registrado. Un cargo ausente requiere revisión, no acredita un pago.</p>
       ${sin?`<div style="background:var(--silver);border-radius:12px;padding:18px;margin-top:13px;text-align:center">
           <div style="font-size:1.8rem">📭</div>
           <div style="font-weight:700;margin-top:5px">Sin cargos en este mes</div>
@@ -567,7 +601,7 @@ async function vHistorico(){
         <div class="kpi"><div class="l">% cobranza</div><div class="v" style="color:${col(Number(m.pct)||0)}">${Number(m.pct||0).toFixed(1)}%</div></div>
         <div class="kpi"><div class="l">Cobrado</div><div class="v">${money(m.cobrado)}</div><div class="s">de ${money(m.facturado)} facturado</div></div>
         <div class="kpi"><div class="l">Pendiente</div><div class="v" style="color:var(--warn)">${money(m.pendiente)}</div></div>
-        <div class="kpi"><div class="l">Recibido en el mes</div><div class="v" style="color:var(--ok)">${money(m.recibido)}</div><div class="s">${money(m.recuperado)} de cartera vieja</div></div>
+
       </div>
       ${m.estado_mes==='por_vencer'?'<p class="sub" style="margin-top:10px;color:var(--blue);font-weight:600">Este mes ya está facturado pero aún no vence.</p>':''}`}
       <div class="acts"><button class="btn gh wide" onclick="cerrarSheet()">Cerrar</button></div>`);
