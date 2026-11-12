@@ -15,7 +15,8 @@ alter table public.aportaciones_fondo_reserva
  alter column fecha_pago drop not null,
  alter column referencia drop not null,
  alter column forma_pago drop not null,
- alter column folio drop not null;
+ alter column folio drop not null,
+ add column if not exists pago_confirmado_sin_recibo boolean not null default false;
 
 alter table public.aportaciones_fondo_reserva enable row level security;
 revoke all on public.aportaciones_fondo_reserva from public,anon,authenticated;
@@ -28,9 +29,9 @@ begin
  if h is null or p_password is null or extensions.crypt(p_password,h) is distinct from h then return jsonb_build_object('ok',false); end if;
  return jsonb_build_object('ok',true,'cuota',1000,'residentes',coalesce((
  with unidades as (
- select r.id_residente, r.num, r.departamento, r.nombre_completo, r.condominio_id, a.monto, a.fecha_pago, a.referencia, a.folio, a.forma_pago, a.registrado_por,
+ select r.id_residente, r.num, r.departamento, r.nombre_completo, r.condominio_id, a.monto, a.fecha_pago, a.referencia, case when rc.estado='activo' then a.folio end as folio, a.forma_pago, a.registrado_por,
         a.registrado_at, c.nombre as condominio,
-        a.id_residente is not null and (a.folio is null or rc.estado is not distinct from 'activo') as pagado
+        a.id_residente is not null and (a.pago_confirmado_sin_recibo or a.folio is null or rc.estado='activo') as pagado
  from public.residentes r
  left join public.aportaciones_fondo_reserva a on a.id_residente=r.id_residente
  left join public.recibos rc on rc.folio=a.folio
@@ -64,7 +65,7 @@ begin
  if not exists(select 1 from public.residentes where id_residente=p_id_residente and coalesce(trim(num),'')<>'' and exists(select 1 from public.admins a where a.user_id=p_user and (a.rol='plataforma' or residentes.condominio_id=a.condominio_id or residentes.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[]))))) then return jsonb_build_object('ok',false,'error','Unidad no encontrada'); end if;
  -- Serialize retries and concurrent registrations for the same unit.
  perform pg_advisory_xact_lock(1000,p_id_residente);
- if exists(select 1 from public.aportaciones_fondo_reserva a left join public.recibos rc on rc.folio=a.folio where a.id_residente=p_id_residente and (a.folio is null or rc.estado='activo')) then
+ if exists(select 1 from public.aportaciones_fondo_reserva a left join public.recibos rc on rc.folio=a.folio where a.id_residente=p_id_residente and (a.pago_confirmado_sin_recibo or a.folio is null or rc.estado='activo')) then
  return jsonb_build_object('ok',false,'error','Esta unidad ya tiene el fondo registrado. Actualiza la consulta para ver el registro'); end if;
  conceptos:=jsonb_build_array(jsonb_build_object('c','Fondo de reserva · cuota única','m',1000,'tipo','fondo_reserva','fecha_pago',p_fecha_pago,'referencia',trim(p_referencia)));
  recibo:=public.pg_emitir_recibo(p_user,p_password,p_id_residente,conceptos,1000,p_forma_pago);
@@ -109,21 +110,76 @@ begin
  select a.registrado_at into registro
  from public.aportaciones_fondo_reserva a
  left join public.recibos rc on rc.folio=a.folio
- where a.id_residente=p_id_residente and (a.folio is null or rc.estado='activo');
+ where a.id_residente=p_id_residente and (a.pago_confirmado_sin_recibo or a.folio is null or rc.estado='activo');
  if found then
   return jsonb_build_object('ok',true,'ya_registrado',true,'registrado_at',registro);
  end if;
 
- insert into public.aportaciones_fondo_reserva(id_residente,monto,registrado_por)
- values(p_id_residente,1000,p_user)
+ insert into public.aportaciones_fondo_reserva(id_residente,monto,registrado_por,pago_confirmado_sin_recibo)
+ values(p_id_residente,1000,p_user,true)
  on conflict(id_residente) do update set
   monto=excluded.monto, fecha_pago=null, referencia=null, forma_pago=null, folio=null,
-  registrado_por=excluded.registrado_por, registrado_at=excluded.registrado_at
+  registrado_por=excluded.registrado_por, registrado_at=excluded.registrado_at,
+  pago_confirmado_sin_recibo=true
  returning registrado_at into registro;
  return jsonb_build_object('ok',true,'registrado_at',registro);
 end; $$;
 revoke all on function public.pg_marcar_fondo_reserva_pagado(text,text,integer,boolean) from public;
 grant execute on function public.pg_marcar_fondo_reserva_pagado(text,text,integer,boolean) to anon,authenticated;
+
+create or replace function public.pg_emitir_recibo_fondo_reserva(
+ p_user text, p_password text, p_id_residente integer, p_fecha_pago date, p_forma_pago text
+)
+returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+ h text;
+ aporte public.aportaciones_fondo_reserva%rowtype;
+ recibo json;
+begin
+ select password_hash into h from public.admins where user_id=p_user limit 1;
+ if h is null or p_password is null or extensions.crypt(p_password,h) is distinct from h then
+  return jsonb_build_object('ok',false,'error','Acceso no autorizado');
+ end if;
+ if not exists(
+  select 1 from public.residentes r join public.admins a on a.user_id=p_user
+  where r.id_residente=p_id_residente and nullif(trim(r.num),'') is not null
+  and (a.rol='plataforma' or r.condominio_id=a.condominio_id
+       or r.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[])))
+ ) then
+  return jsonb_build_object('ok',false,'error','Unidad no encontrada');
+ end if;
+ perform pg_advisory_xact_lock(1000,p_id_residente);
+ select * into aporte from public.aportaciones_fondo_reserva where id_residente=p_id_residente for update;
+ if not found then
+  return jsonb_build_object('ok',false,'error','Primero registra el pago del fondo');
+ end if;
+ if exists(select 1 from public.recibos where folio=aporte.folio and estado='activo') then
+  return jsonb_build_object('ok',true,'folio',aporte.folio,'fecha_pago',aporte.fecha_pago,'forma_pago',aporte.forma_pago);
+ end if;
+ if aporte.folio is not null and not aporte.pago_confirmado_sin_recibo then
+  return jsonb_build_object('ok',false,'error','Primero registra el pago del fondo');
+ end if;
+ if p_fecha_pago is null or p_fecha_pago>(now() at time zone 'America/Cancun')::date then
+  return jsonb_build_object('ok',false,'error','Indica una fecha de pago válida');
+ end if;
+ if p_forma_pago is null or p_forma_pago not in ('Transferencia','Dep. en efectivo','Efectivo','Mercado Pago') then
+  return jsonb_build_object('ok',false,'error','Selecciona una forma de pago');
+ end if;
+
+ recibo:=public.pg_emitir_recibo(p_user,p_password,p_id_residente,
+  jsonb_build_array(jsonb_build_object('c','Fondo de reserva · cuota única','m',aporte.monto,
+   'tipo','fondo_reserva','fecha_pago',p_fecha_pago)),aporte.monto,p_forma_pago);
+ if (recibo->>'ok')::boolean is distinct from true then
+  raise exception 'No se pudo emitir el comprobante del fondo';
+ end if;
+ update public.aportaciones_fondo_reserva
+ set folio=(recibo->>'folio')::bigint,fecha_pago=p_fecha_pago,forma_pago=p_forma_pago,
+     pago_confirmado_sin_recibo=true
+ where id_residente=p_id_residente;
+ return jsonb_build_object('ok',true,'folio',recibo->'folio','fecha_pago',p_fecha_pago,'forma_pago',p_forma_pago);
+end; $$;
+revoke all on function public.pg_emitir_recibo_fondo_reserva(text,text,integer,date,text) from public;
+grant execute on function public.pg_emitir_recibo_fondo_reserva(text,text,integer,date,text) to anon,authenticated;
 
 notify pgrst, 'reload schema';
 commit;

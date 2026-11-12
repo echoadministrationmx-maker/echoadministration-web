@@ -31,6 +31,7 @@ test('confirmation records the unit without receipt details and refreshes buildi
  }]);
  assert.equal((node('frRanking').innerHTML.match(/100%/g)||[]).length,2);
  assert.doesNotMatch(node('frRows').innerHTML,/Ver comprobante/);
+ assert.match(node('frRows').innerHTML,/Emitir comprobante del fondo/);
  node('frQ').oninput({target:{value:'Beto'}});
  assert.match(node('frRows').innerHTML,/Ver comprobante/);
 });
@@ -52,5 +53,5 @@ test('home and login provide visible release marker and direct access',()=>{
  assert.match(html,/Ver seguimiento anual/);
  assert.match(html,/ir\('fondo'\)/);
  assert.match(html,/location.hash.slice\(1\)/);
- assert.match(html,/fondo-reserva.js\?v=20261112-registro/);
+ assert.match(html,/fondo-reserva.js\?v=20261112-recibo/);
 });
