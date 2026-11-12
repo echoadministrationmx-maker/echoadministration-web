@@ -1,3 +1,5 @@
+begin;
+
 -- One-time reserve contribution. No monthly maintenance charges are created or changed.
 create table if not exists public.aportaciones_fondo_reserva (
  id_residente integer primary key references public.residentes(id_residente),
@@ -9,6 +11,12 @@ create table if not exists public.aportaciones_fondo_reserva (
  registrado_por text not null,
  registrado_at timestamptz not null default now()
 );
+alter table public.aportaciones_fondo_reserva
+ alter column fecha_pago drop not null,
+ alter column referencia drop not null,
+ alter column forma_pago drop not null,
+ alter column folio drop not null;
+
 alter table public.aportaciones_fondo_reserva enable row level security;
 revoke all on public.aportaciones_fondo_reserva from public,anon,authenticated;
 
@@ -19,13 +27,28 @@ begin
  select password_hash into h from public.admins where user_id=p_user limit 1;
  if h is null or p_password is null or extensions.crypt(p_password,h) is distinct from h then return jsonb_build_object('ok',false); end if;
  return jsonb_build_object('ok',true,'cuota',1000,'residentes',coalesce((
+ with unidades as (
+ select r.id_residente, r.num, r.departamento, r.nombre_completo, r.condominio_id, a.monto, a.fecha_pago, a.referencia, a.folio, a.forma_pago, a.registrado_por,
+        a.registrado_at, c.nombre as condominio,
+        a.id_residente is not null and (a.folio is null or rc.estado is not distinct from 'activo') as pagado
+ from public.residentes r
+ left join public.aportaciones_fondo_reserva a on a.id_residente=r.id_residente
+ left join public.recibos rc on rc.folio=a.folio
+ left join public.condominios c on c.id=r.condominio_id
+ where coalesce(trim(r.num),'')<>'' and exists(
+  select 1 from public.admins admin where admin.user_id=p_user and
+  (admin.rol='plataforma' or r.condominio_id=admin.condominio_id
+   or r.condominio_id=any(coalesce(admin.condominios_permitidos,'{}'::integer[])))
+ )
+ )
  select jsonb_agg(jsonb_build_object('id_residente',r.id_residente,'edificio',trim(r.num),'departamento',r.departamento,
- 'nombre_completo',r.nombre_completo,'pagado',coalesce(rc.estado='activo',false),'monto',case when rc.estado='activo' then a.monto else 0 end,
- 'fecha_pago',case when rc.estado='activo' then a.fecha_pago end,'referencia',case when rc.estado='activo' then a.referencia end,
- 'folio',case when rc.estado='activo' then a.folio end,'forma_pago',case when rc.estado='activo' then a.forma_pago end,
- 'registrado_por',case when rc.estado='activo' then a.registrado_por end) order by trim(r.num),r.departamento)
- from public.residentes r left join public.aportaciones_fondo_reserva a on a.id_residente=r.id_residente
- left join public.recibos rc on rc.folio=a.folio where coalesce(trim(r.num),'')<>'' and exists(select 1 from public.admins a where a.user_id=p_user and (a.rol='plataforma' or r.condominio_id=a.condominio_id or r.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[]))))),'[]'::jsonb));
+ 'condominio_id',r.condominio_id,'condominio',r.condominio,
+ 'nombre_completo',r.nombre_completo,'pagado',r.pagado,'monto',case when r.pagado then r.monto else 0 end,
+ 'fecha_pago',case when r.pagado then r.fecha_pago end,'referencia',case when r.pagado then r.referencia end,
+ 'folio',case when r.pagado then r.folio end,'forma_pago',case when r.pagado then r.forma_pago end,
+ 'registrado_por',case when r.pagado then r.registrado_por end,
+ 'registrado_at',case when r.pagado then r.registrado_at end) order by trim(r.num),r.departamento)
+ from unidades r),'[]'::jsonb));
 end; $$;
 
 create or replace function public.pg_registrar_fondo_reserva(p_user text,p_password text,p_id_residente integer,p_fecha_pago date,p_referencia text,p_forma_pago text,p_confirmado boolean)
@@ -41,8 +64,8 @@ begin
  if not exists(select 1 from public.residentes where id_residente=p_id_residente and coalesce(trim(num),'')<>'' and exists(select 1 from public.admins a where a.user_id=p_user and (a.rol='plataforma' or residentes.condominio_id=a.condominio_id or residentes.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[]))))) then return jsonb_build_object('ok',false,'error','Unidad no encontrada'); end if;
  -- Serialize retries and concurrent registrations for the same unit.
  perform pg_advisory_xact_lock(1000,p_id_residente);
- if exists(select 1 from public.aportaciones_fondo_reserva a join public.recibos rc on rc.folio=a.folio where a.id_residente=p_id_residente and rc.estado='activo') then
- return jsonb_build_object('ok',false,'error','Esta unidad ya tiene el fondo registrado. Revisa su comprobante; no se duplicó el pago'); end if;
+ if exists(select 1 from public.aportaciones_fondo_reserva a left join public.recibos rc on rc.folio=a.folio where a.id_residente=p_id_residente and (a.folio is null or rc.estado='activo')) then
+ return jsonb_build_object('ok',false,'error','Esta unidad ya tiene el fondo registrado. Actualiza la consulta para ver el registro'); end if;
  conceptos:=jsonb_build_array(jsonb_build_object('c','Fondo de reserva · cuota única','m',1000,'tipo','fondo_reserva','fecha_pago',p_fecha_pago,'referencia',trim(p_referencia)));
  recibo:=public.pg_emitir_recibo(p_user,p_password,p_id_residente,conceptos,1000,p_forma_pago);
  if coalesce((recibo->>'ok')::boolean,false) is not true then raise exception 'No se pudo emitir el comprobante del fondo'; end if;
@@ -55,3 +78,52 @@ revoke all on function public.pg_fondo_reserva(text,text) from public;
 revoke all on function public.pg_registrar_fondo_reserva(text,text,integer,date,text,text,boolean) from public;
 grant execute on function public.pg_fondo_reserva(text,text) to anon,authenticated;
 grant execute on function public.pg_registrar_fondo_reserva(text,text,integer,date,text,text,boolean) to anon,authenticated;
+
+create or replace function public.pg_marcar_fondo_reserva_pagado(
+ p_user text, p_password text, p_id_residente integer, p_confirmado boolean
+)
+returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
+declare
+ h text;
+ registro timestamptz;
+begin
+ select password_hash into h from public.admins where user_id=p_user limit 1;
+ if h is null or p_password is null or extensions.crypt(p_password,h) is distinct from h then
+  return jsonb_build_object('ok',false,'error','Acceso no autorizado');
+ end if;
+ if p_confirmado is distinct from true then
+  return jsonb_build_object('ok',false,'error','Confirma que la unidad ya pagó el fondo');
+ end if;
+ if not exists(
+  select 1 from public.residentes r where r.id_residente=p_id_residente
+  and coalesce(trim(r.num),'')<>'' and exists(
+   select 1 from public.admins a where a.user_id=p_user and
+   (a.rol='plataforma' or r.condominio_id=a.condominio_id
+    or r.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[])))
+  )
+ ) then
+  return jsonb_build_object('ok',false,'error','Unidad no encontrada');
+ end if;
+
+ perform pg_advisory_xact_lock(1000,p_id_residente);
+ select a.registrado_at into registro
+ from public.aportaciones_fondo_reserva a
+ left join public.recibos rc on rc.folio=a.folio
+ where a.id_residente=p_id_residente and (a.folio is null or rc.estado='activo');
+ if found then
+  return jsonb_build_object('ok',true,'ya_registrado',true,'registrado_at',registro);
+ end if;
+
+ insert into public.aportaciones_fondo_reserva(id_residente,monto,registrado_por)
+ values(p_id_residente,1000,p_user)
+ on conflict(id_residente) do update set
+  monto=excluded.monto, fecha_pago=null, referencia=null, forma_pago=null, folio=null,
+  registrado_por=excluded.registrado_por, registrado_at=excluded.registrado_at
+ returning registrado_at into registro;
+ return jsonb_build_object('ok',true,'registrado_at',registro);
+end; $$;
+revoke all on function public.pg_marcar_fondo_reserva_pagado(text,text,integer,boolean) from public;
+grant execute on function public.pg_marcar_fondo_reserva_pagado(text,text,integer,boolean) to anon,authenticated;
+
+notify pgrst, 'reload schema';
+commit;
