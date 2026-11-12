@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');
-function setup(){const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:'',checked:false,disabled:false,dataset:{},validity:{valid:true},classList:{add(){},remove(){},toggle(){}},addEventListener(){},querySelectorAll(){return []},reportValidity(){return true}});return nodes.get(id)};const c=vm.createContext({document:{getElementById:node},window:{addEventListener(){},scrollTo(){}},history:{replaceState(){}},location:{hash:''},Intl,Date,setTimeout,clearTimeout,fetch(){throw Error('unexpected network')}});c.globalThis=c;vm.runInContext(fs.readFileSync('operaciones/cobranza-report.js','utf8'),c);for(const match of fs.readFileSync('operaciones/index.html','utf8').matchAll(/<script(?:\s[^>]*)?>(.*?)<\/script>/gs)){if(match[1].trim())vm.runInContext(match[1],c)}vm.runInContext(fs.readFileSync('operaciones/fondo-reserva.js','utf8'),c);return {c,node};}
+function setup(){const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',value:'',checked:false,disabled:false,dataset:{},validity:{valid:true},classList:{add(){},remove(){},toggle(){}},addEventListener(){},focus(){},querySelectorAll(){return []},reportValidity(){return true}});return nodes.get(id)};const c=vm.createContext({document:{getElementById:node},window:{addEventListener(){},scrollTo(){}},history:{replaceState(){}},location:{hash:''},Intl,Date,setTimeout,clearTimeout,fetch(){throw Error('unexpected network')}});c.globalThis=c;vm.runInContext(fs.readFileSync('operaciones/cobranza-report.js','utf8'),c);for(const match of fs.readFileSync('operaciones/index.html','utf8').matchAll(/<script(?:\s[^>]*)?>(.*?)<\/script>/gs)){if(match[1].trim())vm.runInContext(match[1],c)}vm.runInContext(fs.readFileSync('operaciones/fondo-reserva.js','utf8'),c);return {c,node};}
 test('fund search distinguishes registered contributions from missing records',async()=>{const {c,node}=setup();c.fixture={ok:true,residentes:[{id_residente:1,edificio:'A',departamento:'101',nombre_completo:'Ana',pagado:true,monto:1000,folio:1},{id_residente:2,edificio:'B',departamento:'202',nombre_completo:'Beto',pagado:false}]};await vm.runInContext("V='fondo';rpc=async()=>fixture;vFondo()",c);assert.match(node('frRows').innerHTML,/Fondo registrado/);assert.match(node('frRows').innerHTML,/\$1,000/);node('frQ').oninput({target:{value:'Beto'}});assert.match(node('frRows').innerHTML,/Beto/);assert.doesNotMatch(node('frRows').innerHTML,/Ana/);});
 test('confirmation records the unit without receipt details and refreshes building collection',async()=>{
  const {c,node}=setup();
@@ -14,6 +14,11 @@ test('confirmation records the unit without receipt details and refreshes buildi
   return {ok:true,registrado_at:'2026-11-12T12:00:00Z'};
  };vFondo()`,c);
  assert.match(node('frRanking').innerHTML,/100%[\s\S]*0%/);
+ assert.match(node('vista').innerHTML,/Registrar pago del fondo/);
+ node('frRegistrar').onclick();
+ assert.equal(node('frS').value,'sin_registro');
+ assert.match(node('frRows').innerHTML,/>Registrar pago<\/button>/);
+ node('frS').onchange({target:{value:''}});
  node('frQ').oninput({target:{value:'Ana'}});
  assert.match(node('frRanking').innerHTML,/100%[\s\S]*0%/);
  vm.runInContext('revisarFondo(FONDO.rows[0])',c);
@@ -47,5 +52,5 @@ test('home and login provide visible release marker and direct access',()=>{
  assert.match(html,/Ver seguimiento anual/);
  assert.match(html,/ir\('fondo'\)/);
  assert.match(html,/location.hash.slice\(1\)/);
- assert.match(html,/fondo-reserva.js\?v=20261112-fondo/);
+ assert.match(html,/fondo-reserva.js\?v=20261112-registro/);
 });

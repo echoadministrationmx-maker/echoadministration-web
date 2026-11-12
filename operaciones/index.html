@@ -693,7 +693,7 @@ async function vPagos(){
       <div class="item" style="cursor:pointer" data-i="${i}">
         <div class="ihead"><span class="tag">${u.ident}</span><span class="iname">${esc(u.nombre_completo)}</span>
         <span class="pill ${Number(u.adeudo)>0?'p-warn':'p-ok'}">${Number(u.adeudo)>0?money(u.adeudo):'Al corriente ✓'}</span></div>
-        ${Number(u.adeudo)>0?`<div class="sub" style="margin-top:6px">${u.meses_pend} ${u.meses_pend==1?'mes':'meses'} pendientes · toca para registrar pago</div>`:''}
+        <div class="acts"><button type="button" class="btn sm">Registrar pago de mantenimiento</button></div>
       </div>`).join('')}
       ${it.length>60?'<p class="sub">Mostrando 60. Afina la búsqueda.</p>':''}
       ${it.length===0?'<div class="empty"><div class="e">🔍</div><div class="t">Sin coincidencias</div></div>':''}
@@ -1776,7 +1776,7 @@ $('btnRef').onclick=async()=>{
 };
 </script>
 <script src="/operaciones/regularizacion-inline.js"></script>
-<script src="/operaciones/fondo-reserva.js?v=20261112-fondo"></script>
+<script src="/operaciones/fondo-reserva.js?v=20261112-registro"></script>
 <script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&MENU.some(x=>x.k===k)&&V!==k)ir(k);});</script>
 </body>
 </html>
