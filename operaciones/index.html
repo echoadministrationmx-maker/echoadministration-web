@@ -532,18 +532,23 @@ async function vComparativa(){
 /* ---------- HISTÓRICO POR EDIFICIO ---------- */
 let hiAnio=2026, hiVista='pct';
 async function vHistorico(){
-  if(!D.hi||D.hi.anio!==hiAnio){D.hi=await rpc('pg_reporte_cobranza',{...C,p_anio:hiAnio,p_mes:CORTE.mes});if(!D.hi?.ok)throw new Error('No se pudo consultar el reporte autorizado');}
+  if(!D.hi||D.hi.anio!==hiAnio){
+    const anio=hiAnio;
+    const reporte=await rpc('pg_reporte_cobranza',{...C,p_anio:anio,p_mes:CORTE.mes});
+    if(V!=='historico'||hiAnio!==anio)return;
+    if(!reporte?.ok)throw new Error('No se pudo consultar el reporte autorizado');
+    D.hi=reporte;
+  }
+  const anios=[...new Set([2023,2024,2025,2026,2027,CORTE.anio,...(D.hi.anios||[])])].sort((a,b)=>a-b);
   const eds=(D.hi.edificios||[]).map(e=>({...e,meses:EchoReport.meses(e.meses||[])})).sort((a,b)=>a.edificio.localeCompare(b.edificio,undefined,{numeric:true})), tot=EchoReport.totales(eds);
   const col=p=>p>=70?'var(--ok)':p>=45?'var(--amber)':p>0?'var(--warn)':'#C9D2E0';
-  const EST={sin_cargos:['#F4F6FA','#94A0B0','Sin facturar'],futuro:['#F4F6FA','#C3CAD6','Aún no facturado'],
-             por_vencer:['#EEF3FF','#1847CC','Por vencer'],normal:['','','']};
   const cel=(m)=>{
     if(m.estado_mes==='sin_cargos'||m.estado_mes==='futuro')
       return {txt:'—',bg:'#F4F6FA',fg:'#B7C0CE',t:'Sin cargos generados para este mes'};
     const p=Number(m.pct)||0;
-    const txt = hiVista==='pct' ? p.toFixed(0)+'%' : hiVista==='cobrado' ? money(m.cobrado) : money(m.pendiente);
+    const txt = hiVista==='pct' ? p.toFixed(1)+'%' : hiVista==='cobrado' ? money(m.cobrado) : money(m.pendiente);
     if(m.estado_mes==='por_vencer')
-      return {txt:txt,bg:'#E4EBFF',fg:'#1847CC',t:'Facturado pero aún no vence'};
+      return {txt:txt,bg:'#E4EBFF',fg:'#1847CC',t:'Periodo posterior al corte operativo'};
     return {txt:txt,bg:col(p),fg:p>0?'#fff':'#8794A6',t:(m.sin_registro||0)+' unidades sin cargo registrado'};
   };
   $('vista').innerHTML=`
@@ -551,8 +556,9 @@ async function vHistorico(){
       <div class="chead">
         <div style="flex:1;min-width:180px"><h3>Cobranza mes a mes por edificio</h3>
           <p class="sub">Cuotas registradas por periodo. Los cargos ausentes no se consideran pagados. Toca una celda para revisar; el fondo de reserva no se incluye.</p></div>
-        <select id="hiA" style="max-width:120px">${Array.from({length:Math.max(4,CORTE.anio-2022)},(_,i)=>2023+i).map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
+        <select id="hiA" style="max-width:120px">${anios.map(y=>`<option${y===hiAnio?' selected':''}>${y}</option>`).join('')}</select>
       </div>
+      <button class="btn gh sm" id="hiActualizar">Actualizar histórico</button>
       <p class="sub">${tot.reduce((a,m)=>a+Number(m.sin_registro||0),0)} registros unidad/mes sin cargo: requieren verificación y no se consideran pagos.</p>
       <div class="seg">
         ${[['pct','% cobranza'],['cobrado','Cobrado del periodo'],['pendiente','Pendiente']].map(([k,t])=>`<button class="${hiVista===k?'on':''}" data-v="${k}">${t}</button>`).join('')}
@@ -579,16 +585,17 @@ async function vHistorico(){
           ${tot.map(m=>{
             const sin = m.estado_mes==='sin_cargos'||m.estado_mes==='futuro';
             const p=Number(m.pct)||0;
-            return `<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${sin?'#B7C0CE':(p>=70?'var(--ok)':p>=45?'var(--amber)':'var(--warn)')}">${sin?'—':hiVista==='pct'?p.toFixed(0)+'%':money(m[hiVista])}</td>`;}).join('')}
+            return `<td style="text-align:center;font-size:.72rem;font-weight:800;padding:8px 2px;color:${sin?'#B7C0CE':(p>=70?'var(--ok)':p>=45?'var(--amber)':'var(--warn)')}">${sin?'—':hiVista==='pct'?p.toFixed(1)+'%':money(m[hiVista])}</td>`;}).join('')}
         </tr></tfoot>
       </table>
       <div class="sub" style="margin-top:12px;line-height:1.7">
         🟢 ≥70% &nbsp;·&nbsp; 🟠 45–69% &nbsp;·&nbsp; 🔴 &lt;45% &nbsp;·&nbsp;
-        <span style="background:#E4EBFF;color:#1847CC;border-radius:5px;padding:2px 7px;font-weight:700">azul</span> facturado pero aún no vence &nbsp;·&nbsp;
+        <span style="background:#E4EBFF;color:#1847CC;border-radius:5px;padding:2px 7px;font-weight:700">azul</span> cuota de un periodo posterior al corte &nbsp;·&nbsp;
         <b style="color:#B7C0CE">—</b> sin cargos generados (no cuenta como cobrado)
       </div>
     </div>`;
-  $('hiA').onchange=e=>{hiAnio=Number(e.target.value);D.hi=null;vHistorico();};
+  $('hiActualizar').onclick=()=>{D.hi=null;render();};
+  $('hiA').onchange=e=>{hiAnio=Number(e.target.value);D.hi=null;render();};
   $('vista').querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{hiVista=b.dataset.v;vHistorico();});
   $('vista').querySelectorAll('.hiCel').forEach(b=>b.onclick=()=>{
     const e=eds[Number(b.dataset.e)], m=(e.meses||[]).find(x=>x.mes==b.dataset.m);
@@ -606,7 +613,7 @@ async function vHistorico(){
         <div class="kpi"><div class="l">Pendiente</div><div class="v" style="color:var(--warn)">${money(m.pendiente)}</div></div>
 
       </div>
-      ${m.estado_mes==='por_vencer'?'<p class="sub" style="margin-top:10px;color:var(--blue);font-weight:600">Este mes ya está facturado pero aún no vence.</p>':''}`}
+      ${m.estado_mes==='por_vencer'?'<p class="sub" style="margin-top:10px;color:var(--blue);font-weight:600">Este mes ya está cuota de un periodo posterior al corte.</p>':''}`}
       <div class="acts"><button class="btn gh wide" onclick="cerrarSheet()">Cerrar</button></div>`);
   });
 }
@@ -768,7 +775,7 @@ async function marcarPagos(u,d){
     const r=await rpc('pg_marcar_pagos',{...C,p_ids:ids});
     if(!r||!r.ok){toast('No se pudo aplicar.','err');b.disabled=false;b.textContent='Marcar como pagados';return;}
     toast(r.marcados+' mes(es) marcados','good');
-    D.units=null; D.cob=null;
+    D.units=null; D.cob=null; D.an=null; D.hi=null;
     zonaRecibo(u,d,conceptos,total);
   }catch(e){toast('Error de conexión.','err');b.disabled=false;b.textContent='Marcar como pagados';}
 }

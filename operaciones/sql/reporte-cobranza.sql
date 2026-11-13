@@ -1,15 +1,21 @@
 -- Read-only report. Uses the portal's existing admin password verification.
 create or replace function public.pg_reporte_cobranza(p_user text,p_password text,p_anio integer,p_mes integer)
 returns jsonb language plpgsql security definer set search_path=public,extensions,pg_temp as $$
-declare h text; periodo_actual date;
+declare h text; periodo_actual date; corte_operativo date;
 begin
  select password_hash into h from public.admins where user_id=p_user limit 1;
  if h is null or p_password is null or extensions.crypt(p_password,h) is distinct from h then return jsonb_build_object('ok',false); end if;
  periodo_actual:=make_date(p_anio,p_mes,1);
- return (with detalle as (
+ select mes_corte into corte_operativo from public.config_operacion where id=1;
+ return (with unidades_autorizadas as (
+ select r.* from public.residentes r
+ where exists(select 1 from public.admins a where a.user_id=p_user and
+ (a.rol='plataforma' or r.condominio_id=a.condominio_id
+ or r.condominio_id=any(coalesce(a.condominios_permitidos,'{}'::integer[]))))
+ ), detalle as (
  select r.id_residente,trim(r.num) edificio,r.departamento,r.nombre_completo,
  p.periodo,p.estado,p.monto,p.fecha_pago
- from public.residentes r left join public.pagos p on p.id_residente=r.id_residente
+ from unidades_autorizadas r left join public.pagos p on p.id_residente=r.id_residente
  and p.periodo>=least(make_date(p_anio,1,1),(periodo_actual-interval '1 month')::date)
  and p.periodo<make_date(p_anio+1,1,1)
  and p.concepto ~* '^Cuota '
@@ -23,15 +29,16 @@ begin
  ), edificios as (
  select edificio,count(distinct id_residente) unidades,
  (select jsonb_agg(jsonb_build_object('mes',m,'cargos',n,'facturado',facturado,'cobrado',cobrado,'pendiente',pendiente,
- 'sin_registro',greatest(0,unidades-n),'pct',case when facturado>0 then round(100*cobrado/facturado,1) else null end,
- 'estado_mes',case when n=0 then 'sin_cargos' else 'normal' end) order by m)
- from (select m,count(x.periodo)::int n,count(distinct d.id_residente)::int unidades,
+ 'sin_registro',case when make_date(p_anio,m,1)<=corte_operativo then greatest(0,unidades-unidades_con_cargo) else 0 end,'pct',case when facturado>0 then round(100*cobrado/facturado,1) else null end,
+ 'estado_mes',case when n=0 and make_date(p_anio,m,1)>corte_operativo then 'futuro' when n=0 then 'sin_cargos' when make_date(p_anio,m,1)>corte_operativo then 'por_vencer' else 'normal' end) order by m)
+ from (select m,count(x.periodo)::int n,count(distinct x.id_residente)::int unidades_con_cargo,count(distinct d.id_residente)::int unidades,
  coalesce(sum(x.monto),0)::numeric facturado,coalesce(sum(x.monto) filter(where x.estado='pagado'),0)::numeric cobrado,
  coalesce(sum(x.monto) filter(where x.estado='pendiente'),0)::numeric pendiente
  from generate_series(1,12) m cross join (select distinct id_residente from detalle where edificio=d0.edificio)d
  left join detalle x on x.id_residente=d.id_residente and x.periodo=make_date(p_anio,m,1)
  group by m)t) meses from detalle d0 where coalesce(edificio,'')<>'' group by edificio
  ) select jsonb_build_object('ok',true,'anio',p_anio,'mes',p_mes,
+ 'anios',coalesce((select jsonb_agg(anio order by anio) from (select distinct extract(year from p.periodo)::int anio from public.pagos p join unidades_autorizadas u using(id_residente) where p.periodo is not null and p.concepto ~* '^Cuota ') a),'[]'::jsonb),
   'seguimiento',coalesce((select jsonb_agg(jsonb_build_object(
  'id_residente',r.id_residente,'edificio',trim(r.num),'departamento',r.departamento,'nombre_completo',r.nombre_completo,
  'meses',(select jsonb_agg(to_jsonb(z) order by z.mes) from (
@@ -45,7 +52,7 @@ begin
  from generate_series(1,12) m left join detalle x on x.id_residente=r.id_residente and x.periodo=make_date(p_anio,m,1)
  group by m) z)
 
- ) order by trim(r.num),r.departamento) from public.residentes r where coalesce(trim(r.num),'')<>''),'[]'::jsonb),
+ ) order by trim(r.num),r.departamento) from unidades_autorizadas r where coalesce(trim(r.num),'')<>''),'[]'::jsonb),
  'comparativa',coalesce((select jsonb_agg(to_jsonb(c) order by edificio,departamento) from comparativa c where pago_anterior and (pendiente or not tiene_cargo)),'[]'::jsonb),
  'edificios',coalesce((select jsonb_agg(to_jsonb(e) order by edificio) from edificios e),'[]'::jsonb)));
 end; $$;
