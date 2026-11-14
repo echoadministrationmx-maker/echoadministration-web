@@ -206,7 +206,7 @@ const MENU=[
   {k:'comparativa',t:'Seguimiento anual',i:'🔄'},
   {k:'fondo',t:'Fondo de reserva · $1,000',i:'🛟'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
-  {k:'recibos',t:'Recibos emitidos',i:'🧾'},
+  {k:'recibos',t:'Comprobantes emitidos',i:'🧾'},
   {k:'constancias',t:'Estados sin adeudo',i:'📄'},
   {k:'pagos',t:'Registrar pago',i:'💳'},
   {g:'Comunidad'},
@@ -620,34 +620,90 @@ async function vHistorico(){
 
 /* ---------- RECIBOS EMITIDOS ---------- */
 async function vRecibos(){
-  D.rc=await rpc('pg_recibos',{...C,p_limite:60});
+  D.rc=await rpc('pg_recibos',{...C,p_limite:2147483647});
+  if(D.rc?.ok===false)throw new Error('No se pudieron cargar los comprobantes.');
   const rs=D.rc.recibos||[], bit=D.rc.bitacora||[];
+  const unidades=rs.map(r=>{
+    const [edificio,...partes]=String(r.ident||'').split('-');
+    return {edificio:r.edificio|| (partes.length?edificio.trim():''),departamento:r.departamento|| (partes.length?partes.join('-').trim():edificio.trim())};
+  });
+  const edificios=[...new Set(unidades.map(u=>u.edificio).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
   $('vista').innerHTML=`
-    <div class="card" style="background:#EEF3FF;border-color:var(--accent)">
-      <h3>Recibos emitidos</h3>
-      <p class="sub">Si emitiste un comprobante por error, cancélalo aquí. Puedes además regresar sus meses a "pendiente" para volver a registrarlos bien.</p>
+    <div class="card">
+      <h3>Comprobantes emitidos</h3>
+      <div class="grid g3">
+        <div><label for="rcEdificio">Edificio</label><select id="rcEdificio"><option value="">Todos</option>${edificios.map(e=>`<option>${esc(e)}</option>`).join('')}</select></div>
+        <div><label for="rcDepartamento">Departamento</label><input id="rcDepartamento" placeholder="Ej. 202"></div>
+        <div><label for="rcFolio">Folio</label><input id="rcFolio" inputmode="numeric"></div>
+      </div>
+      <p class="sub" id="rcConteo" aria-live="polite"></p>
     </div>
-    ${rs.length?rs.map((r,i)=>`
-      <div class="item" style="${r.estado==='cancelado'?'opacity:.6':''}">
-        <div class="ihead"><span class="tag">#${r.folio}</span><span class="iname">${esc(r.ident)} · ${esc(r.nombre)}</span>
-          <span class="pill ${r.estado==='cancelado'?'p-warn':'p-ok'}">${r.estado==='cancelado'?'Cancelado':'Activo'}</span></div>
-        <p class="sub">${fecha(r.created_at)} · ${esc(r.forma_pago)} · por ${esc(r.creado_por)}${r.email_enviado_a?' · enviado a '+esc(r.email_enviado_a):''}</p>
-        <div style="font-weight:800;font-size:1.05rem;margin-top:5px">${money(r.total)}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px">
-          ${(r.conceptos||[]).map(c=>`<span class="pill p-gray">${esc(c.c)} · ${money(c.m)}</span>`).join('')}
-        </div>
-        ${r.estado==='cancelado'?`<div style="background:var(--warnbg);border-radius:9px;padding:9px 11px;margin-top:9px;font-size:.82rem">
-          <b style="color:var(--warn)">Cancelado</b> por ${esc(r.cancelado_por)} el ${fecha(r.cancelado_at)} · ${esc(r.motivo_cancelacion)}</div>`:
-          `<div class="acts"><button class="btn gh sm" data-c="${i}">✕ Cancelar recibo</button></div>`}
-      </div>`).join(''):'<div class="empty"><div class="e">🧾</div><div class="t">Sin recibos emitidos</div></div>'}
-    ${bit.length?`<div class="card" style="margin-top:6px">
-      <div class="chead"><h3>Movimientos revertidos</h3></div>
-      ${bit.map(b=>`<div style="padding:9px 0;border-bottom:1px solid var(--silver);font-size:.85rem">
-        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-          <b>${esc(b.ident)} · ${esc(b.concepto)}</b><span class="mono">${money(b.monto)}</span></div>
-        <div class="sub">${fecha(b.created_at)} · ${esc(b.usuario)} · ${esc(b.motivo)}</div>
-      </div>`).join('')}</div>`:''}`;
-  $('vista').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>cancelarRecibo(rs[Number(b.dataset.c)]));
+    <div id="rcResultados"></div>
+    ${bit.length?`<div class="card"><h3>Movimientos revertidos</h3>${bit.map(b=>`
+      <div class="item"><b>${esc(b.ident)} · ${esc(b.concepto)}</b> · ${money(b.monto)}
+      <p class="sub">${fecha(b.created_at)} · ${esc(b.usuario)} · ${esc(b.motivo)}</p></div>`).join('')}</div>`:''}`;
+  const render=()=>{
+    const edificio=$('rcEdificio').value;
+    const departamento=$('rcDepartamento').value.trim().toUpperCase();
+    const folio=$('rcFolio').value.trim().replace(/^#/,'');
+    const resultados=rs.map((r,i)=>({r,i})).filter(({r,i})=>
+      (!edificio||unidades[i].edificio===edificio)&&
+      (!departamento||String(unidades[i].departamento).toUpperCase()===departamento)&&
+      (!folio||String(r.folio)===folio));
+    $('rcConteo').textContent=`${resultados.length} de ${rs.length} comprobantes`;
+    $('rcResultados').innerHTML=resultados.map(({r,i})=>`
+      <div class="item">
+        <div class="ihead"><span class="tag">#${esc(r.folio)}</span><span class="iname">${esc(r.ident)} · ${esc(r.nombre)}</span>
+        <span class="pill ${r.estado==='cancelado'?'p-warn':'p-ok'}">${r.estado==='cancelado'?'Cancelado':'Activo'}</span></div>
+        <p class="sub">${fecha(r.created_at)} · ${esc(r.forma_pago)} · ${esc(r.creado_por)}</p>
+        <p><b>${money(r.total)}</b> · ${(r.conceptos||[]).map(c=>esc(c.c)).join(' · ')}</p>
+        <p class="sub">${r.email_enviado_a?'Correo registrado de envío · '+esc(r.email_enviado_a):'Sin envío registrado'}</p>
+        ${r.estado==='cancelado'?`<p class="sub">Cancelado por ${esc(r.cancelado_por)} el ${fecha(r.cancelado_at)} · ${esc(r.motivo_cancelacion)}</p>`:`
+          <div class="acts">
+            <button class="btn sm" data-ver="${i}">Ver / Guardar PDF</button>
+            <button class="btn gh sm" data-reenviar="${i}">Reenviar por correo</button>
+            <button class="btn gh sm" data-c="${i}">Cancelar recibo</button>
+          </div>`}
+      </div>`).join('')||'<div class="empty">No hay comprobantes para esta búsqueda.</div>';
+  };
+  $('rcEdificio').onchange=render;
+  $('rcDepartamento').oninput=render;
+  $('rcFolio').oninput=render;
+  $('rcResultados').onclick=event=>{
+    const button=event.target.closest('button');
+    if(!button)return;
+    if(button.dataset.ver!==undefined){
+      const r=rs[Number(button.dataset.ver)];
+      abrirRecibo(esc(r.folio),esc(r.nombre),esc(r.ident),fecha(r.created_at),
+        (r.conceptos||[]).map(c=>({...c,c:esc(c.c)})),r.total,esc(r.forma_pago),null,true);
+    }
+    if(button.dataset.reenviar!==undefined)reenviarComprobante(rs[Number(button.dataset.reenviar)]);
+    if(button.dataset.c!==undefined)cancelarRecibo(rs[Number(button.dataset.c)]);
+  };
+  render();
+}
+function reenviarComprobante(r){
+  sheet(`<h3>Reenviar comprobante #${esc(r.folio)}</h3>
+    <p class="sub">${esc(r.ident)} · ${esc(r.nombre)}</p>
+    <form id="rcEnviarForm">
+      <label for="rcCorreo">Correo del destinatario</label>
+      <input id="rcCorreo" type="email" required value="${esc(r.email_enviado_a||'')}">
+      <div class="acts"><button class="btn" type="submit" id="rcEnviar">Enviar copia</button>
+      <button class="btn gh" type="button" onclick="cerrarSheet()">Volver</button></div>
+    </form>`);
+  $('rcEnviarForm').onsubmit=async event=>{
+    event.preventDefault();
+    const button=$('rcEnviar');
+    button.disabled=true;
+    if(await enviarRecibo(r.folio,$('rcCorreo').value.trim())){
+      if(!button.isConnected)return;
+      cerrarSheet();
+      if(V==='recibos'){
+        try{await vRecibos();}catch(e){toast('Copia enviada. Actualiza la lista para ver el correo.','err');}
+      }
+    }else button.disabled=false;
+  };
 }
 function cancelarRecibo(r){
   sheet(`<h3>Cancelar recibo #${r.folio}</h3>
@@ -815,10 +871,12 @@ async function enviarRecibo(folio,correo){
       headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
       body:JSON.stringify({p_user:C.p_user,p_password:C.p_password,folio,email_destino:correo})});
     const d=await r.json();
-    toast(d&&d.ok?('Comprobante #'+folio+' enviado'):'Se emitió, pero el correo no salió.',d&&d.ok?'good':'err');
-  }catch(e){toast('Se emitió, pero el correo no salió.','err');}
+    const enviado=Boolean(r.ok&&d?.ok);
+    toast(enviado?('Comprobante #'+folio+' enviado'):'No se pudo enviar el correo.',enviado?'good':'err');
+    return enviado;
+  }catch(e){toast('No se pudo enviar el correo.','err');return false;}
 }
-function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
+function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv,copia=false){
   const fil=conceptos.map(x=>`<tr><td style="padding:13px 0;border-bottom:1px solid #F3F4F6">${x.c}</td><td style="padding:13px 0;text-align:right;font-weight:500;border-bottom:1px solid #F3F4F6">$${Number(x.m).toLocaleString('es-MX',{minimumFractionDigits:2})}</td></tr>`).join('');
   const tot='$'+Number(total).toLocaleString('es-MX',{minimumFractionDigits:2});
   const w=window.open('','_blank'); if(!w){toast('Permite ventanas emergentes.','err');return;}
@@ -838,7 +896,7 @@ function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
   @media print{body{background:#fff;padding:0}.pb{display:none}.h{border:0}}</style></head><body>
   <div class="pb"><button onclick="window.print()">🖨 Imprimir / PDF</button></div>
   <div class="h"><div class="hd"><div><div class="c">ECHO ADMINISTRATION</div><h1>MANZANA 80</h1><div style="color:#BFDBFE">ALDEA TULUM</div></div>
-  <div style="text-align:right"><div class="c">FOLIO</div><div style="font-size:22px;font-weight:600">#${folio}</div></div></div>
+  <div style="text-align:right"><div class="c">FOLIO</div><div style="font-size:22px;font-weight:600">#${folio}</div>${copia?'<small>Copia del comprobante original</small>':''}</div></div>
   <div class="b"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px">
   <div><div class="lb">Datos del Cliente</div><div style="font-size:16px;font-weight:500">${nombre}</div><div style="color:#4B5563">Domicilio: ${String(ident).replace('-',' ')}</div></div>
   <div style="text-align:right"><div class="lb">Fecha</div><div style="font-size:16px;font-weight:500">${fech}</div></div></div>
@@ -847,7 +905,7 @@ function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
   <div style="display:flex;justify-content:space-between;color:#4B5563;padding:4px 0">Subtotal<span>${tot}</span></div>
   <div style="display:flex;justify-content:space-between;font-size:19px;font-weight:700;color:#1E3A5F;border-top:1px solid #E5E7EB;padding-top:9px">Total<span>${tot}</span></div></div></div>
   <div class="inf"><div><b>Forma de Pago</b><br>${forma}</div><div><b>Método</b><br>Una sola exhibición</div><div><b>Moneda</b><br>Pesos mexicanos</div></div>
-  <div style="border:1px solid ${cv?'#BFDBFE':'#E5E7EB'};background:${cv?'#EFF6FF':'#fff'};border-radius:9px;padding:14px;margin-top:14px;font-size:13px">
+  ${copia?'':`<div style="border:1px solid ${cv?'#BFDBFE':'#E5E7EB'};background:${cv?'#EFF6FF':'#fff'};border-radius:9px;padding:14px;margin-top:14px;font-size:13px">
     <b style="color:#1E40AF">Convenio activo: ${cv?'Sí':'No'}</b>
     ${cv?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:5px 16px;margin-top:8px;color:#374151">
       <div><b>Tipo:</b> ${cv.tipo||'—'}</div>
@@ -857,7 +915,7 @@ function abrirRecibo(folio,nombre,ident,fech,conceptos,total,forma,cv){
       <div><b>Saldo del convenio:</b> $${Number(cv.saldo_convenio).toLocaleString('es-MX')}</div>
       <div><b>Próximo pago:</b> ${cv.proximo_pago||'—'}</div>
     </div>${cv.condiciones?`<div style="margin-top:7px;color:#4B5563"><b>Condiciones:</b> ${cv.condiciones}</div>`:''}`:''}
-  </div>
+  </div>`}
   <div style="text-align:center;margin-top:22px;padding-top:15px;border-top:1px solid #E5E7EB">
   <div style="font-style:italic;font-size:12px;color:#9CA3AF">"Juntarse es el principio, mantenerse juntos el progreso, trabajar en equipo el éxito"</div>
   <div style="font-weight:600;color:#2563EB;margin-top:7px;font-size:13px">ALDEAMZ80@GMAIL.COM</div></div>
