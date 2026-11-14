@@ -1176,8 +1176,56 @@ async function vResidentes(){
   $('ro').onchange=e=>{rFiltro.orden=e.target.value;vResidentes();};
   $('rlist').querySelectorAll('[data-act]').forEach(b=>{
     const r=it[Number(b.dataset.i)];
-    b.onclick=()=>({wa:()=>whats(r),ed:()=>editarRes(r),ll:()=>formLlamada(r),oc:()=>cambiarOcupante(r),ver:()=>verificar(r),cn:()=>formConstancia(r)})[b.dataset.act]();
+    b.onclick=()=>({wa:()=>whats(r),ed:()=>editarRes(r),ll:()=>formLlamada(r),oc:()=>cambiarOcupante(r),ver:()=>verificar(r),cn:()=>formConstancia(r),pr:()=>fichaPropiedad(r)})[b.dataset.act]();
   });
+}
+async function fichaPropiedad(r){
+  const args={...C,p_id_residente:r.id_residente};
+  try{
+    const d=await rpc('pg_cambios_propietario',args);
+    if(!d.ok){toast(d.error,'err');return;}
+    mostrarPropiedad(r,d.historial,args);
+  }catch(e){toast('No se pudo abrir la ficha de propiedad.','err');}
+}
+function mostrarPropiedad(r,historial,args){
+  const ultimo=historial[0];
+  const anterior=ultimo?.nuevo||(r.ocupante_tipo==='rentero'?'':r.nombre_completo);
+  const hoy=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Cancun',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  sheet(`<h3>Cambios de propietario · ${esc(r.ident)}</h3>
+    ${ultimo?`<p>Propietario actual registrado <b>${esc(ultimo.nuevo)}</b></p>`:''}
+    <form id="propForm">
+      <div class="grid g2">
+        <div><label for="propTipo">Movimiento</label><select id="propTipo" required>
+          <option value="">Selecciona</option><option value="venta">Venta</option><option value="traspaso">Traspaso</option>
+        </select></div>
+        <div><label for="propFecha">Fecha del movimiento</label><input id="propFecha" type="date" required max="${hoy}" ${ultimo?'min="'+esc(ultimo.fecha)+'"':''}></div>
+        <div><label for="propAnterior">Propietario anterior</label><input id="propAnterior" required maxlength="200" value="${esc(anterior)}" ${ultimo?'readonly':''}></div>
+        <div><label for="propNuevo">Nuevo propietario</label><input id="propNuevo" required maxlength="200"></div>
+      </div>
+      <div class="acts"><button class="btn" id="propGuardar" type="submit">Guardar cambio de propietario</button></div>
+      <p class="sub" id="propError" role="status"></p>
+    </form>
+    <h3>Historial de la unidad</h3>
+    ${historial.map(c=>`<div class="item">
+      <b>${c.tipo==='venta'?'Venta':'Traspaso'} · ${esc(c.fecha)}</b>
+      <p>${esc(c.anterior)} → ${esc(c.nuevo)}</p>
+      <p class="sub">Registrado por ${esc(c.registrado_por)} · ${fecha(c.registrado_at)}</p>
+    </div>`).join('')||'<p class="sub">Aún no hay ventas ni traspasos registrados.</p>'}`);
+  $('propForm').onsubmit=async event=>{
+    event.preventDefault();
+    const button=$('propGuardar'), error=$('propError');
+    button.disabled=true;
+    error.textContent='';
+    try{
+      const d=await rpc('pg_cambios_propietario',{...args,p_tipo:$('propTipo').value,
+        p_anterior:$('propAnterior').value.trim(),p_nuevo:$('propNuevo').value.trim(),
+        p_fecha:$('propFecha').value,p_ultimo:ultimo?.id??null});
+      if(!d.ok){error.textContent=d.error;return;}
+      if(button.isConnected&&$('sheet').classList.contains('on'))mostrarPropiedad(r,d.historial,args);
+      toast('Cambio de propietario guardado.','good');
+    }catch(e){error.textContent='No se pudo confirmar el guardado. Vuelve a abrir la ficha para revisar el historial.';}
+    finally{button.disabled=false;}
+  };
 }
 function resumenAnios(meses){
   const m={};
@@ -1224,6 +1272,7 @@ function tarjetaResidente(r,i){
     <div class="acts">
       ${tel?`<button class="btn sm" style="background:#25D366" data-act="wa" data-i="${i}">💬 WhatsApp</button>`:''}
       <button class="btn gh sm" data-act="ed" data-i="${i}">✎ Datos</button>
+      <button class="btn gh sm" data-act="pr" data-i="${i}">Cambios de propietario</button>
       <button class="btn gh sm" data-act="oc" data-i="${i}">${rent?'🔑 Es propietario':'🏠 Es rentero'}</button>
       <button class="btn gh sm" data-act="ll" data-i="${i}">⚠️ Llamada</button>
       ${deb?'':`<button class="btn ok sm" data-act="cn" data-i="${i}">📄 No adeudo</button>`}
