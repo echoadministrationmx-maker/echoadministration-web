@@ -201,9 +201,8 @@ const MENU=[
   {g:'Cobranza'},
   {k:'inicio',t:'Resumen',i:'📊'},
   {k:'cobranza',t:'Cobranza mensual',i:'📈'},
-  {k:'regularizacion',t:'Regularización y WhatsApp',i:'💬'},
   {k:'analisis',t:'Análisis de cobranza',i:'🔎'},
-  {k:'comparativa',t:'Seguimiento anual',i:'🔄'},
+  {k:'comparativa',t:'Seguimiento anual y regularización',i:'🔄'},
   {k:'fondo',t:'Fondo de reserva · $1,000',i:'🛟'},
   {k:'historico',t:'Histórico por edificio',i:'🗓️'},
   {k:'recibos',t:'Comprobantes emitidos',i:'🧾'},
@@ -240,6 +239,7 @@ function pintarBadges(){
   const d=$('notifDot'); if(n>0){d.textContent=n;d.classList.remove('hide');}else d.classList.add('hide');
 }
 function ir(k){
+  if(k==='regularizacion')k='comparativa';
   V=k; history.replaceState(null,'','#'+k); cerrarMenu();
   const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
@@ -264,7 +264,8 @@ async function entrar(){
     $('quien').textContent=u;
     const cfg=await rpc('pg_config',C); if(cfg&&cfg.ok)CORTE={anio:cfg.anio,mes:cfg.mes};
     cargarNotifs();
-    pintarNav(); ir(MENU.some(x=>x.k===location.hash.slice(1))?location.hash.slice(1):'inicio');
+    pintarNav(); const destino=location.hash.slice(1);
+    ir(destino==='regularizacion'||MENU.some(x=>x.k===destino)?destino:'inicio');
   }catch(e){$('lerr').textContent='Sin conexión. Revisa tu internet.';}
   b.disabled=false;b.textContent='Entrar';
 }
@@ -279,7 +280,6 @@ async function render(){
   try{
     if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
-    else if(V==='regularizacion') await vRegularizacion();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='comparativa') await vComparativa();
     else if(V==='fondo') await vFondo();
@@ -502,30 +502,77 @@ async function vCobranza(){
 /* Comparison is read-only; never changes the operating cutoff. */
 let cmpPeriodo='',cmpEdificio='',cmpQuery='',cmpNivel='';
 let cmpRequest=0;
+function contactarSeguimiento(r){
+  let telefono=regWaTel(r);
+  if(/^521\d{10}$/.test(telefono))telefono='52'+telefono.slice(3);
+  const nombre=String(r.nombre_completo||'').trim().split(/\s+/)[0];
+  const saludo=nombre?`Hola, ${nombre}.`:'Hola.';
+  sheet(`<h3>Escribir por WhatsApp · ${esc(r.ident)}</h3>
+    <p class="sub">${esc(r.telefono)}</p>
+    <label for="cmpMensaje">Mensaje</label>
+    <textarea id="cmpMensaje" rows="5">${esc(`${saludo} Somos Echo Administración de Manzana 80. Le escribimos para dar seguimiento al estado de cuenta de su unidad ${r.ident}. ¿Podemos ayudarle a revisar sus pagos o resolver alguna duda?`)}</textarea>
+    <div class="acts">
+      <a id="cmpWhatsApp" class="btn" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
+      <button class="btn gh" onclick="cerrarSheet()">Cerrar</button>
+    </div>`);
+  const mensaje=$('cmpMensaje'), link=$('cmpWhatsApp');
+  mensaje.oninput=()=>{
+    const texto=mensaje.value.trim();
+    if(texto)link.href=`https://wa.me/${telefono}?text=${encodeURIComponent(texto)}`;
+    else link.removeAttribute('href');
+  };
+  mensaje.oninput();
+}
 async function vComparativa(){
  const request=++cmpRequest;
  const value=cmpPeriodo||`${CORTE.anio}-${String(CORTE.mes).padStart(2,'0')}`;
  const [y,m]=value.split('-').map(Number);
- const report=await rpc('pg_reporte_cobranza',{...C,p_anio:y,p_mes:m});
+ const [report,dir,conv]=await Promise.all([
+   rpc('pg_reporte_cobranza',{...C,p_anio:y,p_mes:m}),
+   rpc('pg_directorio',C).catch(()=>null),
+   rpc('pg_convenios_pago',C).catch(()=>null)
+ ]);
  if(!report?.ok)throw new Error('No se pudo consultar el seguimiento autorizado');
  if(V!=='comparativa'||request!==cmpRequest)return;
  const rows=(report.seguimiento||[]).map(r=>EchoReport.seguimiento(r,m)).sort((a,b)=>a.orden-b.orden||b.saldo-a.saldo||`${a.edificio} ${a.departamento}`.localeCompare(`${b.edificio} ${b.departamento}`,undefined,{numeric:true}));
+ REG.residentes=dir?.residentes||[];
+ REG.convenios=conv?.convenios||[];
+ const porId=new Map(REG.residentes.map(r=>[String(r.id_residente),r]));
+ const normalizarUnidad=valor=>String(valor||'').replace(/\s+/g,'').toUpperCase();
+ const porUnidad=new Map(REG.residentes.map(r=>[normalizarUnidad(r.ident),r]));
+ const contactos=rows.map(r=>porId.get(String(r.id_residente))||
+   porUnidad.get(normalizarUnidad(`${r.edificio}-${r.departamento}`)));
+ const conveniosDisponibles=Array.isArray(conv?.convenios);
  const labels={alta:'Prioridad alta',media:'Seguimiento',preventiva:'Preventivo',revisar:'Verificar datos',al_dia:'Sin pendientes registrados'};
  const estados={pagado:['✓','Pagado según registro','#E7F5EC','#1B7A3D'],pendiente:['$','Pendiente','#FBE9EC','#B00020'],sin_registro:['?','Sin cargo registrado','#F2F4F8','#6A7382'],revisar:['!','Revisar estado','#FBF1DF','#B87503'],futuro:['—','Fuera del corte','#F2F4F8','#94A0B0']};
  $('vista').innerHTML=`<div class="card"><h3>Seguimiento anual · ${y}</h3><p class="sub">Situación actual de las cuotas de enero a ${MES[m]}. El corte de análisis no cambia el mes de operación ni reconstruye saldos de una fecha pasada. Mantenimiento separado del fondo de reserva.</p>
  <div class="grid g3"><div><label for="cmpMes">Año y mes hasta el que comparar</label><input type="month" id="cmpMes" value="${value}" max="${CORTE.anio}-${String(CORTE.mes).padStart(2,'0')}"></div><div><label for="cmpEdif">Edificio</label><select id="cmpEdif"><option value="">Todos</option>${[...new Set(rows.map(r=>r.edificio))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div><div><label for="cmpQ">Buscar unidad o residente</label><input id="cmpQ" value="${esc(cmpQuery)}"></div></div>
  <label for="cmpNivel" style="margin-top:12px">A quién dar seguimiento</label><select id="cmpNivel"><option value="">Todos</option><option value="interrumpio">Pagaron el mes anterior y este no</option>${Object.entries(labels).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+ ${!Array.isArray(dir?.residentes)||!conveniosDisponibles?'<p class="sub" role="status">No se pudieron cargar todos los contactos o convenios. Usa Actualizar para volver a intentar.</p>':''}
  <button class="btn gh sm" id="cmpRefresh" style="margin-top:12px">↻ Actualizar</button></div><div id="cmpRows"></div>`;
  $('cmpMes').onchange=e=>{if(e.target.validity.valid&&e.target.value){cmpPeriodo=e.target.value;render();}};
  const paint=()=>{
- const found=rows.filter(r=>(!cmpEdificio||r.edificio===cmpEdificio)&&(!cmpNivel||(cmpNivel==='interrumpio'?r.interrumpio:r.nivel===cmpNivel))&&`${r.edificio} ${r.departamento} ${r.nombre_completo}`.toLowerCase().includes(cmpQuery.toLowerCase()));
- $('cmpRows').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Unidades filtradas</div><div class="v">${found.length}</div></div><div class="kpi"><div class="l">Saldo pendiente del año</div><div class="v">${money(found.reduce((s,r)=>s+r.saldo,0))}</div></div><div class="kpi"><div class="l">Pagaron el mes anterior; este no</div><div class="v">${found.filter(r=>r.interrumpio).length}</div></div><div class="kpi"><div class="l">Con información por verificar</div><div class="v">${found.filter(r=>r.faltantes).length}</div></div></div>`+found.map(r=>`<div class="item"><div class="ihead"><b>${esc(r.edificio)} · ${esc(r.departamento)} · ${esc(r.nombre_completo)}</b><span class="pill ${r.nivel==='alta'?'p-warn':r.nivel==='al_dia'?'p-ok':'p-gray'}">${labels[r.nivel]}</span></div><p class="sub">${esc(r.motivo)} · ${r.pendientes} meses pendientes · ${money(r.saldo)}</p>
+ const found=rows.map((r,i)=>({r,i})).filter(({r})=>(!cmpEdificio||r.edificio===cmpEdificio)&&(!cmpNivel||(cmpNivel==='interrumpio'?r.interrumpio:r.nivel===cmpNivel))&&`${r.edificio} ${r.departamento} ${r.nombre_completo}`.toLowerCase().includes(cmpQuery.toLowerCase()));
+ $('cmpRows').innerHTML=`<div class="kpis"><div class="kpi"><div class="l">Unidades filtradas</div><div class="v">${found.length}</div></div><div class="kpi"><div class="l">Saldo pendiente del año</div><div class="v">${money(found.reduce((s,{r})=>s+r.saldo,0))}</div></div><div class="kpi"><div class="l">Pagaron el mes anterior; este no</div><div class="v">${found.filter(({r})=>r.interrumpio).length}</div></div><div class="kpi"><div class="l">Con información por verificar</div><div class="v">${found.filter(({r})=>r.faltantes).length}</div></div></div>`+found.map(({r,i})=>{const contacto=contactos[i];const activo=contacto&&conveniosDisponibles&&regActivo(contacto);const tieneTelefono=contacto&&/^\d{10,15}$/.test(regWaTel(contacto));return `<div class="item"><div class="ihead"><b>${esc(r.edificio)} · ${esc(r.departamento)} · ${esc(r.nombre_completo)}</b><span class="pill ${r.nivel==='alta'?'p-warn':r.nivel==='al_dia'?'p-ok':'p-gray'}">${labels[r.nivel]}</span></div><p class="sub">${esc(r.motivo)} · ${r.pendientes} meses pendientes · ${money(r.saldo)}</p>
  <div style="display:grid;grid-template-columns:repeat(6,minmax(38px,1fr));gap:5px;margin:12px 0" aria-label="Cuotas por mes">${EchoReport.meses(r.meses||[]).map(x=>{const state=estados[x.estado]||estados.revisar;return `<div title="${MES[x.mes]}: ${state[1]}${x.pagado_fuera_mes?' · pagado después de su mes':''}" style="text-align:center;border-radius:7px;padding:7px 2px;background:${state[2]};color:${state[3]}"><small>${MES[x.mes].slice(0,3)}</small><div style="font-weight:800">${state[0]}${x.pagado_fuera_mes?' ⏱':''}</div><span style="font-size:.65rem">${state[1]}</span></div>`;}).join('')}</div>
- <p style="font-size:.86rem"><b>Siguiente acción:</b> ${esc(r.accion)}</p></div>`).join('')+(!found.length?'<div class="empty">Sin unidades para estos filtros.</div>':'')+`<div class="card"><p class="sub">✓ Pagado según registro · $ Pendiente · ? Sin cargo · ⏱ Pagado después de su mes. Las prioridades se basan en cuotas registradas, no son una predicción. Confirma comprobantes y convenios antes de cobrar; un cargo ausente no acredita pago ni adeudo.</p></div>`;
+ <p style="font-size:.86rem"><b>Siguiente acción:</b> ${esc(r.accion)}</p>
+ <div class="acts">
+   ${tieneTelefono?`<button class="btn sm" data-cmp-contacto="${i}">Escribir por WhatsApp</button>`:contacto?'<span class="sub">Sin teléfono válido</span>':''}
+   ${activo?`<button class="btn gh sm" data-cmp-convenio="${i}">Ver convenio activo</button>`:
+     contacto&&conveniosDisponibles&&regHist(contacto)>0?`<button class="btn gh sm" data-cmp-plan="${i}">Ver opciones de regularización</button>`:''}
+ </div></div>`;}).join('')+(!found.length?'<div class="empty">Sin unidades para estos filtros.</div>':'')+`<div class="card"><p class="sub">✓ Pagado según registro · $ Pendiente · ? Sin cargo · ⏱ Pagado después de su mes. Las prioridades se basan en cuotas registradas, no son una predicción. Confirma comprobantes y convenios antes de cobrar; un cargo ausente no acredita pago ni adeudo.</p></div>`;
  };
  $('cmpEdif').value=cmpEdificio;$('cmpEdif').onchange=e=>{cmpEdificio=e.target.value;paint();};
  $('cmpNivel').value=cmpNivel;$('cmpNivel').onchange=e=>{cmpNivel=e.target.value;paint();};
  $('cmpQ').oninput=e=>{cmpQuery=e.target.value;paint();};
+ $('cmpRows').onclick=event=>{
+   const button=event.target.closest('button');
+   if(!button)return;
+   const {cmpContacto,cmpConvenio,cmpPlan}=button.dataset;
+   if(cmpContacto!==undefined)contactarSeguimiento(contactos[Number(cmpContacto)]);
+   if(cmpConvenio!==undefined)regOpenActive(Number(contactos[Number(cmpConvenio)].id_residente));
+   if(cmpPlan!==undefined)regOpenOffer(Number(contactos[Number(cmpPlan)].id_residente));
+ };
  $('cmpRefresh').onclick=()=>render();paint();
 }
 
@@ -1891,6 +1938,6 @@ $('btnRef').onclick=async()=>{
 </script>
 <script src="/operaciones/regularizacion-inline.js"></script>
 <script src="/operaciones/fondo-reserva.js?v=20261112-recibo"></script>
-<script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&MENU.some(x=>x.k===k)&&V!==k)ir(k);});</script>
+<script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'||MENU.some(x=>x.k===k))&&V!==k)ir(k);});</script>
 </body>
 </html>
