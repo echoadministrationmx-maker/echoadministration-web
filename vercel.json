@@ -26,6 +26,18 @@
       "destination": "/operaciones/index.html"
     },
     {
+      "source": "/operaciones/general",
+      "destination": "/operaciones/index.html"
+    },
+    {
+      "source": "/operaciones/manzana-60",
+      "destination": "/operaciones/index.html"
+    },
+    {
+      "source": "/operaciones/manzana-80",
+      "destination": "/operaciones/index.html"
+    },
+    {
       "source": "/registro-propietarios",
       "destination": "/registro-propietarios/index.html"
     },
