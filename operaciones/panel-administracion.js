@@ -241,3 +241,5 @@ function mostrarAccesoEquipo(d) {
     <div class="acts"><button class="btn gh" id="cerrarCredencial">Cerrar</button></div>`);
   $('cerrarCredencial').onclick=cerrarSheet;
 }
+
+prepararAccesoPanel();
