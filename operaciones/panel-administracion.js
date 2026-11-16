@@ -29,6 +29,7 @@ function prepararAccesoPanel() {
   document.title = nombrePanel();
   $('loginTitulo').textContent = nombrePanel();
   $('marcaFondo').classList.toggle('hide',rutaGeneral || manzanaDeRuta==='M60');
+  $('loginRutas').classList.toggle('hide',Boolean(manzanaDeRuta));
 }
 
 function verAccesoPanel(d) {
