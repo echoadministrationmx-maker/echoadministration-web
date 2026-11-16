@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14233c">
+<title>Registrar departamento en renta · Echo</title>
+<link rel="stylesheet" href="/formularios/registro.css">
+<script src="/formularios/registro.js" defer></script>
+</head>
+<body>
+<header><a class="brand" href="/"><span class="logo" aria-hidden="true">E</span>Echo Administración</a></header>
+<main>
+  <div class="encabezado">
+    <a href="/rentas" class="volver">← Rentas</a>
+    <h1>Registra tu departamento en renta</h1>
+    <p>Envía los datos a la administración de tu manzana. Puedes registrar una unidad disponible o una que ya esté rentada.</p>
+  </div>
+  <form id="registro" data-tipo="departamento" method="post" aria-label="Registrar departamento en renta">
+    <section aria-labelledby="datosDepto">
+      <h2 id="datosDepto">Departamento</h2>
+      <div class="campos">
+        <div><label for="manzana">Manzana</label><select name="manzana" id="manzana" required><option value="">Selecciona tu manzana</option><option value="M60">Manzana 60</option><option value="M80">Manzana 80</option></select></div>
+        <div><label for="edificio">Edificio o torre</label><input id="edificio" name="edificio" maxlength="40" required></div>
+        <div><label for="unidad">Número de unidad</label><input id="unidad" name="unidad" maxlength="40" required></div>
+        <div><label for="titulo">Título del registro</label><input id="titulo" name="titulo" minlength="2" maxlength="120" placeholder="Ej. Departamento amueblado" required></div>
+        <div><label for="habitaciones">Habitaciones <sup>(opcional)</sup></label><input id="habitaciones" name="habitaciones" type="number" min="0" max="25" step="1"></div>
+        <div><label for="banos">Baños <sup>(opcional)</sup></label><input id="banos" name="banos" type="number" min="0" max="25" step=".5"></div>
+      </div>
+    </section>
+    <section aria-labelledby="condicionesRenta">
+      <h2 id="condicionesRenta">Renta y disponibilidad</h2>
+      <fieldset>
+        <legend>Plazos de renta</legend>
+        <div class="plazos">
+          <label class="opcion"><input type="checkbox" name="plazos" value="corto"> Corto plazo</label>
+          <label class="opcion"><input type="checkbox" name="plazos" value="mediano"> Mediano plazo</label>
+          <label class="opcion"><input type="checkbox" name="plazos" value="largo"> Largo plazo</label>
+        </div>
+        <p class="ayuda">Puedes seleccionar más de uno.</p>
+      </fieldset>
+      <div class="campos" style="margin-top:14px">
+        <div><label for="situacion">Situación actual</label><select id="situacion" name="situacion" required><option value="">Selecciona una opción</option><option value="disponible">Disponible</option><option value="rentado">Ya está rentado</option></select></div>
+        <div><label for="fechaDisponible">Disponible desde <sup>(opcional)</sup></label><input type="date" id="fechaDisponible" name="fecha_disponible" min="2000-01-01" max="2100-12-31"></div>
+        <div><label for="precio">Precio de referencia (MXN) <sup>(opcional)</sup></label><input id="precio" name="precio" type="number" min=".01" max="9999999999" step=".01"></div>
+        <div><label for="periodoPrecio">Periodo del precio</label><select id="periodoPrecio" name="periodo_precio"><option value="">Seleccionar si indicas un precio</option><option value="noche">Por noche</option><option value="semana">Por semana</option><option value="mes">Por mes</option></select></div>
+        <div class="ancho"><label for="descripcion">Descripción o notas <sup>(opcional)</sup></label><textarea id="descripcion" name="descripcion" rows="3" maxlength="1500"></textarea></div>
+        <div class="ancho"><label for="enlace">Enlace a un anuncio existente <sup>(opcional)</sup></label><input type="url" id="enlace" name="enlace" maxlength="600" placeholder="https://"></div>
+        <div class="ancho"><label for="fotos">Fotos del departamento <sup>(opcional)</sup></label><input type="file" id="fotos" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="fotosAyuda"><p class="ayuda" id="fotosAyuda">Hasta cuatro fotos en JPG, PNG o WebP, de 12 MB o menos por archivo.</p></div>
+      </div>
+    </section>
+    <section aria-labelledby="datosContacto">
+      <h2 id="datosContacto">Contacto del propietario</h2>
+      <div class="campos">
+        <div class="ancho"><label for="contacto">Nombre completo</label><input id="contacto" name="contacto" autocomplete="name" minlength="2" maxlength="120" required></div>
+        <div><label for="email">Correo electrónico</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254"></div>
+        <div><label for="telefono">Teléfono o WhatsApp</label><input type="tel" id="telefono" name="telefono" autocomplete="tel" maxlength="30"></div>
+      </div>
+      <p class="ayuda">Comparte al menos un medio de contacto. Tu administración revisará el registro y sus fotos. Consulta el <a href="/privacidad">aviso de privacidad</a>.</p>
+    </section>
+    <div class="acciones"><p id="estado" role="alert"></p><button type="submit">Enviar departamento</button></div>
+  </form>
+  <section id="confirmacion" class="confirmacion" tabindex="-1" hidden><h2>Registro recibido</h2><p>La administración de tu manzana revisará los datos del departamento.</p><p><a href="/rentas">Volver a Rentas</a></p></section>
+</main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14233c">
+<title>Registrar negocio para convenios · Echo</title>
+<link rel="stylesheet" href="/formularios/registro.css">
+<script src="/formularios/registro.js" defer></script>
+</head>
+<body>
+<header><a class="brand" href="/"><span class="logo" aria-hidden="true">E</span>Echo Administración</a></header>
+<main>
+  <div class="encabezado">
+    <a href="/convenios" class="volver">← Convenios</a>
+    <h1>Registra tu negocio para un convenio</h1>
+    <p>Cuéntanos qué descuento o beneficio te gustaría ofrecer a la comunidad de Echo.</p>
+  </div>
+  <form id="registro" data-tipo="negocio" method="post" aria-label="Registrar negocio para convenios">
+    <section aria-labelledby="datosNegocio">
+      <h2 id="datosNegocio">Datos del negocio</h2>
+      <div class="campos">
+        <div><label for="nombre">Nombre comercial</label><input id="nombre" name="nombre" autocomplete="organization" minlength="2" maxlength="120" required></div>
+        <div><label for="categoria">Giro o categoría</label><input id="categoria" name="categoria" minlength="2" maxlength="70" placeholder="Ej. Restaurante" required></div>
+        <div><label for="ciudad">Ciudad y estado</label><input id="ciudad" name="ciudad" minlength="2" maxlength="120" placeholder="Ej. Tulum, Quintana Roo" required></div>
+        <div><label for="direccion">Dirección <sup>(opcional)</sup></label><input id="direccion" name="direccion" autocomplete="street-address" maxlength="240"></div>
+        <div class="ancho"><label for="enlace">Sitio web, Instagram o Maps <sup>(opcional)</sup></label><input type="url" id="enlace" name="enlace" maxlength="600" placeholder="https://"></div>
+      </div>
+    </section>
+    <section aria-labelledby="datosBeneficio">
+      <h2 id="datosBeneficio">Beneficio propuesto</h2>
+      <div class="campos">
+        <div class="ancho"><label for="beneficio">Descuento o beneficio</label><textarea id="beneficio" name="beneficio" rows="2" minlength="3" maxlength="500" placeholder="Ej. 15% en alimentos de lunes a jueves" required></textarea></div>
+        <div class="ancho"><label for="condiciones">Condiciones y cómo canjearlo <sup>(opcional)</sup></label><textarea id="condiciones" name="condiciones" rows="3" maxlength="1200"></textarea></div>
+        <div><label for="vigencia">Fecha de vencimiento <sup>(opcional)</sup></label><input id="vigencia" name="vigencia" type="date" max="2100-12-31"></div>
+      </div>
+    </section>
+    <section aria-labelledby="datosContacto">
+      <h2 id="datosContacto">Persona de contacto</h2>
+      <div class="campos">
+        <div class="ancho"><label for="contacto">Nombre completo</label><input id="contacto" name="contacto" autocomplete="name" minlength="2" maxlength="120" required></div>
+        <div><label for="email">Correo electrónico</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254"></div>
+        <div><label for="telefono">Teléfono o WhatsApp</label><input type="tel" id="telefono" name="telefono" autocomplete="tel" maxlength="30"></div>
+      </div>
+      <p class="ayuda">Comparte al menos un medio de contacto. Echo revisará tu propuesta. Consulta el <a href="/privacidad">aviso de privacidad</a>.</p>
+    </section>
+    <div class="acciones"><p id="estado" role="alert"></p><button type="submit">Enviar propuesta</button></div>
+  </form>
+  <section id="confirmacion" class="confirmacion" tabindex="-1" hidden><h2>Propuesta recibida</h2><p>El equipo de Echo revisará los datos y el beneficio que propusiste.</p><p><a href="/convenios">Volver a Convenios</a></p></section>
+</main>
+</body>
+</html>

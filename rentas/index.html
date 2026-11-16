@@ -136,8 +136,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;color:var(--ink);letter
 .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px}
 .field input,.field select,.field textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:#fff;transition:border-color .18s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,71,204,.08)}
-.drop{border:1.5px dashed var(--border);border-radius:11px;padding:22px;text-align:center;color:var(--muted);font-size:13.5px;cursor:pointer}
-.drop:hover{border-color:var(--blue);color:var(--blue)}
 .ok-msg{display:none;background:var(--green-light);border:1px solid #A7F3D0;color:var(--green);border-radius:12px;padding:16px;text-align:center;font-size:14px;margin-top:18px}
 
 /* STEPS */
@@ -209,7 +207,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;color:var(--ink);letter
       <a id="lk-inicio" class="on" onclick="ir('inicio')">Inicio</a>
       <a id="lk-propietarios" onclick="ir('propietarios')">Administra tu propiedad</a>
       <a id="lk-dashboard" onclick="ir('dashboard')">Dashboard</a>
-      <a class="btn btn-primary nav-cta" onclick="ir('propietarios')">Promociona tu depto</a>
+      <a class="btn btn-primary nav-cta" href="/registrar-departamento">Registrar departamento</a>
     </div>
   </div>
 </div>
@@ -270,6 +268,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;color:var(--ink);letter
 
     <!-- Formulario -->
     <div id="owner-form" style="margin-top:50px">
+      <p style="margin-bottom:16px">¿Tu departamento está en Manzana 60 o Manzana 80? <a href="/registrar-departamento">Regístralo con su plazo, disponibilidad y fotos.</a></p>
       <div class="sec-head"><div><h2>Solicita administración</h2><p>Te contactamos en menos de 24 horas.</p></div></div>
       <div class="form-card">
         <div class="fgrid">
@@ -284,7 +283,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;color:var(--ink);letter
           <div class="field"><label>¿Actualmente se renta?</label><select id="f-renta"><option>No</option><option>Sí</option></select></div>
           <div class="field full"><label>Plataformas donde está publicado</label><input id="f-plat" placeholder="Airbnb, Booking… (opcional)"></div>
           <div class="field full"><label>Calendario de disponibilidad</label><input id="f-disp" placeholder="Ej. Disponible todo el año / temporadas"></div>
-          <div class="field full"><label>Fotografías del inmueble</label><div class="drop">📷 Arrastra o toca para subir fotos (opcional)</div></div>
           <div class="field full"><label>Comentarios adicionales</label><textarea id="f-coment" rows="3" placeholder="Cuéntanos lo que quieras"></textarea></div>
         </div>
         <button class="btn btn-primary btn-block" id="btn-solicitud" style="margin-top:20px" onclick="enviarSolicitud()">Enviar solicitud</button>
