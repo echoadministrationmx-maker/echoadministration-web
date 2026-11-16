@@ -625,6 +625,7 @@ footer a:hover{color:#fff}
   </div>
 </footer>
 
+<script src="/formularios/leads.js"></script>
 <script>
 const WA = '522206808919';
 let lang = 'es';
@@ -671,6 +672,8 @@ document.getElementById('leadForm').addEventListener('submit', e => {
     val('lf-r') && ('Rol: ' + val('lf-r')),
     val('lf-m') && ('Reto principal: ' + val('lf-m'))
   ].filter(Boolean);
+  echoLead('comite', { nombre: n, telefono: w, ciudad: co, mensaje: val('lf-m'),
+    datos: { condominio: co, departamentos: val('lf-u'), rol: val('lf-r') } });
   openWA(lines.join('\n'));
 });
 
@@ -692,6 +695,7 @@ document.getElementById('invForm').addEventListener('submit', e => {
     'Perfil: ' + val('if-p'),
     val('if-m') && ('Mensaje: ' + val('if-m'))
   ].filter(Boolean);
+  echoLead('inversionista', { nombre: n, empresa: val('if-co'), mensaje: val('if-m'), datos: { perfil: val('if-p') } });
   openWA(lines.join('\n'));
 });
 

@@ -352,6 +352,7 @@ async function render(){
     else if(V==='inventario-rentas') await vInventarioRentas();
     else if(V==='negocios-convenios') await vSolicitudesNegocios();
     else if(V==='publicaciones-inmuebles') await vPublicacionesInmobiliarias();
+    else if(V==='leads') await vLeads();
     else if(V==='rentas')     await vRentas();
     else if(V==='convenios')  await vConvenios();
     else if(V==='alberca')    await vAlberca();
@@ -2004,6 +2005,7 @@ $('btnRef').onclick=async()=>{
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
 <script src="/operaciones/publicaciones-inmuebles.js"></script>
+<script src="/operaciones/leads.js"></script>
 <script src="/operaciones/regularizacion-inline.js"></script>
 <script src="/operaciones/fondo-reserva.js?v=20261112-recibo"></script>
 <script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'&&condominioActivo.codigo==='M80'||menuCondominio().some(x=>x.k===k))&&V!==k)ir(k);});</script>

@@ -124,6 +124,7 @@
   </div>
 </footer>
 
+<script src="/formularios/leads.js"></script>
 <script>
 const v=id=>document.getElementById(id).value.trim();
 document.getElementById('adminForm').addEventListener('submit',e=>{
@@ -134,6 +135,8 @@ document.getElementById('adminForm').addEventListener('submit',e=>{
   const t=['[Administradores]','Hola Echo, administro propiedades y me interesa sumarme.','',
     'Nombre: '+v('a-n'),'WhatsApp: '+v('a-w'),v('a-e')&&('Empresa: '+v('a-e')),
     'Administro en: '+v('a-c'),'Tipo: '+v('a-t'),'Unidades: '+v('a-u')].filter(Boolean).join('\n');
+  echoLead('administrador',{nombre:v('a-n'),telefono:v('a-w'),empresa:v('a-e'),ciudad:v('a-c'),
+    datos:{administra:v('a-t'),unidades:v('a-u')}});
   window.open('https://wa.me/522206808919?text='+encodeURIComponent(t),'_blank','noopener');
 });
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});

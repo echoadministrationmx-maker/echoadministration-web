@@ -49,7 +49,7 @@
     <div>
       <div class="eyebrow rv">Para negocios</div>
       <h1 class="rv d1">¿Quieres registrar tu convenio <span class="serif">con nosotros?</span></h1>
-      <p class="lead rv d2">Pon tu negocio dentro de la app de Echo, frente a los residentes y propietarios de las comunidades que administramos. Tú solo nos dices qué descuento ofreces.</p>
+      <p class="lead rv d2">Sales en nuestra página web, en todas nuestras redes y dentro de la app de Echo, frente a los residentes y propietarios de las comunidades que administramos. Tú solo nos dices qué descuento ofreces.</p>
       <div class="hero-cta rv d2">
         <a href="#registro-form" class="btn btn-primary">Registrar mi convenio →</a>
         <a href="#como" class="btn btn-ghost">Cómo funciona</a>
@@ -82,9 +82,9 @@
   <div class="wrap">
     <div class="eyebrow rv">Por qué Echo</div>
     <h2 class="rv d1">Publicidad que llega <span class="serif">a quien vive cerca.</span></h2>
-    <p class="lead rv d2" style="margin-bottom:44px">Tu convenio aparece donde nuestros residentes pagan su cuota, revisan avisos y buscan qué hacer.</p>
+    <p class="lead rv d2" style="margin-bottom:44px">Tu convenio aparece en nuestra página web, en nuestras redes sociales y donde nuestros residentes pagan su cuota y buscan qué hacer.</p>
     <div class="g3">
-      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div><h3>Dentro de nuestra app</h3><p>Tu marca, tu descuento y tu ubicación en la sección de convenios del portal de residentes.</p></div>
+      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div><h3>Web, redes y app</h3><p>Tu marca y tu descuento en nuestra página web, en todas nuestras redes y en la sección de convenios de la app.</p></div>
       <div class="card rv d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><h3>Clientes de tu zona</h3><p>Residentes, propietarios y huéspedes de comunidades en Tulum, Tampico, CDMX y Mazatlán.</p></div>
       <div class="card rv d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12l-8 8-8-8V4h8z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div><h3>Tú pones las reglas</h3><p>Decide el descuento, las condiciones y hasta cuándo es válido. Lo puedes cambiar cuando quieras.</p></div>
     </div>
@@ -99,7 +99,7 @@
       <div class="steps rv d2" style="margin-top:28px">
         <div class="step"><div><h3>Llena el formulario</h3><p>Nombre del negocio, ciudad y el descuento que quieres ofrecer.</p></div></div>
         <div class="step"><div><h3>Lo revisamos</h3><p>El equipo de Echo te contacta para confirmar los detalles.</p></div></div>
-        <div class="step"><div><h3>Sales en la app</h3><p>Tu convenio se publica para los residentes de tu ciudad.</p></div></div>
+        <div class="step"><div><h3>Te damos difusión</h3><p>Sales en nuestra página web y en todas nuestras redes, y tu convenio queda disponible para los residentes de tu ciudad.</p></div></div>
       </div>
     </div>
 
@@ -109,13 +109,15 @@
         <p class="sub">Te toma menos de 2 minutos.</p>
         <div class="fr"><label for="nombre">Nombre del negocio</label><input id="nombre" name="nombre" autocomplete="organization" minlength="2" maxlength="120" required placeholder="Ej. Casa del Mar"></div>
         <div class="f2">
-          <div class="fr"><label for="categoria">Giro</label>
-            <select id="categoria" name="categoria" required>
+          <div class="fr"><label for="categoria_sel">Giro</label>
+            <select id="categoria_sel" required>
               <option value="">Selecciona</option>
               <option>Restaurante</option><option>Café o bar</option><option>Tours y experiencias</option>
               <option>Spa y bienestar</option><option>Gimnasio o yoga</option><option>Transporte</option>
-              <option>Tienda</option><option>Servicios para el hogar</option><option>Eventos</option><option>Otro</option>
-            </select></div>
+              <option>Tienda</option><option>Servicios para el hogar</option><option>Eventos</option><option value="otro">Otro</option>
+            </select>
+            <input id="categoria" name="categoria" maxlength="70" placeholder="Escribe tu giro" aria-label="Escribe tu giro" style="margin-top:8px" hidden>
+          </div>
           <div class="fr"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" minlength="2" maxlength="120" required placeholder="Ej. Tulum, Q. Roo"></div>
         </div>
         <div class="fr"><label for="beneficio">¿Qué descuento ofreces?</label>
@@ -136,7 +138,7 @@
       <div class="form done" id="confirmacion" tabindex="-1" hidden>
         <div class="tick">✓</div>
         <h3>¡Recibimos tu convenio!</h3>
-        <p class="sub" style="margin:8px 0 22px;color:var(--muted)">El equipo de Echo te contactará para confirmar los detalles y publicarlo.</p>
+        <p class="sub" style="margin:8px 0 22px;color:var(--muted)">El equipo de Echo te contactará para confirmar los detalles y publicarlo en nuestra web y redes.</p>
         <a href="https://wa.me/522206808919" target="_blank" rel="noopener" class="btn btn-ghost">¿Dudas? Escríbenos por WhatsApp</a>
       </div>
     </div>
@@ -150,6 +152,25 @@
   </div>
 </footer>
 
+<script src="/formularios/leads.js"></script>
+<script>
+// Giro: si eligen "Otro", lo escriben ellos. El valor final viaja en el campo "categoria".
+const selGiro=document.getElementById('categoria_sel'), giro=document.getElementById('categoria');
+selGiro.addEventListener('change',()=>{
+  const otro=selGiro.value==='otro';
+  giro.hidden=!otro; giro.required=otro;
+  giro.value=otro?'':selGiro.value;
+  if(otro)giro.focus();
+});
+// Guardar también como lead (con su origen), aunque falle el registro del convenio.
+document.getElementById('registro').addEventListener('submit',()=>{
+  const f=document.getElementById('registro');
+  if(!f.checkValidity())return;
+  const val=id=>document.getElementById(id).value.trim();
+  echoLead('convenio',{nombre:val('contacto'),telefono:val('telefono'),email:val('email'),empresa:val('nombre'),
+    ciudad:val('ciudad'),mensaje:val('beneficio'),datos:{giro:val('categoria'),beneficio:val('beneficio')}});
+},true);
+</script>
 <script src="/formularios/registro.js"></script>
 <script>
 document.querySelectorAll('.ex button').forEach(b=>b.onclick=()=>{const i=document.getElementById('beneficio');i.value=b.textContent;i.focus();});

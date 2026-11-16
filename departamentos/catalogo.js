@@ -141,9 +141,13 @@ async function verInmueble(id) {
       ${r.fotos && r.fotos.length ? `<div class="gal">${r.fotos.map((f, i) => `<img alt="Foto ${i + 1}" loading="lazy" src="data:image/jpeg;base64,${esc(f)}">`).join('')}</div>` : ''}
       <p class="desc">${esc(d.descripcion)}</p>
       <div class="acts">
-        <a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}">Me interesa · WhatsApp</a>
-        <a class="btn btn-ghost" href="mailto:echoadministrationmx@gmail.com?subject=${asunto}">Escribir por correo</a>
+        <a class="btn btn-primary" data-lead="whatsapp" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}">Me interesa · WhatsApp</a>
+        <a class="btn btn-ghost" data-lead="correo" href="mailto:echoadministrationmx@gmail.com?subject=${asunto}">Escribir por correo</a>
       </div>`;
+    porId('contenido').querySelectorAll('[data-lead]').forEach(a => a.addEventListener('click', () => {
+      if (window.echoLead) echoLead('departamento', { ciudad: d.ciudad,
+        datos: { ficha: id, titulo: d.titulo, tipo: etiqueta(d), canal: a.dataset.lead } });
+    }));
   } catch (error) {
     if (peticion === detalleConsulta && dialogo.open) porId('contenido').innerHTML = `<button class="x" type="button" aria-label="Cerrar" onclick="dialogo.close()">×</button><h2 id="titulo-inmueble">${esc(error.message)}</h2>`;
   }
