@@ -16,18 +16,31 @@ let puedeCrearCondominio = false;
 let promesaExcel;
 
 function menuCondominio() {
-  return condominioActivo?.codigo==='M80' ? [...MENU_CONDOMINIO,...MENU] : MENU_CONDOMINIO;
+  const cabecera = puedeCrearCondominio && !manzanaDeRuta
+    ? [{k:'portafolio',t:'Vista general',i:'▦'}] : [];
+  if (condominioActivo?.codigo==='M80') return [...cabecera,...MENU_CONDOMINIO,...MENU];
+  if (condominioActivo?.codigo==='M60') {
+    const equipo = puedeCrearCondominio ? [{k:'equipo-cond',t:'Accesos del equipo',i:'🔑'}] : [];
+    return [...cabecera,...VISTAS_M60,...MENU_CONDOMINIO,...equipo];
+  }
+  return [...cabecera,...MENU_CONDOMINIO];
 }
 
-function cambiarCondominio(id) {
+function cambiarCondominio(id,destinoSolicitado) {
+  if (manzanaDeRuta) return;
   const siguiente = condominios.find(c=>c.id===Number(id));
-  if (!siguiente || siguiente.id===condominioActivo?.id) return;
+  if (!siguiente) return;
+  if (siguiente.id===condominioActivo?.id) {
+    if (destinoSolicitado) ir(destinoSolicitado);
+    return;
+  }
   condominioActivo = siguiente;
   document.getElementById('cond').textContent = siguiente.nombre;
   document.getElementById('btnNotif').classList.toggle('hide',siguiente.codigo!=='M80');
   cerrarSheet();
   pintarNav();
-  const destino = menuCondominio().some(m=>m.k===V) ? V : siguiente.codigo==='M80' ? 'inicio' : 'propietarios';
+  const porDefecto = siguiente.codigo==='M80'?'inicio':siguiente.codigo==='M60'?'resumen-local':'propietarios';
+  const destino = destinoSolicitado || (V!=='portafolio' && menuCondominio().some(m=>m.k===V) ? V : porDefecto);
   if (siguiente.codigo==='M80') {
     const config = cargarCorte().catch(()=>{});
     cargarNotifs();
@@ -42,10 +55,11 @@ function cambiarCondominio(id) {
 
 function pintarSelectorCond() {
   const selector = $('condSelector');
+  $('controlCond').classList.toggle('hide',!!manzanaDeRuta);
   selector.replaceChildren(...condominios.map(c=>new Option(c.nombre,c.id)));
   selector.value = String(condominioActivo.id);
   selector.onchange = ()=>cambiarCondominio(selector.value);
-  $('btnNuevoCond').classList.toggle('hide',!puedeCrearCondominio);
+  $('btnNuevoCond').classList.toggle('hide',!puedeCrearCondominio || !!manzanaDeRuta);
   $('btnNuevoCond').onclick = abrirNuevoCondominio;
   $('cond').textContent = condominioActivo.nombre;
   $('btnNotif').classList.toggle('hide',condominioActivo.codigo!=='M80');
@@ -402,6 +416,7 @@ async function vArchivos() {
     </div>
     <div class="card">
       <div class="chead"><h3>Importar padrón</h3><button class="btn gh sm" id="descargarPlantillaCond">Descargar plantilla</button></div>
+      <p class="sub" style="margin:-3px 0 12px">Completa clave de propietario, nombre, edificio y unidad en la plantilla. Revisa el archivo y confirma la carga para crear o actualizar las fichas del padrón.</p>
       <label for="elegirPadron">Archivo de ${esc(condominio.nombre)} (.xlsx)</label>
       <input id="elegirPadron" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       <div class="acts"><button class="btn sm" id="revisarPadron" disabled>Revisar archivo</button></div>

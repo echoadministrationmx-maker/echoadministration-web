@@ -151,12 +151,17 @@ details.acc[open] summary::before{content:'− '}
 <div id="login">
   <div class="card" style="text-align:center;padding:28px">
     <div class="logo" style="width:46px;height:46px;font-size:1.3rem;margin:0 auto 14px">E</div>
-    <h2>Panel de Operaciones</h2><p class="sub" style="color:var(--blue);font-weight:700">Actualizado 12 nov 2026 · Fondo de reserva por edificio</p>
+    <h2 id="loginTitulo">Panel de Operaciones</h2><p id="marcaFondo" class="sub" style="color:var(--blue);font-weight:700">Actualizado 12 nov 2026 · Fondo de reserva por edificio</p>
     <p class="sub" style="margin-bottom:20px">Echo Administración</p>
     <div style="text-align:left"><label>Usuario</label><input id="u" autocomplete="username"></div>
     <div style="text-align:left;margin-top:12px"><label>Contraseña</label><input id="p" type="password" autocomplete="current-password"></div>
     <button class="btn wide" id="entrar" style="margin-top:18px">Entrar</button>
-    <div id="lerr" style="color:var(--warn);font-weight:600;font-size:.84rem;margin-top:11px"></div>
+    <div class="acts" id="loginRutas" style="justify-content:center">
+      <a href="/operaciones/general">Vista general</a>
+      <a href="/operaciones/manzana-60">Manzana 60</a>
+      <a href="/operaciones/manzana-80">Manzana 80</a>
+    </div>
+    <div id="lerr" role="alert" style="color:var(--warn);font-weight:600;font-size:.84rem;margin-top:11px"></div>
   </div>
 </div>
 
@@ -165,7 +170,7 @@ details.acc[open] summary::before{content:'− '}
 <div class="shell hide" id="shell">
   <aside class="side" id="side">
     <div class="brand"><div class="logo">E</div><div class="n">Operaciones<small id="cond"></small></div></div>
-    <div class="cond-control">
+    <div class="cond-control" id="controlCond">
       <label for="condSelector">Condominio</label>
       <select id="condSelector"></select>
       <button class="btn gh sm hide" id="btnNuevoCond">Agregar condominio</button>
@@ -214,7 +219,7 @@ async function rpc(fn,args){
 }
 function toast(m,t){const e=$('toast');e.textContent=m;e.className='toast on'+(t?' '+t:'');setTimeout(()=>e.className='toast',2700);}
 function sheet(html){$('sheetBox').innerHTML=html;$('sheet').classList.add('on');}
-function cerrarSheet(){$('sheet').classList.remove('on');}
+function cerrarSheet(){$('sheet').classList.remove('on');if($('claveGenerada'))$('sheetBox').replaceChildren();}
 $('sheet').addEventListener('click',e=>{if(e.target.id==='sheet')cerrarSheet();});
 
 /* ============ NAVEGACIÓN ============ */
@@ -276,15 +281,18 @@ $('burger').onclick=abrirMenu; $('scrim').onclick=cerrarMenu;
 /* ============ LOGIN ============ */
 async function entrar(){
   const u=$('u').value.trim(), p=$('p').value, b=$('entrar');
+  if(b.disabled)return;
   if(!u||!p){$('lerr').textContent='Escribe usuario y contraseña.';return;}
   b.disabled=true;b.innerHTML='<span class="sp"></span>';$('lerr').textContent='';
   try{
     const credenciales={p_user:u,p_password:p};
     const d=await rpc('pg_operaciones_condominios',credenciales);
     if(!d?.ok){$('lerr').textContent=d?.error||'Usuario o contraseña incorrectos.';return;}
+    const restriccion=verAccesoPanel(d);
+    if(restriccion){$('lerr').textContent=restriccion;return;}
     condominios=d.condominios;
     if(!condominios.length){$('lerr').textContent='Tu usuario todavía no tiene un condominio asignado.';return;}
-    const deseado=new URLSearchParams(location.search).get('condominio')?.toUpperCase();
+    const deseado=manzanaDeRuta||new URLSearchParams(location.search).get('condominio')?.toUpperCase();
     condominioActivo=condominios.find(c=>c.codigo===deseado)||condominios.find(c=>c.codigo==='M80')||condominios[0];
     puedeCrearCondominio=d.puede_crear;
     C=credenciales;
@@ -298,7 +306,7 @@ async function entrar(){
     const destino=location.hash.slice(1);
     const menu=menuCondominio();
     ir(menu.some(x=>x.k===destino)||destino==='regularizacion'&&condominioActivo.codigo==='M80'
-      ? destino : condominioActivo.codigo==='M80' ? 'inicio' : 'propietarios');
+      ? destino : inicioPanel());
   }catch(e){$('lerr').textContent='No se pudo entrar a Operaciones. Intenta de nuevo.';}
   finally{b.disabled=false;b.textContent='Entrar';}
 }
@@ -316,7 +324,12 @@ async function render(){
   const condominio=condominioActivo, vista=V;
   loading();
   try{
-    if(V==='propietarios') await vPropietarios();
+    if(V==='portafolio') await vPortafolio();
+    else if(V==='resumen-local') await vResumenLocal();
+    else if(V==='incidencias-locales') await vRegistrosLocales('incidencia');
+    else if(V==='gastos-locales') await vRegistrosLocales('gasto');
+    else if(V==='equipo-cond') await vEquipoCond();
+    else if(V==='propietarios') await vPropietarios();
     else if(V==='archivos') await vArchivos();
     else if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
@@ -1980,7 +1993,9 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js"></script>
+<script src="/operaciones/condominios.js?v=20261116-paneles"></script>
+<script src="/operaciones/panel-administracion.js"></script>
+<script>prepararAccesoPanel();</script>
 <script src="/operaciones/regularizacion-inline.js"></script>
 <script src="/operaciones/fondo-reserva.js?v=20261112-recibo"></script>
 <script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'&&condominioActivo.codigo==='M80'||menuCondominio().some(x=>x.k===k))&&V!==k)ir(k);});</script>
