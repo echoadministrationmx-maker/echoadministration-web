@@ -225,27 +225,6 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .inv-box p{color:var(--muted);max-width:520px}
 
 
-/* COMMUNITY */
-.com{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.com-card{position:relative;border-radius:24px;padding:40px;overflow:hidden;border:1px solid var(--line);background:#fff;display:flex;flex-direction:column;min-height:300px;transition:transform .3s,box-shadow .3s}
-.com-card:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
-.com-card.dark{background:var(--navy);border-color:var(--navy);color:#C7D0E6}
-.com-card.dark h3{color:#fff}
-.com-card .k{font-size:13px;font-weight:500;color:var(--blue);margin-bottom:14px}
-.com-card.dark .k{color:#8FB0FF}
-.com-card h3{font-size:clamp(24px,2.6vw,32px);letter-spacing:-.03em;line-height:1.1;margin-bottom:12px}
-.com-card p{font-size:15.5px;color:var(--muted);max-width:420px}
-.com-card.dark p{color:#9FAACB}
-.com-chips{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 28px}
-.com-chips span{font-size:12.5px;padding:6px 12px;border-radius:999px;background:var(--sky);color:var(--blue);font-weight:500}
-.com-card.dark .com-chips span{background:rgba(143,176,255,.14);color:#C7D6FF}
-.com-act{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
-.com-act .btn{padding:12px 20px;font-size:14.5px}
-.btn-line-w{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
-.btn-line-w:hover{border-color:#fff}
-@media (max-width:980px){.com{grid-template-columns:1fr}}
-@media (max-width:620px){.com-card{padding:28px}}
-
 /* MODAL */
 .modal{position:fixed;inset:0;background:rgba(10,22,51,.5);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
 .modal.open{display:flex}
@@ -319,8 +298,8 @@ footer a:hover{color:#fff}
     <div class="nav-links">
       <a href="#servicios" data-en="Services">Servicios</a>
       <a href="#cobranza" data-en="Collections">Cobranza</a>
-      <a href="/departamentos" data-en="Listings">Departamentos</a>
-      <a href="/convenios" data-en="Perks">Convenios</a>
+      <a href="#como-funciona" data-en="How it works">Cómo funciona</a>
+      <a href="#portal" data-en="Resident portal">Portal</a>
       <a href="#" onclick="openInv(event)" data-en="Partners &amp; investors">Aliados e inversionistas</a>
     </div>
     <div class="nav-r">
@@ -335,8 +314,6 @@ footer a:hover{color:#fff}
   <a href="#servicios" data-en="Services">Servicios</a>
   <a href="#cobranza" data-en="Collections">Cobranza</a>
   <a href="#como-funciona" data-en="How it works">Cómo funciona</a>
-  <a href="/departamentos" data-en="Listings for rent &amp; sale">Departamentos en renta y venta</a>
-  <a href="/convenios" data-en="Perks">Convenios</a>
   <a href="/portal" data-en="Resident login">Entrar al portal</a>
   <a href="#" onclick="openInv(event)" data-en="Partners &amp; investors">Aliados e inversionistas</a>
   <a href="#propuesta" style="color:var(--blue);font-weight:600" data-en="Get a proposal →">Solicita tu propuesta →</a>
@@ -597,38 +574,6 @@ footer a:hover{color:#fff}
   </div>
 </section>
 
-<!-- COMMUNITY -->
-<section id="comunidad" style="padding-top:0">
-  <div class="wrap">
-    <div class="split-h">
-      <div><div class="eyebrow rv" data-en="Echo community">Comunidad Echo</div><h2 class="rv d1" data-en="More than administration: <span class='serif'>a community.</span>">Más que administración: <span class="serif">una comunidad.</span></h2></div>
-      <p class="lead rv d2" data-en="Find a unit for rent or sale in communities managed by Echo, and enjoy perks with local businesses.">Encuentra departamentos en renta o venta en comunidades administradas por Echo y aprovecha beneficios con negocios locales.</p>
-    </div>
-    <div class="com">
-      <div class="com-card dark rv">
-        <div class="k" data-en="Listings">Departamentos</div>
-        <h3 data-en="Units for rent and sale">Departamentos en renta y venta</h3>
-        <p data-en="Every listing is reviewed by Echo before it's published.">Cada ficha la revisa Echo antes de publicarse.</p>
-        <div class="com-chips"><span data-en="Rent">Renta</span><span data-en="Sale">Venta</span><span data-en="Short, mid &amp; long term">Corto, mediano y largo plazo</span></div>
-        <div class="com-act">
-          <a href="/departamentos" class="btn btn-white"><span data-en="See listings">Ver departamentos</span> <span class="arr">→</span></a>
-          <a href="/publicar-departamento" class="btn btn-line-w" data-en="List my unit">Publicar mi departamento</a>
-        </div>
-      </div>
-      <div class="com-card rv d1">
-        <div class="k" data-en="Perks">Convenios</div>
-        <h3 data-en="Perks for Echo residents">Beneficios para residentes Echo</h3>
-        <p data-en="Discounts and experiences with businesses in Tulum, Tampico, CDMX and Mazatlán.">Descuentos y experiencias con negocios en Tulum, Tampico, CDMX y Mazatlán.</p>
-        <div class="com-chips"><span data-en="Restaurants">Restaurantes</span><span>Tours</span><span data-en="Wellness">Bienestar</span><span data-en="Transport">Transporte</span></div>
-        <div class="com-act">
-          <a href="/convenios" class="btn btn-primary"><span data-en="See active perks">Ver convenios activos</span> <span class="arr">→</span></a>
-          <a href="/registrar-negocio" class="btn btn-ghost" data-en="Register my business">Registrar mi negocio</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- INVESTORS -->
 <div class="inv">
   <div class="wrap">
@@ -669,7 +614,7 @@ footer a:hover{color:#fff}
         <div class="logo"><span class="logo-mark"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M2 9C2 5.13 5.13 2 9 2C12.87 2 16 5.13 16 9C16 12.87 12.87 16 9 16" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M9 6V12M6 9H12" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></span>Echo <small>Administración</small></div>
         <p style="font-size:14px;max-width:300px" data-en="Condo management with an on-site team and our own platform.">Administración de condominios con equipo en campo y plataforma propia.</p>
       </div>
-      <div><h4 data-en="Services">Servicios</h4><ul><li><a href="#servicios" data-en="Administration">Administración</a></li><li><a href="#cobranza" data-en="Active collections">Cobranza activa</a></li><li><a href="#portal" data-en="Resident portal">Portal de residentes</a></li><li><a href="/departamentos" data-en="Units for rent &amp; sale">Renta y venta</a></li><li><a href="/publicar-departamento" data-en="List my unit">Publicar departamento</a></li><li><a href="/convenios" data-en="Perks">Convenios</a></li></ul></div>
+      <div><h4 data-en="Services">Servicios</h4><ul><li><a href="#servicios" data-en="Administration">Administración</a></li><li><a href="#cobranza" data-en="Active collections">Cobranza activa</a></li><li><a href="#portal" data-en="Resident portal">Portal de residentes</a></li></ul></div>
       <div><h4 data-en="Company">Empresa</h4><ul><li><a href="#como-funciona" data-en="How it works">Cómo funciona</a></li><li><a href="#" onclick="openInv(event)" data-en="Partners &amp; investors">Aliados e inversionistas</a></li><li><a href="/portal" data-en="Resident login">Entrar al portal</a></li></ul></div>
       <div><h4 data-en="Contact">Contacto</h4><ul><li><a href="https://wa.me/522206808919" target="_blank" rel="noopener">WhatsApp</a></li><li><a href="mailto:echoadministrationmx@gmail.com" data-en="Email">Correo</a></li><li><a href="#propuesta" data-en="Get a proposal">Solicita tu propuesta</a></li></ul></div>
     </div>

@@ -3,50 +3,158 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#14233c">
-<title>Registrar negocio para convenios · Echo</title>
-<link rel="stylesheet" href="/formularios/registro.css">
-<script src="/formularios/registro.js" defer></script>
+<meta name="theme-color" content="#0A1633">
+<title>Registra tu convenio con Echo · Anuncia tu negocio en nuestra app</title>
+<meta name="description" content="Pon tu negocio frente a los residentes de las comunidades que administra Echo. Solo dinos qué descuento ofreces.">
+<link rel="stylesheet" href="/formularios/echo-landing.css">
+<style>
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.phone{width:300px;margin:0 auto;background:var(--navy);border-radius:44px;padding:12px;box-shadow:var(--sh-lg);transform:rotate(3deg)}
+.screen{background:#fff;border-radius:34px;padding:24px 18px;min-height:540px}
+.screen .t{font-size:12.5px;color:var(--muted)}
+.screen .h{font-size:19px;font-weight:600;color:var(--ink);letter-spacing:-.02em;margin-bottom:16px}
+.promo{border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid var(--line);display:flex;gap:12px;align-items:center}
+.promo.top{background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;border:0;flex-direction:column;align-items:flex-start;padding:20px}
+.promo.top .off{font-size:34px;font-weight:600;letter-spacing:-.04em;line-height:1}
+.promo.top .n{font-size:14px;opacity:.85}
+.promo.top .tag{font-size:11px;color:#fff;background:rgba(255,255,255,.22);border-radius:999px;padding:4px 10px}
+.logo-b{width:42px;height:42px;border-radius:12px;background:var(--sky);display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.promo b{display:block;color:var(--ink);font-size:14px;font-weight:600}
+.promo span{font-size:12.5px;color:var(--muted)}
+.promo .pct{margin-left:auto;font-weight:600;color:var(--blue);font-size:15px}
+.stats{display:flex;gap:40px;margin-top:40px;flex-wrap:wrap}
+.stats b{display:block;font-size:32px;font-weight:600;color:var(--ink);letter-spacing:-.04em;line-height:1}
+.stats span{font-size:13px;color:var(--muted)}
+.steps{counter-reset:s;display:grid;gap:14px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start;padding:22px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.step::before{counter-increment:s;content:counter(s);width:44px;height:44px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:600}
+.step p{font-size:15px;color:var(--muted)}
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ex button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 13px;font-size:13px;color:var(--text);cursor:pointer}
+.ex button:hover{border-color:var(--blue);color:var(--blue)}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:48px}.phone{transform:none}}
+</style>
 </head>
 <body>
-<header><a class="brand" href="/"><span class="logo" aria-hidden="true">E</span>Echo Administración</a></header>
-<main>
-  <div class="encabezado">
-    <a href="/convenios" class="volver">← Convenios</a>
-    <h1>Registra tu negocio para un convenio</h1>
-    <p>Cuéntanos qué descuento o beneficio te gustaría ofrecer a la comunidad de Echo.</p>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a href="/" class="logo"><span class="logo-mark"></span>Echo <small>Convenios</small></a>
+    <div class="top-r"><a href="#registro-form" class="btn btn-primary">Registrar mi convenio</a></div>
   </div>
-  <form id="registro" data-tipo="negocio" method="post" aria-label="Registrar negocio para convenios">
-    <section aria-labelledby="datosNegocio">
-      <h2 id="datosNegocio">Datos del negocio</h2>
-      <div class="campos">
-        <div><label for="nombre">Nombre comercial</label><input id="nombre" name="nombre" autocomplete="organization" minlength="2" maxlength="120" required></div>
-        <div><label for="categoria">Giro o categoría</label><input id="categoria" name="categoria" minlength="2" maxlength="70" placeholder="Ej. Restaurante" required></div>
-        <div><label for="ciudad">Ciudad y estado</label><input id="ciudad" name="ciudad" minlength="2" maxlength="120" placeholder="Ej. Tulum, Quintana Roo" required></div>
-        <div><label for="direccion">Dirección <sup>(opcional)</sup></label><input id="direccion" name="direccion" autocomplete="street-address" maxlength="240"></div>
-        <div class="ancho"><label for="enlace">Sitio web, Instagram o Maps <sup>(opcional)</sup></label><input type="url" id="enlace" name="enlace" maxlength="600" placeholder="https://"></div>
+</header>
+
+<div class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow rv">Para negocios</div>
+      <h1 class="rv d1">¿Quieres registrar tu convenio <span class="serif">con nosotros?</span></h1>
+      <p class="lead rv d2">Pon tu negocio dentro de la app de Echo, frente a los residentes y propietarios de las comunidades que administramos. Tú solo nos dices qué descuento ofreces.</p>
+      <div class="hero-cta rv d2">
+        <a href="#registro-form" class="btn btn-primary">Registrar mi convenio →</a>
+        <a href="#como" class="btn btn-ghost">Cómo funciona</a>
       </div>
-    </section>
-    <section aria-labelledby="datosBeneficio">
-      <h2 id="datosBeneficio">Beneficio propuesto</h2>
-      <div class="campos">
-        <div class="ancho"><label for="beneficio">Descuento o beneficio</label><textarea id="beneficio" name="beneficio" rows="2" minlength="3" maxlength="500" placeholder="Ej. 15% en alimentos de lunes a jueves" required></textarea></div>
-        <div class="ancho"><label for="condiciones">Condiciones y cómo canjearlo <sup>(opcional)</sup></label><textarea id="condiciones" name="condiciones" rows="3" maxlength="1200"></textarea></div>
-        <div><label for="vigencia">Fecha de vencimiento <sup>(opcional)</sup></label><input id="vigencia" name="vigencia" type="date" max="2100-12-31"></div>
+      <div class="stats rv d2">
+        <div><b>956</b><span>departamentos</span></div>
+        <div><b>4</b><span>ciudades</span></div>
+        <div><b>2 min</b><span>para registrarte</span></div>
       </div>
-    </section>
-    <section aria-labelledby="datosContacto">
-      <h2 id="datosContacto">Persona de contacto</h2>
-      <div class="campos">
-        <div class="ancho"><label for="contacto">Nombre completo</label><input id="contacto" name="contacto" autocomplete="name" minlength="2" maxlength="120" required></div>
-        <div><label for="email">Correo electrónico</label><input type="email" id="email" name="email" autocomplete="email" maxlength="254"></div>
-        <div><label for="telefono">Teléfono o WhatsApp</label><input type="tel" id="telefono" name="telefono" autocomplete="tel" maxlength="30"></div>
+    </div>
+    <div class="rv d1">
+      <div class="phone"><div class="screen">
+        <div class="t">Beneficios para ti</div>
+        <div class="h">Convenios Echo</div>
+        <div class="promo top">
+          <span class="tag">Destacado</span>
+          <div class="off">20% OFF</div>
+          <div class="n">Tu negocio aquí · presenta tu app Echo</div>
+        </div>
+        <div class="promo"><div class="logo-b">🍽️</div><div><b>Restaurante</b><span>Tulum</span></div><div class="pct">15%</div></div>
+        <div class="promo"><div class="logo-b">🧘</div><div><b>Spa y bienestar</b><span>Tulum</span></div><div class="pct">2x1</div></div>
+        <div class="promo"><div class="logo-b">🚗</div><div><b>Traslados</b><span>Aeropuerto</span></div><div class="pct">10%</div></div>
+        <div class="promo"><div class="logo-b">🤿</div><div><b>Tours</b><span>Cenotes</span></div><div class="pct">15%</div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<section id="como">
+  <div class="wrap">
+    <div class="eyebrow rv">Por qué Echo</div>
+    <h2 class="rv d1">Publicidad que llega <span class="serif">a quien vive cerca.</span></h2>
+    <p class="lead rv d2" style="margin-bottom:44px">Tu convenio aparece donde nuestros residentes pagan su cuota, revisan avisos y buscan qué hacer.</p>
+    <div class="g3">
+      <div class="card rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div><h3>Dentro de nuestra app</h3><p>Tu marca, tu descuento y tu ubicación en la sección de convenios del portal de residentes.</p></div>
+      <div class="card rv d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><h3>Clientes de tu zona</h3><p>Residentes, propietarios y huéspedes de comunidades en Tulum, Tampico, CDMX y Mazatlán.</p></div>
+      <div class="card rv d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12l-8 8-8-8V4h8z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div><h3>Tú pones las reglas</h3><p>Decide el descuento, las condiciones y hasta cuándo es válido. Lo puedes cambiar cuando quieras.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="registro-form" style="background:var(--bg);border-top:1px solid var(--line)">
+  <div class="wrap g2">
+    <div>
+      <div class="eyebrow rv">Así de fácil</div>
+      <h2 class="rv d1">Solo dinos tu <span class="serif">descuento.</span></h2>
+      <div class="steps rv d2" style="margin-top:28px">
+        <div class="step"><div><h3>Llena el formulario</h3><p>Nombre del negocio, ciudad y el descuento que quieres ofrecer.</p></div></div>
+        <div class="step"><div><h3>Lo revisamos</h3><p>El equipo de Echo te contacta para confirmar los detalles.</p></div></div>
+        <div class="step"><div><h3>Sales en la app</h3><p>Tu convenio se publica para los residentes de tu ciudad.</p></div></div>
       </div>
-      <p class="ayuda">Comparte al menos un medio de contacto. Echo revisará tu propuesta. Consulta el <a href="/privacidad">aviso de privacidad</a>.</p>
-    </section>
-    <div class="acciones"><p id="estado" role="alert"></p><button type="submit">Enviar propuesta</button></div>
-  </form>
-  <section id="confirmacion" class="confirmacion" tabindex="-1" hidden><h2>Propuesta recibida</h2><p>El equipo de Echo revisará los datos y el beneficio que propusiste.</p><p><a href="/convenios">Volver a Convenios</a></p></section>
-</main>
+    </div>
+
+    <div class="rv d1">
+      <form class="form" id="registro" data-tipo="negocio" method="post" aria-label="Registrar convenio">
+        <h3>Registra tu convenio</h3>
+        <p class="sub">Te toma menos de 2 minutos.</p>
+        <div class="fr"><label for="nombre">Nombre del negocio</label><input id="nombre" name="nombre" autocomplete="organization" minlength="2" maxlength="120" required placeholder="Ej. Casa del Mar"></div>
+        <div class="f2">
+          <div class="fr"><label for="categoria">Giro</label>
+            <select id="categoria" name="categoria" required>
+              <option value="">Selecciona</option>
+              <option>Restaurante</option><option>Café o bar</option><option>Tours y experiencias</option>
+              <option>Spa y bienestar</option><option>Gimnasio o yoga</option><option>Transporte</option>
+              <option>Tienda</option><option>Servicios para el hogar</option><option>Eventos</option><option>Otro</option>
+            </select></div>
+          <div class="fr"><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad" minlength="2" maxlength="120" required placeholder="Ej. Tulum, Q. Roo"></div>
+        </div>
+        <div class="fr"><label for="beneficio">¿Qué descuento ofreces?</label>
+          <input id="beneficio" name="beneficio" minlength="3" maxlength="500" required placeholder="Ej. 15% en alimentos de lunes a jueves">
+          <div class="ex" aria-label="Ejemplos">
+            <button type="button">10% en tu cuenta</button><button type="button">2x1 en bebidas</button><button type="button">15% en tours</button><button type="button">Envío gratis</button>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="fr"><label for="contacto">Tu nombre</label><input id="contacto" name="contacto" autocomplete="name" minlength="2" maxlength="120" required></div>
+          <div class="fr"><label for="telefono">WhatsApp</label><input id="telefono" name="telefono" type="tel" autocomplete="tel" maxlength="30" placeholder="+52"></div>
+        </div>
+        <div class="fr"><label for="email">Correo <sup>(opcional)</sup></label><input id="email" name="email" type="email" autocomplete="email" maxlength="254"></div>
+        <button class="btn btn-primary" type="submit">Registrar mi convenio →</button>
+        <p class="msg" id="estado" role="alert"></p>
+        <p class="fine">Al enviar aceptas el <a href="/privacidad">aviso de privacidad</a>.</p>
+      </form>
+      <div class="form done" id="confirmacion" tabindex="-1" hidden>
+        <div class="tick">✓</div>
+        <h3>¡Recibimos tu convenio!</h3>
+        <p class="sub" style="margin:8px 0 22px;color:var(--muted)">El equipo de Echo te contactará para confirmar los detalles y publicarlo.</p>
+        <a href="https://wa.me/522206808919" target="_blank" rel="noopener" class="btn btn-ghost">¿Dudas? Escríbenos por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>© 2026 Echo Administración · Tulum · Tampico · CDMX · Mazatlán</span>
+    <div><a href="/privacidad">Aviso de privacidad</a><a href="/terminos">Términos</a></div>
+  </div>
+</footer>
+
+<script src="/formularios/registro.js"></script>
+<script>
+document.querySelectorAll('.ex button').forEach(b=>b.onclick=()=>{const i=document.getElementById('beneficio');i.value=b.textContent;i.focus();});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
 </body>
 </html>
