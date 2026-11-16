@@ -22,8 +22,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .lm svg{width:20px;height:20px}
 .ln{font-size:17px;font-weight:800;color:var(--ink)}
 .ln span{color:var(--blue)}
-.login-box h2{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
+.login-box h1{font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px;text-align:center}
 .login-sub{font-size:13.5px;color:var(--muted);text-align:center;margin-bottom:28px}
+.manzana-list{list-style:none;display:grid;gap:10px}
+.manzana-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border:1.5px solid var(--border);border-radius:10px;color:var(--ink);text-decoration:none}
+.manzana-link:hover{border-color:var(--blue);background:var(--blue-light)}
+.manzana-link:focus-visible,.manzana-back:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.manzana-link strong,.manzana-link small{display:block}
+.manzana-link strong{font-size:15px}
+.manzana-link small{margin-top:3px;color:var(--muted);font-size:12px}
+.manzana-arrow{color:var(--blue);flex:none}
+.manzana-back{display:block;margin-top:17px;color:var(--blue);text-align:center;font-weight:700;font-size:13px}
+
 .fg{margin-bottom:16px}
 .fg label{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .fg input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
@@ -134,19 +144,35 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div class="lm"><svg viewBox="0 0 20 20" fill="none"><path d="M2 10C2 5.58 5.58 2 10 2C14.42 2 18 5.58 18 10C18 14.42 14.42 18 10 18" stroke="white" stroke-width="2.2" stroke-linecap="round"/><path d="M10 7V13M7 10H13" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         <span class="ln">Echo <span>Administración</span></span>
       </div>
-      <h2>Portal de Residentes</h2>
-      <p class="login-sub">Manzana 80 · Aldea Tulum</p>
-      <div class="fg">
-        <label>Clave de acceso</label>
-        <input type="text" id="input-user" placeholder="Ej: 301D2, 204A, 101O1">
+      <h1>Portal de Residentes</h1>
+      <div id="manzana-selector">
+        <p class="login-sub" id="manzana-instruccion">Elige tu manzana para continuar.</p>
+        <ul class="manzana-list" aria-labelledby="manzana-instruccion">
+          <li><a class="manzana-link" href="/portal?manzana=M80">
+            <span><strong>Manzana 80</strong><small>Iniciar sesión</small></span>
+            <span aria-hidden="true" class="manzana-arrow">→</span>
+          </a></li>
+          <li><a class="manzana-link" href="/registro-propietarios">
+            <span><strong>Manzana 60</strong><small>Registro de propietarios</small></span>
+            <span aria-hidden="true" class="manzana-arrow">→</span>
+          </a></li>
+        </ul>
       </div>
-      <div class="fg">
-        <label>Contraseña</label>
-        <input type="password" id="input-pass" placeholder="Tulum + tu clave">
-      </div>
-      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar al portal →</button>
-      <div class="login-error" id="login-error">Clave o contraseña incorrecta.</div>
-      <p class="login-hint">¿No sabes tu clave?<br><a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
+      <form id="form-manzana-80" class="hidden" method="post" onsubmit="event.preventDefault(); doLogin()">
+        <p class="login-sub">Manzana 80 · Aldea Tulum</p>
+        <div class="fg">
+          <label for="input-user">Clave de acceso</label>
+          <input type="text" id="input-user" autocomplete="username" placeholder="Ej: 301D2, 204A, 101O1">
+        </div>
+        <div class="fg">
+          <label for="input-pass">Contraseña</label>
+          <input type="password" id="input-pass" autocomplete="current-password" placeholder="Tulum + tu clave">
+        </div>
+        <button class="btn-login" id="btn-login">Entrar al portal →</button>
+        <div class="login-error" id="login-error" role="alert">Clave o contraseña incorrecta.</div>
+        <p class="login-hint">¿No sabes tu clave?<br><a href="mailto:echoadministrationmx@gmail.com" style="color:var(--blue);font-weight:600">echoadministrationmx@gmail.com</a></p>
+        <a class="manzana-back" href="/portal">← Cambiar de manzana</a>
+      </form>
     </div>
   </div>
   <div class="login-footer">
@@ -156,6 +182,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <a href="/">← Inicio</a>
   </div>
 </div>
+
+<script>
+  if (new URLSearchParams(window.location.search).get('manzana')?.toUpperCase() === 'M80') {
+    document.getElementById('manzana-selector').classList.add('hidden');
+    document.getElementById('form-manzana-80').classList.remove('hidden');
+  }
+</script>
 
 <div id="portal" class="hidden">
   <div class="sidebar">
@@ -1530,6 +1563,7 @@ async function doLogin() {
   const u = document.getElementById('input-user').value.trim();
   const p = document.getElementById('input-pass').value.trim();
   const btn = document.getElementById('btn-login');
+  if (btn.disabled) return;
   const err = document.getElementById('login-error');
   err.style.display = 'none';
 
@@ -1574,6 +1608,7 @@ async function doLogin() {
     renderLlamadas();
     renderAvisoLlamadas();
     renderComunidad();
+    initComunidad();
     cargarMisDatos();
     cargarAviso();
     cargarMisRentas();
@@ -2018,8 +2053,6 @@ function doPago() {
   mostrarMsgPago('Mercado Pago se abrió en una pestaña nueva. ' + instruccion + ' Después envía tu comprobante.', 'info');
 }
 
-initComunidad();
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>
 </body>
 </html>
