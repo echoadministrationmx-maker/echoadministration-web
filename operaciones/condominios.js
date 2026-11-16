@@ -17,11 +17,11 @@ let promesaExcel;
 
 function menuCondominio() {
   const cabecera = puedeCrearCondominio && !manzanaDeRuta
-    ? [{k:'portafolio',t:'Vista general',i:'▦'}] : [];
+    ? [{k:'portafolio',t:'Vista general',i:'▦'},{k:'negocios-convenios',t:'Solicitudes de convenios',i:'🤝'}] : [];
   if (condominioActivo?.codigo==='M80') return [...cabecera,...MENU_CONDOMINIO,...MENU];
   if (condominioActivo?.codigo==='M60') {
     const equipo = puedeCrearCondominio ? [{k:'equipo-cond',t:'Accesos del equipo',i:'🔑'}] : [];
-    return [...cabecera,...VISTAS_M60,...MENU_CONDOMINIO,...equipo];
+    return [...cabecera,...VISTAS_M60,{k:'inventario-rentas',t:'Departamentos en renta',i:'🏠'},...MENU_CONDOMINIO,...equipo];
   }
   return [...cabecera,...MENU_CONDOMINIO];
 }
