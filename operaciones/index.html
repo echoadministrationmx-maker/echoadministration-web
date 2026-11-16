@@ -113,6 +113,17 @@ details.acc summary::before{content:'＋ ';font-weight:800}
 details.acc[open] summary::before{content:'− '}
 .mono{font-variant-numeric:tabular-nums}
 
+/* ---------- CONDOMINIOS ---------- */
+.cond-control{padding:0 16px 7px}
+.cond-control label{color:#ffffffc2}
+.cond-control select{padding:9px 10px;font-size:.88rem;border-color:#ffffff24;background:#1C2839;color:#fff}
+.cond-control .btn{margin-top:7px;background:none;border-color:#ffffff30;color:#fff;width:100%}
+.cond-tabla{overflow:auto;margin-top:12px}
+.cond-tabla table{border-collapse:collapse;width:100%;font-size:.83rem}
+.cond-tabla th,.cond-tabla td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--mid)}
+.cond-tabla th{white-space:nowrap;background:var(--silver)}
+.dl span{overflow-wrap:anywhere}
+
 /* ---------- LOGIN ---------- */
 #login{max-width:390px;margin:8vh auto;padding:0 16px}
 
@@ -140,8 +151,8 @@ details.acc[open] summary::before{content:'− '}
 <div id="login">
   <div class="card" style="text-align:center;padding:28px">
     <div class="logo" style="width:46px;height:46px;font-size:1.3rem;margin:0 auto 14px">E</div>
-    <h2>Panel de Operaciones</h2><p class="sub" style="color:var(--blue);font-weight:700">Actualizado 12 nov 2026 · Fondo de reserva por edificio</p>
-    <p class="sub" style="margin-bottom:20px">Echo Administración · Manzana 80</p>
+    <h2>Panel de Operaciones</h2>
+    <p class="sub" style="margin-bottom:20px">Echo Administración</p>
     <div style="text-align:left"><label>Usuario</label><input id="u" autocomplete="username"></div>
     <div style="text-align:left;margin-top:12px"><label>Contraseña</label><input id="p" type="password" autocomplete="current-password"></div>
     <button class="btn wide" id="entrar" style="margin-top:18px">Entrar</button>
@@ -153,7 +164,12 @@ details.acc[open] summary::before{content:'− '}
 
 <div class="shell hide" id="shell">
   <aside class="side" id="side">
-    <div class="brand"><div class="logo">E</div><div class="n">Operaciones<small id="cond">Manzana 80</small></div></div>
+    <div class="brand"><div class="logo">E</div><div class="n">Operaciones<small id="cond"></small></div></div>
+    <div class="cond-control">
+      <label for="condSelector">Condominio</label>
+      <select id="condSelector"></select>
+      <button class="btn gh sm hide" id="btnNuevoCond">Agregar condominio</button>
+    </div>
     <nav id="nav"></nav>
     <div class="foot"><span id="quien"></span><button id="salir">Salir</button></div>
   </aside>
@@ -161,7 +177,7 @@ details.acc[open] summary::before{content:'− '}
   <div class="main">
     <header class="top">
       <button class="burger" id="burger">☰</button>
-      <h1 id="titulo">Resumen</h1><small style="color:var(--faint);font-size:.65rem">16 oct · Fondo $1,000</small>
+      <h1 id="titulo">Resumen</h1>
       <button class="iconbtn" id="btnNotif" title="Notificaciones">🔔<span class="dot hide" id="notifDot"></span></button>
       <button class="iconbtn" id="btnRef" title="Actualizar">↻</button>
     </header>
@@ -185,11 +201,16 @@ const fecha=s=>s?new Date(String(s).length<=10?s+'T12:00:00':s).toLocaleDateStri
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 async function rpc(fn,args){
+  const legacy=fn.startsWith('pg_')&&!fn.startsWith('pg_operaciones_');
+  const condominio=condominioActivo;
+  if(legacy&&condominio?.codigo!=='M80')throw new Error('Esta sección de Operaciones pertenece a Manzana 80.');
   const r=await fetch(`${SB}/rest/v1/rpc/${fn}`,{method:'POST',
     headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},
     body:JSON.stringify(args||{})});
+  const dato=r.ok?await r.json():null;
+  if(legacy&&condominio!==condominioActivo)throw new Error('El condominio seleccionado cambió.');
   if(!r.ok)throw new Error('HTTP '+r.status);
-  return r.json();
+  return dato;
 }
 function toast(m,t){const e=$('toast');e.textContent=m;e.className='toast on'+(t?' '+t:'');setTimeout(()=>e.className='toast',2700);}
 function sheet(html){$('sheetBox').innerHTML=html;$('sheet').classList.add('on');}
@@ -223,7 +244,7 @@ const MENU=[
   {k:'descuentos',t:'Descuentos',i:'🏷️'}
 ];
 function pintarNav(){
-  $('nav').innerHTML=MENU.map(m=>m.g
+  $('nav').innerHTML=menuCondominio().map(m=>m.g
     ? `<div class="grp">${m.g}</div>`
     : `<button class="nv${V===m.k?' on':''}" data-k="${m.k}"><span class="ic">${m.i}</span>${m.t}<span class="cnt hide" id="cnt-${m.k}"></span></button>`).join('');
   $('nav').querySelectorAll('.nv').forEach(b=>b.onclick=()=>ir(b.dataset.k));
@@ -240,8 +261,9 @@ function pintarBadges(){
 }
 function ir(k){
   if(k==='regularizacion')k='comparativa';
+  const m=menuCondominio().find(x=>x.k===k);
+  if(!m)return;
   V=k; history.replaceState(null,'','#'+k); cerrarMenu();
-  const m=MENU.find(x=>x.k===k)||{t:'Panel'};
   $('titulo').textContent=m.t;
   $('nav').querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
   $('vista').scrollTop=0; window.scrollTo(0,0);
@@ -257,17 +279,28 @@ async function entrar(){
   if(!u||!p){$('lerr').textContent='Escribe usuario y contraseña.';return;}
   b.disabled=true;b.innerHTML='<span class="sp"></span>';$('lerr').textContent='';
   try{
-    const d=await rpc('pg_cobranza',{p_user:u,p_password:p});
-    if(!d||d.ok===false){$('lerr').textContent='Usuario o contraseña incorrectos.';b.disabled=false;b.textContent='Entrar';return;}
-    C={p_user:u,p_password:p}; D.cob=d.meses||[];
-    $('login').classList.add('hide'); $('shell').classList.remove('hide');
+    const credenciales={p_user:u,p_password:p};
+    const d=await rpc('pg_operaciones_condominios',credenciales);
+    if(!d?.ok){$('lerr').textContent=d?.error||'Usuario o contraseña incorrectos.';return;}
+    condominios=d.condominios;
+    if(!condominios.length){$('lerr').textContent='Tu usuario todavía no tiene un condominio asignado.';return;}
+    const deseado=new URLSearchParams(location.search).get('condominio')?.toUpperCase();
+    condominioActivo=condominios.find(c=>c.codigo===deseado)||condominios.find(c=>c.codigo==='M80')||condominios[0];
+    puedeCrearCondominio=d.puede_crear;
+    C=credenciales;
+    if(condominioActivo.codigo==='M80')await cargarCorte();
+    $('login').classList.add('hide');
+    $('shell').classList.remove('hide');
     $('quien').textContent=u;
-    const cfg=await rpc('pg_config',C); if(cfg&&cfg.ok)CORTE={anio:cfg.anio,mes:cfg.mes};
-    cargarNotifs();
-    pintarNav(); const destino=location.hash.slice(1);
-    ir(destino==='regularizacion'||MENU.some(x=>x.k===destino)?destino:'inicio');
-  }catch(e){$('lerr').textContent='Sin conexión. Revisa tu internet.';}
-  b.disabled=false;b.textContent='Entrar';
+    pintarSelectorCond();
+    if(condominioActivo.codigo==='M80')cargarNotifs();
+    pintarNav();
+    const destino=location.hash.slice(1);
+    const menu=menuCondominio();
+    ir(menu.some(x=>x.k===destino)||destino==='regularizacion'&&condominioActivo.codigo==='M80'
+      ? destino : condominioActivo.codigo==='M80' ? 'inicio' : 'propietarios');
+  }catch(e){$('lerr').textContent='No se pudo entrar a Operaciones. Intenta de nuevo.';}
+  finally{b.disabled=false;b.textContent='Entrar';}
 }
 $('entrar').onclick=entrar;
 $('p').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
@@ -275,10 +308,17 @@ $('salir').onclick=()=>location.reload();
 
 /* ============ RENDER ============ */
 function loading(){ $('vista').innerHTML='<div class="empty"><div class="e">⏳</div><div class="t">Cargando…</div></div>'; }
+async function cargarCorte(){
+  const cfg=await rpc('pg_config',C);
+  if(cfg?.ok)CORTE={anio:cfg.anio,mes:cfg.mes};
+}
 async function render(){
+  const condominio=condominioActivo, vista=V;
   loading();
   try{
-    if(V==='inicio')      await vInicio();
+    if(V==='propietarios') await vPropietarios();
+    else if(V==='archivos') await vArchivos();
+    else if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
     else if(V==='analisis')   await vAnalisis();
     else if(V==='comparativa') await vComparativa();
@@ -299,6 +339,7 @@ async function render(){
     else if(V==='descuentos') await vDescuentos();
     pintarBadges();
   }catch(e){
+    if(condominio!==condominioActivo||vista!==V)return;
     $('vista').innerHTML=`<div class="empty"><div class="e">⚠️</div>
       <div class="t">No se pudo cargar esta sección</div>
       <div style="margin-top:6px">Revisa tu conexión y usa ↻ Actualizar.</div>
@@ -1909,7 +1950,9 @@ async function cargarNotifs(){
   try{ D.nt=await rpc('pg_notificaciones',C); pintarBadges(); }catch(e){}
 }
 $('btnNotif').onclick=async()=>{
+  if(condominioActivo?.codigo!=='M80')return;
   await cargarNotifs();
+  if(condominioActivo?.codigo!=='M80')return;
   const it=(D.nt&&D.nt.items)||[];
   sheet(`<h3>Notificaciones</h3><p class="sub">${D.nt?D.nt.pendientes:0} sin revisar</p>
     <div style="margin-top:12px">${it.length?it.map(n=>`
@@ -1931,13 +1974,15 @@ $('btnNotif').onclick=async()=>{
 $('btnRef').onclick=async()=>{
   const b=$('btnRef'); b.disabled=true; b.innerHTML='<span class="sp" style="border-color:#0003;border-top-color:var(--blue)"></span>';
   D={cob:null,units:null,dir:null,inc:null,ll:null,av:null,ga:null,sv:null,cv:null,dc:null,rt:null,nt:null,an:null,hi:null,rc:null,cn:null,ab:null,sc:null};
-  await cargarNotifs(); await render();
+  if(condominioActivo.codigo==='M80')await cargarNotifs();
+  await render();
   toast('Datos actualizados','good');
   b.disabled=false; b.textContent='↻';
 };
 </script>
+<script src="/operaciones/condominios.js"></script>
 <script src="/operaciones/regularizacion-inline.js"></script>
 <script src="/operaciones/fondo-reserva.js?v=20261112-recibo"></script>
-<script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'||MENU.some(x=>x.k===k))&&V!==k)ir(k);});</script>
+<script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'&&condominioActivo.codigo==='M80'||menuCondominio().some(x=>x.k===k))&&V!==k)ir(k);});</script>
 </body>
 </html>
