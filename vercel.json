@@ -26,6 +26,10 @@
       "destination": "/operaciones/index.html"
     },
     {
+      "source": "/registro-propietarios",
+      "destination": "/registro-propietarios/index.html"
+    },
+    {
       "source": "/operaciones/regularizacion",
       "destination": "/operaciones/regularizacion.html"
     },
