@@ -1,0 +1,20 @@
+[hidden]{display:none!important}
+.barra{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.barra h2,.ficha h2{margin:0}
+.acciones-inmueble{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.secundario,.link-boton{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:var(--accent);border-radius:9px;padding:9px 14px;min-height:42px;font:700 .92rem 'DM Sans',sans-serif;text-decoration:none;cursor:pointer}
+.link-boton.principal{color:#fff;background:var(--accent);border-color:var(--accent)}
+.ficha{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;padding:17px;overflow-wrap:anywhere}
+.info{font-size:.9rem;margin-top:7px}
+.etiqueta{font-size:.8rem;font-weight:800;color:#143775;background:#eaf1ff;border-radius:20px;padding:4px 10px}
+.alerta{color:#962448;font-weight:600;margin:8px 0}
+.alerta:empty{display:none}
+.ayuda{overflow-wrap:anywhere}
+dialog{max-width:min(680px,calc(100% - 28px));max-height:88vh;width:100%;border:1px solid var(--line);border-radius:15px;color:var(--ink);padding:22px}
+dialog::backdrop{background:#10223d90}
+.fotos-inmueble{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.fotos-inmueble img,.foto-portada{display:block;width:100%;max-height:280px;object-fit:contain;border-radius:8px;background:var(--bg)}
+.catalogo-inmuebles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.catalogo-inmuebles .ficha{margin-bottom:0}
+.foto-portada{aspect-ratio:4 / 3;object-fit:cover;margin-bottom:10px}
+@media(max-width:570px){.catalogo-inmuebles{grid-template-columns:1fr}}

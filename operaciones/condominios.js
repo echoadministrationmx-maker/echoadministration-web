@@ -17,7 +17,7 @@ let promesaExcel;
 
 function menuCondominio() {
   const cabecera = puedeCrearCondominio && !manzanaDeRuta
-    ? [{k:'portafolio',t:'Vista general',i:'▦'},{k:'negocios-convenios',t:'Solicitudes de convenios',i:'🤝'}] : [];
+    ? [{k:'portafolio',t:'Vista general',i:'▦'},{k:'negocios-convenios',t:'Solicitudes de convenios',i:'🤝'},{k:'publicaciones-inmuebles',t:'Publicaciones inmobiliarias',i:'🏠'}] : [];
   if (condominioActivo?.codigo==='M80') return [...cabecera,...MENU_CONDOMINIO,...MENU];
   if (condominioActivo?.codigo==='M60') {
     const equipo = puedeCrearCondominio ? [{k:'equipo-cond',t:'Accesos del equipo',i:'🔑'}] : [];

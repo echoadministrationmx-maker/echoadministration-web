@@ -1,0 +1,29 @@
+<!doctype html><html lang="es-MX">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Departamentos en renta y venta · Echo</title>
+<link rel="stylesheet" href="/formularios/registro.css"><link rel="stylesheet" href="/formularios/inmuebles.css">
+<script src="/formularios/inmuebles-datos.js" defer></script><script src="/departamentos/catalogo.js" defer></script></head>
+<body>
+<header><a class="brand" href="/"><span class="logo" aria-hidden="true">E</span>Echo Administración</a></header>
+<main>
+  <div class="encabezado"><h1>Departamentos en renta y venta</h1>
+    <div class="acciones-inmueble"><a class="link-boton principal" href="/publicar-departamento">Publicar mi departamento</a></div>
+  </div>
+  <form id="filtros" method="get" style="margin-bottom:18px">
+    <div class="campos">
+      <div><label for="operacion">Operación</label><select name="operacion" id="operacion"><option value="">Renta y venta</option><option value="renta">Renta</option><option value="venta">Venta</option></select></div>
+      <div><label for="busqueda">Ciudad, zona o título</label><input id="busqueda" name="busqueda" type="search" maxlength="100"></div>
+    </div>
+    <button type="submit" style="margin-top:12px">Buscar departamentos</button>
+  </form>
+  <p id="estado" role="status" style="margin-bottom:9px"></p>
+  <section id="resultados" class="catalogo-inmuebles" aria-label="Departamentos publicados"></section>
+  <div class="acciones-inmueble">
+    <button id="anterior" class="secundario" type="button" hidden>Anterior</button>
+    <button id="siguiente" class="secundario" type="button" hidden>Siguiente</button>
+  </div>
+  <dialog id="detalle" aria-labelledby="titulo-inmueble">
+    <div id="contenido"></div>
+    <form method="dialog" style="border:0;box-shadow:none;padding:10px 0 0"><button class="secundario">Cerrar</button></form>
+  </dialog>
+</main></body></html>

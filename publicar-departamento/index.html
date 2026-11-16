@@ -1,0 +1,72 @@
+<!doctype html><html lang="es-MX">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publica tu departamento · Echo</title>
+<link rel="stylesheet" href="/formularios/registro.css"><link rel="stylesheet" href="/formularios/inmuebles.css">
+<script src="/formularios/fotos.js" defer></script><script src="/formularios/inmuebles-datos.js" defer></script>
+<script src="/publicar-departamento/panel.js" defer></script></head>
+<body>
+<header><a class="brand" href="/"><span class="logo" aria-hidden="true">E</span>Echo Administración</a></header>
+<main>
+  <div class="encabezado">
+    <a class="volver" href="/departamentos">← Ver catálogo</a>
+    <h1>Publica tu departamento</h1>
+    <p>Crea un acceso para enviar departamentos en renta o venta. Echo revisa cada ficha antes de mostrarla en el catálogo.</p>
+  </div>
+  <section id="acceso">
+    <div class="acciones-inmueble" style="margin-bottom:12px">
+      <button id="crear-tab" type="button">Crear acceso</button>
+      <button id="entrar-tab" type="button" class="secundario">Iniciar sesión</button>
+    </div>
+    <form id="cuenta" method="post">
+      <h2 id="cuenta-titulo">Crea tu acceso</h2>
+      <div class="campos">
+        <div id="campo-nombre" class="ancho"><label for="nombre">Nombre completo</label><input id="nombre" name="nombre" autocomplete="name" maxlength="120" required></div>
+        <div><label for="usuario">Usuario</label><input id="usuario" name="usuario" autocomplete="username" required minlength="4" maxlength="40" pattern="[A-Za-z0-9][A-Za-z0-9._\-]{3,39}" autocapitalize="none" placeholder="Ej. ana.lopez"></div>
+        <div><label for="clave">Contraseña</label><input id="clave" name="clave" type="password" autocomplete="new-password" required minlength="10" maxlength="64"></div>
+      </div>
+      <p class="ayuda">Usa letras, números, puntos, guiones o guiones bajos en el usuario. Elige una contraseña de al menos diez caracteres.</p>
+      <p id="error-cuenta" class="alerta" role="alert"></p>
+      <div class="acciones"><button type="submit" id="cuenta-enviar">Crear acceso</button></div>
+    </form>
+  </section>
+
+  <section id="panel" hidden>
+    <div class="barra"><h2 id="saludo">Mis publicaciones</h2><button id="salir" class="secundario" type="button">Cerrar sesión</button></div>
+    <p id="estado-panel" class="alerta" role="status"></p>
+    <div class="acciones-inmueble" style="margin-bottom:14px"><button type="button" id="nueva">Agregar departamento</button></div>
+    <div id="lista"></div>
+    <form id="publicacion" method="post" hidden>
+      <h2 id="titulo-form">Nuevo departamento</h2>
+      <section aria-label="Tipo y ubicación">
+        <div class="campos">
+          <div><label for="operacion">Operación</label><select id="operacion" name="operacion" required><option value="renta">Renta</option><option value="venta">Venta</option></select></div>
+          <div><label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="120" minlength="4" placeholder="Ej. Departamento con terraza" required></div>
+          <div><label for="ciudad">Ciudad o municipio</label><input id="ciudad" name="ciudad" maxlength="100" required></div>
+          <div><label for="region">Estado o región</label><input id="region" name="region" maxlength="100" required></div>
+          <div><label for="zona">Colonia, zona o condominio</label><input id="zona" name="zona" maxlength="100" required></div>
+          <div><label for="direccion">Dirección exacta o unidad <sup>(solo Echo)</sup></label><input id="direccion" name="direccion" maxlength="240"></div>
+        </div>
+      </section>
+      <section aria-label="Precio y características">
+        <div class="campos">
+          <div><label for="precio">Precio (MXN)</label><input id="precio" name="precio" type="number" min=".01" max="9999999999" step=".01" required></div>
+          <div id="campo-periodo"><label for="periodo">Periodo del precio</label><select id="periodo" name="periodo"><option value="mes">Por mes</option><option value="semana">Por semana</option><option value="noche">Por noche</option></select></div>
+          <div id="campo-plazo"><label for="plazo">Plazo de renta</label><select id="plazo" name="plazo"><option value="corto">Corto plazo</option><option value="mediano">Mediano plazo</option><option value="largo">Largo plazo</option></select></div>
+          <div><label for="habitaciones">Habitaciones <sup>(opcional)</sup></label><input id="habitaciones" name="habitaciones" type="number" min="0" max="25" step="1"></div>
+          <div><label for="banos">Baños <sup>(opcional)</sup></label><input id="banos" name="banos" type="number" min="0" max="25" step=".5"></div>
+          <div class="ancho"><label for="descripcion">Descripción pública</label><textarea id="descripcion" name="descripcion" minlength="10" maxlength="1500" rows="4" required></textarea><p class="ayuda">Describe el departamento. Usa los campos privados para teléfono, correo y dirección exacta.</p></div>
+          <div class="ancho"><label for="fotos">Fotos <sup>(opcional)</sup></label><input type="file" id="fotos" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="ayuda-fotos"><p id="ayuda-fotos" class="ayuda">Hasta cuatro fotos JPG, PNG o WebP de 12 MB o menos por archivo.</p><div id="fotos-actuales"></div></div>
+        </div>
+      </section>
+      <section aria-label="Contacto privado">
+        <div class="campos">
+          <div><label for="email">Correo electrónico <sup>(solo Echo)</sup></label><input id="email" name="email" type="email" autocomplete="email" maxlength="254"></div>
+          <div><label for="telefono">Teléfono o WhatsApp <sup>(solo Echo)</sup></label><input id="telefono" name="telefono" type="tel" autocomplete="tel" maxlength="30"></div>
+        </div>
+        <p class="ayuda">Indica al menos un medio de contacto. Consulta el <a href="/privacidad">aviso de privacidad</a>.</p>
+      </section>
+      <p id="error-publicacion" class="alerta" role="alert"></p>
+      <div class="acciones-inmueble"><button type="submit">Enviar a revisión</button><button type="button" class="secundario" id="cancelar">Cancelar</button></div>
+    </form>
+  </section>
+</main></body></html>

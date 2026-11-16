@@ -123,6 +123,8 @@ details.acc[open] summary::before{content:'− '}
 .cond-tabla th,.cond-tabla td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--mid)}
 .cond-tabla th{white-space:nowrap;background:var(--silver)}
 .dl span{overflow-wrap:anywhere}
+.fotos-inmueble{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.fotos-inmueble img{width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#f4f6f9}
 
 /* ---------- LOGIN ---------- */
 #login{max-width:390px;margin:8vh auto;padding:0 16px}
@@ -349,6 +351,7 @@ async function render(){
     else if(V==='servicios')  await vServicios();
     else if(V==='inventario-rentas') await vInventarioRentas();
     else if(V==='negocios-convenios') await vSolicitudesNegocios();
+    else if(V==='publicaciones-inmuebles') await vPublicacionesInmobiliarias();
     else if(V==='rentas')     await vRentas();
     else if(V==='convenios')  await vConvenios();
     else if(V==='alberca')    await vAlberca();
@@ -1999,6 +2002,8 @@ $('btnRef').onclick=async()=>{
 <script src="/operaciones/condominios.js?v=20261116-paneles"></script>
 <script src="/operaciones/panel-administracion.js"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
+<script src="/formularios/inmuebles-datos.js"></script>
+<script src="/operaciones/publicaciones-inmuebles.js"></script>
 <script src="/operaciones/regularizacion-inline.js"></script>
 <script src="/operaciones/fondo-reserva.js?v=20261112-recibo"></script>
 <script>window.addEventListener("hashchange",()=>{const k=location.hash.slice(1);if(C.p_user&&(k==='regularizacion'&&condominioActivo.codigo==='M80'||menuCondominio().some(x=>x.k===k))&&V!==k)ir(k);});</script>
