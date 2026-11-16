@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
 :root{color-scheme:light;--ink:#14223b;--muted:#4e5c73;--accent:#1847cc;--line:#d5dfea;--paper:#fff;--bg:#eff4fa}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'DM Sans',system-ui,sans-serif}
@@ -37,3 +37,15 @@ button:disabled{opacity:.65;cursor:wait}
 .confirmacion{margin-top:22px}
 .confirmacion p+p{margin-top:13px}
 @media(max-width:550px){main{margin-top:26px}.campos{grid-template-columns:1fr}.acciones button{width:100%}}
+/* Estilo alineado con la nueva página principal */
+:root{--ink:#0A1633;--muted:#6B7590;--accent:#1E4FD8;--line:#E6EAF2;--bg:#FAFBFD}
+body{font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,legend{font-family:'Geist',system-ui,sans-serif;letter-spacing:-.03em}
+h1{font-weight:600}
+header{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);color:var(--ink);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.brand{font-weight:600;letter-spacing:-.02em}
+.logo{font-size:0;width:30px;height:30px;border-radius:9px;background:#0A1633 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M2 9C2 5.13 5.13 2 9 2C12.87 2 16 5.13 16 9C16 12.87 12.87 16 9 16'/%3E%3Cpath d='M9 6V12M6 9H12'/%3E%3C/svg%3E") center/16px no-repeat}
+form,.confirmacion{border-radius:24px;box-shadow:0 2px 4px rgba(10,22,51,.04),0 24px 64px rgba(10,22,51,.08)}
+input,select,textarea{border-radius:12px!important}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 4px #EAF0FF}
+button,.link-boton{border-radius:999px!important}
