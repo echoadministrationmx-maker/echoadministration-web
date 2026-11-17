@@ -97,7 +97,7 @@ footer{background:var(--ink);padding:28px 32px;text-align:center;font-size:13px;
 <div class="section">
   <div class="container">
     <div id="convenios-grid" class="convenios-grid"></div>
-    <div id="empty" class="empty hidden"><div>🔍</div><p>No hay convenios para este filtro todavía.<br>¡Estamos trabajando en más alianzas!</p></div>
+    <div id="empty" class="empty hidden"><div>🤝</div><p id="emptyMsg">No hay convenios para este filtro todavía.<br>¡Estamos trabajando en más alianzas!</p></div>
     <div class="cta-aliado">
       <h2>¿Tienes un negocio?</h2>
       <p>Únete a nuestra red de aliados y llega a cientos de residentes en toda la República.</p>
@@ -112,25 +112,16 @@ footer{background:var(--ink);padding:28px 32px;text-align:center;font-size:13px;
 <footer>© 2026 Echo Administración · Tulum · Tampico · CDMX · Mazatlán</footer>
 
 <script>
-const convenios = [
-  {nombre:'Casa Tortuga',ico:'🐢',estado:'tulum',cat:'restaurantes',desc:'Restaurante y beach club en el corazón de Tulum.',beneficio:'10% de descuento en cuenta de alimentos',tags:['Beach club','Mariscos','Tulum'],status:'activo',destacado:true},
-  {nombre:'Mia Restaurant',ico:'🌺',estado:'tulum',cat:'restaurantes',desc:'Experiencia gastronómica única con vista al Mar Caribe.',beneficio:'15% de descuento en cena para 2+',tags:['Fine dining','Vista al mar'],status:'activo',destacado:true},
-  {nombre:'Bagatelle Tulum',ico:'🥂',estado:'tulum',cat:'restaurantes',desc:'El restaurante más exclusivo de Tulum. Gastronomía y ambiente VIP.',beneficio:'Reservación preferencial + descuento en consumo',tags:['VIP','Música en vivo'],status:'activo',destacado:true},
-  {nombre:'Tours Cenotes',ico:'🤿',estado:'tulum',cat:'tours',desc:'Recorridos por los cenotes más impresionantes de la Riviera Maya.',beneficio:'15% off en tours seleccionados',tags:['Cenotes','Snorkel'],status:'activo'},
-  {nombre:'Traslados Cancún-Tulum',ico:'🚗',estado:'tulum',cat:'transporte',desc:'Traslados privados entre aeropuerto de Cancún y Tulum.',beneficio:'Tarifa preferente para residentes y huéspedes',tags:['Aeropuerto','Privado'],status:'activo'},
-  {nombre:'Fiestas Luna Llena',ico:'🌙',estado:'tulum',cat:'eventos',desc:'Acceso preferencial a los mejores eventos de Tulum.',beneficio:'Lista de invitados + descuento en consumo mínimo',tags:['Nightlife','Playa'],status:'activo'},
-  {nombre:'Spa Tulum Wellness',ico:'💆',estado:'tulum',cat:'bienestar',desc:'Spa y centro de bienestar con tratamientos holísticos.',beneficio:'20% en masajes y tratamientos',tags:['Masajes','Yoga'],status:'proximo'},
-  {nombre:'El Tajín Tampico',ico:'🌮',estado:'tampico',cat:'restaurantes',desc:'La mejor cocina tampiqueña con platillos tradicionales.',beneficio:'10% de descuento en tu cuenta',tags:['Comida local','Mariscos'],status:'proximo'},
-  {nombre:'Tours Laguna del Carpintero',ico:'🦜',estado:'tampico',cat:'tours',desc:'Recorridos en lancha por la Laguna del Carpintero.',beneficio:'Tarifa preferente para residentes Echo',tags:['Naturaleza','Aves'],status:'proximo'},
-  {nombre:'Transporte Tampico',ico:'🚕',estado:'tampico',cat:'transporte',desc:'Servicio de transporte confiable en Tampico.',beneficio:'Descuento en traslados programados',tags:['Aeropuerto','Seguro'],status:'proximo'},
-  {nombre:'Restaurante CDMX',ico:'🍜',estado:'cdmx',cat:'restaurantes',desc:'Gastronomía de vanguardia en la Ciudad de México.',beneficio:'Beneficios exclusivos para residentes Echo',tags:['Gourmet','Moderno'],status:'proximo'},
-  {nombre:'Tours Culturales CDMX',ico:'🏛️',estado:'cdmx',cat:'tours',desc:'Recorridos culturales e históricos por la CDMX.',beneficio:'Descuentos en tours y museos',tags:['Cultura','Historia'],status:'proximo'},
-  {nombre:'Mariscos Mazatlán',ico:'🦐',estado:'mazatlan',cat:'restaurantes',desc:'Los mejores mariscos del Pacífico en Mazatlán.',beneficio:'10% de descuento en mariscos',tags:['Mariscos','Pacífico'],status:'proximo'},
-  {nombre:'Tours Isla de la Piedra',ico:'🏖️',estado:'mazatlan',cat:'tours',desc:'Excursiones a las playas y puntos turísticos de Mazatlán.',beneficio:'Tarifa especial para residentes Echo',tags:['Playa','Aventura'],status:'proximo'},
-];
+// Empezamos de cero: agrega aquí solo convenios firmados.
+const convenios = [];
 
 const ciudadLabels = {tulum:'Tulum, Q.Roo',tampico:'Tampico, Tamps.',cdmx:'Ciudad de México',mazatlan:'Mazatlán, Sin.'};
 let eActivo='todos', cActiva='todas';
+if (!convenios.length) {
+  // Sin convenios todavía: ocultar filtros y mostrar el lanzamiento.
+  document.querySelector('.filtros-wrap').style.display='none';
+  document.getElementById('emptyMsg').innerHTML='<b style="color:var(--ink);font-size:1.15rem">Muy pronto: nuestros primeros convenios.</b><br>Estamos sumando a los primeros negocios aliados en Tulum, Tampico, CDMX y Mazatlán.<br><a href="/registrar-negocio" style="display:inline-block;margin-top:14px;font-weight:700;color:var(--blue)">¿Tienes un negocio? Sé de los primeros →</a>';
+}
 
 function render() {
   let f = convenios;
