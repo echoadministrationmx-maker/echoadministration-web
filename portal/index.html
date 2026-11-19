@@ -778,12 +778,12 @@ let mpAccessToken = null;
 let mpAuthPromise = null;
 let pagoEnProceso = false;
 
-async function resolverIdentidad(clave) {
+async function resolverIdentidad(clave, password) {
   try {
     const r = await fetch(`${URL}/rpc/resolver_identidad`, {
       method: 'POST',
       headers: H,
-      body: JSON.stringify({ p_clave: clave })
+      body: JSON.stringify({ p_clave: clave, p_password: password })
     });
     if (!r.ok) return null;
     const email = await r.json();
@@ -794,7 +794,7 @@ async function resolverIdentidad(clave) {
 }
 
 async function iniciarSesionPago(clave, password) {
-  const email = await resolverIdentidad(clave);
+  const email = await resolverIdentidad(clave, password);
   if (!email) return null;
   try {
     const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
