@@ -283,6 +283,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
         <div id="dash-loading" class="loading">⏳ Cargando tu información...</div>
         <div id="dash-content" class="hidden">
           <div id="dash-aviso-llamadas"></div>
+          <div class="card" data-fondo-reserva style="border:1.5px solid var(--border);margin-bottom:16px" aria-live="polite">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div><div class="card-title" style="margin:0">Fondo de reserva</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Cuota única · independiente del mantenimiento</div></div>
+    <span data-fondo-estado class="kpi-pill">Consultando…</span>
+  </div>
+  <div style="font-size:26px;font-weight:800;margin-top:12px;color:var(--ink)" data-fondo-monto>—</div>
+  <div style="font-size:13px;margin-top:6px;color:var(--muted)" data-fondo-nota>Consultando tu aportación.</div>
+</div>
           <div class="kpi-grid">
             <div class="kpi"><div class="kpi-label">Saldo pendiente</div><div class="kpi-val danger" id="kpi-deuda">$0</div><div class="kpi-pill danger" id="kpi-deuda-pill">—</div></div>
             <div class="kpi"><div class="kpi-label">Pagos registrados</div><div class="kpi-val success" id="kpi-pagados">0</div><div class="kpi-pill success">En el periodo</div></div>
@@ -332,6 +340,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div id="ec-extra" style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;opacity:.85;margin-top:12px;border-top:1px solid #ffffff2e;padding-top:10px"></div>
             <div id="ec-futuroNota" style="display:none;font-size:11.5px;opacity:.7;margin-top:11px"></div>
           </div>
+          <div class="card" data-fondo-reserva style="border:1.5px solid var(--border);margin-bottom:16px" aria-live="polite">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div><div class="card-title" style="margin:0">Fondo de reserva</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Cuota única · independiente del mantenimiento</div></div>
+    <span data-fondo-estado class="kpi-pill">Consultando…</span>
+  </div>
+  <div style="font-size:26px;font-weight:800;margin-top:12px;color:var(--ink)" data-fondo-monto>—</div>
+  <div style="font-size:13px;margin-top:6px;color:var(--muted)" data-fondo-nota>Consultando tu aportación.</div>
+</div>
           <div id="cv-card" style="display:none"></div>
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
@@ -1232,12 +1248,28 @@ async function cambiarRentando(){
 
 // ===== ESTADO DE CUENTA CENTRADO EN EL MES EN CURSO =====
 const $m = n => '$' + Number(n||0).toLocaleString('es-MX');
+function pintarFondoReserva(fondo, mensaje='No se pudo consultar. Actualiza para reintentar.'){
+  const valido = fondo && typeof fondo.pagado==='boolean' && Number(fondo.monto)===1000 && Number(fondo.saldo_pendiente)===(fondo.pagado?0:1000);
+  document.querySelectorAll('[data-fondo-reserva]').forEach(card=>{
+    card.style.display = fondo===null ? 'none' : '';
+    const estado=card.querySelector('[data-fondo-estado]');
+    estado.className='kpi-pill'+(valido?(fondo.pagado?' success':' warn'):'');
+    estado.textContent=valido?(fondo.pagado?'✓ Pagado':'Pendiente de pago'):'Sin confirmar';
+    card.querySelector('[data-fondo-monto]').textContent=valido?$m(fondo.monto):'—';
+    const fecha=valido && fondo.pagado && fondo.fecha_pago && /^\d{4}-\d{2}-\d{2}/.test(fondo.fecha_pago)?new Date(String(fondo.fecha_pago).slice(0,10)+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}):'';
+    card.querySelector('[data-fondo-nota]').textContent=valido?('Saldo pendiente: '+$m(fondo.saldo_pendiente)+(fecha?' · Pago registrado el '+fecha:'')):mensaje;
+  });
+}
 async function cargarEstadoCuenta(){
+  const usuario=sesionUser, clave=sesionPass;
+  if(!usuario||!clave)return;
   try{
     const r=await fetch(`${URL}/rpc/mi_estado_cuenta`,{method:'POST',headers:H,
-      body:JSON.stringify({p_user_id:sesionUser,p_password:sesionPass})});
+      body:JSON.stringify({p_user_id:usuario,p_password:clave})});
     const d=await r.json();
-    if(!d||!d.ok)return;
+    if(usuario!==sesionUser||clave!==sesionPass)return;
+    if(!r.ok||!d||!d.ok){pintarFondoReserva(undefined);return;}
+    pintarFondoReserva(d.fondo_reserva);
 
     const mes=d.mes_actual, pagado = mes && mes.estado==='pagado';
     const cuota = mes ? Number(mes.monto) : Number(d.cuota_mes);
@@ -1308,7 +1340,7 @@ async function cargarEstadoCuenta(){
     if(kps)kps.textContent=Number(d.pagados_num||0);
     const kp=document.getElementById('kpi-deuda-pill');
     if(kp)kp.textContent = tot>0 ? (pagado?'Adeudo anterior':'Incluye este mes') : '✓ Al corriente';
-  }catch(e){}
+  }catch(e){if(usuario===sesionUser&&clave===sesionPass)pintarFondoReserva(undefined);}
 }
 
 // ===== MI CONVENIO DE PAGO =====
@@ -1927,9 +1959,11 @@ function go(id, el) {
   document.getElementById('portal').classList.remove('menu-abierto');
   const t = { dashboard:'Resumen', cuenta:'Estado de cuenta', pago:'Pagar ahora', docs:'Documentos', comunidad:'Contactos de emergencia', comunidad2:'Comunidad', convenios:'Convenios', mirenta:'Mi renta', misdatos:'Mis datos', misrentas:'Mis rentas', inquilinos:'Mis inquilinos', alberca:'Apartar alberca', incidencias:'Incidencias' };
   document.getElementById('topbar-title').textContent = t[id] || id;
+  if((id==='dashboard'||id==='cuenta')&&sesionUser&&sesionPass)cargarEstadoCuenta();
 }
 
 function doLogout() {
+  pintarFondoReserva(undefined,'Inicia sesión para consultar tu aportación.');
   residente = null; pagos = []; incidencias = []; llamadas = []; eventos = []; encuestas = []; sesionUser = ''; sesionPass = ''; fotoBase64 = null;
   mpAccessToken = null; mpAuthPromise = null; pagoEnProceso = false;
   document.getElementById('portal').classList.add('hidden');
