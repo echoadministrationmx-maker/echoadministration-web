@@ -427,6 +427,46 @@ async function vArchivos() {
         padron.cargas.map(c=>[c.archivo,fecha(c.creado_at),c.filas,c.registrado_por]))
         : '<p class="sub">Aquí aparecerán las importaciones completadas.</p>'}
     </div>`;
+  const originales = document.createElement('div');
+  originales.className='card';
+  originales.innerHTML='<h3>Guardar archivos originales</h3><p class="sub">Cualquier formato, hasta 10 MiB por archivo. No modifica el padrón.</p><input id="originalesInput" type="file" multiple><div class="acts"><button class="btn" id="originalesGuardar">Guardar archivos</button></div><p id="originalesEstado" role="status"></p><div id="originalesLista"></div>';
+  $('vista').prepend(originales);
+  const originalRpc=async (accion,extra={})=>{
+    const d=await rpc('pg_operaciones_originales',{...C,p_condominio:condominio.id,p_accion:accion,...extra});
+    if(!d.ok) throw new Error(d.error||'No se pudo completar la operación');
+    return d;
+  };
+  const mensajeOriginal=$('originalesEstado'), listaOriginal=$('originalesLista'), botonOriginal=$('originalesGuardar'), inputOriginal=$('originalesInput');
+  async function listarOriginales(){
+    const d=await originalRpc('listar');
+    listaOriginal.replaceChildren();
+    for(const f of d.archivos){
+      const fila=document.createElement('div'), boton=document.createElement('button');
+      fila.className='acts';
+      fila.append(document.createTextNode(f.nombre+' · '+new Date(f.fecha).toLocaleString()+' · '+f.bytes+' bytes '));
+      boton.className='btn gh sm';boton.textContent='Descargar';
+      boton.onclick=async()=>{try{
+        const x=await originalRpc('descargar',{p_id:f.id});
+        const bytes=Uint8Array.from(atob(x.contenido),c=>c.charCodeAt(0));
+        const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+        const a=document.createElement('a');a.href=url;a.download=x.nombre;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }catch(e){mensajeOriginal.textContent=e.message;}};
+      fila.append(boton);listaOriginal.append(fila);
+    }
+  }
+  botonOriginal.onclick=async()=>{
+    botonOriginal.disabled=true;let guardados=0;
+    try{
+      for(const f of Array.from(inputOriginal.files)){
+        if(f.size>10485760) throw new Error(f.name+': supera 10 MiB');
+        const contenido=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('No se pudo leer '+f.name));reader.readAsDataURL(f);});
+        await originalRpc('guardar',{p_nombre:f.name,p_contenido:contenido});guardados++;
+      }
+      inputOriginal.value='';mensajeOriginal.textContent=guardados+' archivo(s) guardado(s).';
+    }catch(e){mensajeOriginal.textContent=guardados+' guardado(s). '+e.message;}
+    finally{botonOriginal.disabled=false;try{await listarOriginales();}catch(e){mensajeOriginal.textContent+=' '+e.message;}}
+  };
+  listarOriginales().catch(e=>{mensajeOriginal.textContent=e.message;});
   const archivo = $('elegirPadron');
   const revisar = $('revisarPadron');
   const estado = $('padronArchivoEstado');
