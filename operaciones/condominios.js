@@ -14,6 +14,7 @@ let condominios = [];
 let condominioActivo = null;
 let puedeCrearCondominio = false;
 let promesaExcel;
+const filtroHistorialM60 = {anio:2026,edificio:'',busqueda:'',offset:0};
 
 function menuCondominio() {
   const cabecera = puedeCrearCondominio && !manzanaDeRuta
@@ -21,9 +22,74 @@ function menuCondominio() {
   if (condominioActivo?.codigo==='M80') return [...cabecera,...MENU_CONDOMINIO,...MENU];
   if (condominioActivo?.codigo==='M60') {
     const equipo = puedeCrearCondominio ? [{k:'equipo-cond',t:'Accesos del equipo',i:'🔑'}] : [];
-    return [...cabecera,...VISTAS_M60,{k:'inventario-rentas',t:'Departamentos en renta',i:'🏠'},...MENU_CONDOMINIO,...equipo];
+    return [...cabecera,...VISTAS_M60,{k:'historial-m60',t:'Mensualidades y fondo CADU',i:'🗓️'},
+      {k:'inventario-rentas',t:'Departamentos en renta',i:'🏠'},...MENU_CONDOMINIO,...equipo];
   }
   return [...cabecera,...MENU_CONDOMINIO];
+}
+
+async function vHistorialM60() {
+  const condominio=condominioActivo;
+  const f=filtroHistorialM60;
+  const d=await rpc('pg_operaciones_historial_m60',{
+    ...C,p_condominio:condominio.id,p_anio:f.anio,p_edificio:f.edificio||null,
+    p_busqueda:f.busqueda||null,p_offset:f.offset
+  });
+  if(!d.ok) throw new Error(d.error||'No se pudo consultar el historial.');
+  if(condominio!==condominioActivo||V!=='historial-m60') return;
+  const rows=d.filas||[];
+  $('vista').innerHTML=`<div class="card">
+    <div class="chead"><h2>Mensualidades y fondo CADU</h2><span class="pill p-blue">${Number(d.total)} registros</span></div>
+    <p class="sub">Historial del archivo A11 CONTROL PAGOS Ac.xlsx. Cada $500 corresponde a una mensualidad pagada; el fondo de $1,500 corresponde a CADU. El archivo indica el periodo, pero no la fecha exacta de pago. Desde octubre de 2026 se clasificaron las mensualidades como pagadas a la nueva administración. Puedes corregir el destinatario de cada una.</p>
+    <form id="filtrarHistorialM60" class="grid g3" style="margin-top:14px">
+      <div><label for="histAnio">Periodo</label><select id="histAnio">
+        ${[2026,2025,2024,2023,2022,0].map(y=>`<option value="${y}" ${f.anio===y?'selected':''}>${y||'Fondo CADU'}</option>`).join('')}</select></div>
+      <div><label for="histEdificio">Edificio</label><select id="histEdificio"><option value="">Todos</option>
+        ${(d.edificios||[]).map(e=>`<option value="${esc(e)}" ${f.edificio===e?'selected':''}>${esc(e)}</option>`).join('')}</select></div>
+      <div><label for="histBuscar">Unidad o titular</label><input id="histBuscar" value="${esc(f.busqueda)}" maxlength="80" placeholder="Ej. 60-A-101"></div>
+      <div class="acts"><button class="btn sm">Buscar</button></div>
+    </form>
+  </div><div class="card"><div class="cond-tabla"><table><thead><tr>
+    <th>Manzana y unidad</th><th>Titular</th><th>Periodo</th><th>Importe</th><th>Se pagó a</th><th></th>
+    </tr></thead><tbody>${rows.map(r=>`<tr>
+      <td>${esc(r.edificio)}-${esc(r.unidad)}</td><td>${esc(r.nombre||'—')}</td>
+      <td>${r.tipo==='fondo_cadu'?'Fondo CADU':esc(MES[Number(r.periodo.slice(5,7))]+' '+r.periodo.slice(0,4))}</td>
+      <td>${money(r.monto)}</td><td>${esc(r.destino)}</td>
+      <td>${r.tipo==='mensualidad'?`<button type="button" class="btn gh sm editarDestinoM60" data-id="${Number(r.id)}">Editar</button>`:'—'}</td>
+    </tr>`).join('')}</tbody></table></div>
+    ${rows.length?'':`<p class="sub">No hay pagos registrados para estos filtros.</p>`}
+    <div class="acts"><button class="btn gh sm" id="histPrev" ${f.offset===0?'disabled':''}>Anterior</button>
+      <span class="sub">${Number(d.total)?f.offset+1:0}–${Math.min(f.offset+rows.length,Number(d.total))} de ${Number(d.total)}</span>
+      <button class="btn gh sm" id="histNext" ${f.offset+rows.length>=Number(d.total)?'disabled':''}>Siguiente</button></div>
+  </div>`;
+  $('filtrarHistorialM60').onsubmit=e=>{
+    e.preventDefault();f.anio=Number($('histAnio').value);f.edificio=$('histEdificio').value;
+    f.busqueda=$('histBuscar').value.trim();f.offset=0;vHistorialM60().catch(error=>toast(error.message));
+  };
+  $('histPrev').onclick=()=>{f.offset=Math.max(0,f.offset-100);vHistorialM60().catch(error=>toast(error.message));};
+  $('histNext').onclick=()=>{f.offset+=100;vHistorialM60().catch(error=>toast(error.message));};
+  $('vista').querySelectorAll('.editarDestinoM60').forEach(b=>b.onclick=()=>{
+    const r=rows.find(x=>Number(x.id)===Number(b.dataset.id));
+    const conocido=['CADU','Nueva administración'].includes(r.destino);
+    sheet(`<h3>Editar destinatario</h3><p class="sub">${esc(r.edificio)}-${esc(r.unidad)} · ${esc(MES[Number(r.periodo.slice(5,7))])} ${esc(r.periodo.slice(0,4))} · ${money(r.monto)}</p>
+      <form id="formDestinoM60"><label for="nuevoDestinoM60">¿A quién se pagó esta mensualidad?</label>
+      <select id="nuevoDestinoM60"><option value="CADU" ${r.destino==='CADU'?'selected':''}>CADU</option>
+        <option value="Nueva administración" ${r.destino==='Nueva administración'?'selected':''}>Nueva administración</option>
+        <option value="otro" ${!conocido?'selected':''}>Otro</option></select>
+      <input id="otroDestinoM60" maxlength="80" placeholder="Escribe el destinatario" value="${!conocido?esc(r.destino):''}" ${conocido?'hidden':''}>
+      <p id="errorDestinoM60" role="status" class="sub"></p><div class="acts"><button class="btn">Guardar</button>
+      <button type="button" class="btn gh" onclick="cerrarSheet()">Cancelar</button></div></form>`);
+    $('nuevoDestinoM60').onchange=()=>{$('otroDestinoM60').hidden=$('nuevoDestinoM60').value!=='otro';};
+    $('formDestinoM60').onsubmit=async e=>{
+      e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;
+      const destino=$('nuevoDestinoM60').value==='otro'?$('otroDestinoM60').value.trim():$('nuevoDestinoM60').value;
+      try{
+        const answer=await rpc('pg_operaciones_editar_destino_m60',{...C,p_condominio:condominio.id,p_id:r.id,p_destino:destino});
+        if(!answer.ok)throw new Error(answer.error||'No se pudo guardar.');
+        cerrarSheet();await vHistorialM60();toast('Destinatario actualizado','good');
+      }catch(error){$('errorDestinoM60').textContent=error.message;button.disabled=false;}
+    };
+  });
 }
 
 function cambiarCondominio(id,destinoSolicitado) {

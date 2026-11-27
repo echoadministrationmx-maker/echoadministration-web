@@ -334,6 +334,7 @@ async function render(){
     else if(V==='equipo-cond') await vEquipoCond();
     else if(V==='propietarios') await vPropietarios();
     else if(V==='archivos') await vArchivos();
+    else if(V==='historial-m60') await vHistorialM60();
     else if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
     else if(V==='analisis')   await vAnalisis();
@@ -2000,7 +2001,7 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js?v=20261116-paneles"></script>
+<script src="/operaciones/condominios.js?v=20261127-historial"></script>
 <script src="/operaciones/panel-administracion.js"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
