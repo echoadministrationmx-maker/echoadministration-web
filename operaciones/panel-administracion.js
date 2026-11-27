@@ -15,6 +15,7 @@ const VISTAS_M60 = [
 const ESTADOS_INCIDENCIA = {pendiente:'Pendiente',en_proceso:'En proceso',resuelta:'Resuelta'};
 
 function nombrePanel() {
+  if (manzanaDeRuta==='M60') return 'Operaciones · Manzanas 60 y 61';
   if (manzanaDeRuta) return 'Operaciones · Manzana '+manzanaDeRuta.slice(1);
   return rutaGeneral ? 'Operaciones generales · Echo' : 'Panel de Operaciones';
 }
@@ -91,6 +92,7 @@ async function vResumenLocal() {
     <div class="card"><h3>Padrón y operación diaria</h3><div class="acts">
       <button class="btn" data-local-nav="archivos">Subir padrón de propietarios</button>
       <button class="btn gh" data-local-nav="propietarios">Revisar solicitudes</button>
+      <button class="btn gh" data-local-nav="pago-m60">Registrar mensualidad</button>
       <button class="btn gh" data-local-nav="incidencias-locales">Ver incidencias</button>
       <button class="btn gh" data-local-nav="gastos-locales">Ver gastos</button>
     </div></div>`;

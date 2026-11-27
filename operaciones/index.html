@@ -160,7 +160,7 @@ details.acc[open] summary::before{content:'− '}
     <button class="btn wide" id="entrar" style="margin-top:18px">Entrar</button>
     <div class="acts hide" id="loginRutas" style="justify-content:center">
       <a href="/operaciones/general">Vista general</a>
-      <a href="/operaciones/manzana-60">Manzana 60</a>
+      <a href="/operaciones/manzana-60">Manzanas 60 y 61</a>
       <a href="/operaciones/manzana-80">Manzana 80</a>
     </div>
     <div id="lerr" role="alert" style="color:var(--warn);font-weight:600;font-size:.84rem;margin-top:11px"></div>
@@ -335,6 +335,7 @@ async function render(){
     else if(V==='propietarios') await vPropietarios();
     else if(V==='archivos') await vArchivos();
     else if(V==='historial-m60') await vHistorialM60();
+    else if(V==='pago-m60') await vRegistrarPagoM60();
     else if(V==='inicio')      await vInicio();
     else if(V==='cobranza')   await vCobranza();
     else if(V==='analisis')   await vAnalisis();
@@ -2001,8 +2002,8 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js?v=20261127-historial"></script>
-<script src="/operaciones/panel-administracion.js"></script>
+<script src="/operaciones/condominios.js?v=20261127-registro-pagos"></script>
+<script src="/operaciones/panel-administracion.js?v=20261127-registro-pagos"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
 <script src="/operaciones/publicaciones-inmuebles.js"></script>

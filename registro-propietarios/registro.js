@@ -28,7 +28,7 @@ form.addEventListener('submit',async evento=>{
     document.getElementById('registroIntro').hidden = true;
     const enviado = document.getElementById('enviado');
     enviado.hidden = false;
-    enviado.textContent = 'Echo Administración revisará tu registro para incorporarlo al padrón de Manzana 60.';
+    enviado.textContent = 'Echo Administración revisará tu registro para incorporarlo al padrón de Manzanas 60 y 61.';
     enviado.focus();
   } catch(error) {
     estado.textContent = error instanceof TypeError || error.name==='TimeoutError'

@@ -22,10 +22,47 @@ function menuCondominio() {
   if (condominioActivo?.codigo==='M80') return [...cabecera,...MENU_CONDOMINIO,...MENU];
   if (condominioActivo?.codigo==='M60') {
     const equipo = puedeCrearCondominio ? [{k:'equipo-cond',t:'Accesos del equipo',i:'🔑'}] : [];
-    return [...cabecera,...VISTAS_M60,{k:'historial-m60',t:'Mensualidades y fondo CADU',i:'🗓️'},
+    return [...cabecera,...VISTAS_M60,{k:'pago-m60',t:'Registrar mensualidad',i:'💳'},
+      {k:'historial-m60',t:'Mensualidades y fondo CADU',i:'🗓️'},
       {k:'inventario-rentas',t:'Departamentos en renta',i:'🏠'},...MENU_CONDOMINIO,...equipo];
   }
   return [...cabecera,...MENU_CONDOMINIO];
+}
+
+async function vRegistrarPagoM60() {
+  const condominio=condominioActivo;
+  const padron=await datosPadron(condominio.id);
+  if(condominio!==condominioActivo||V!=='pago-m60')return;
+  const unidades=[...new Map(padron.padron.map(u=>[Number(u.unidad_id),u])).values()]
+    .sort((a,b)=>`${a.edificio}-${a.unidad}`.localeCompare(`${b.edificio}-${b.unidad}`,'es',{numeric:true}));
+  const hoy=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'});
+  $('vista').innerHTML=`<div class="card"><h2>Registrar mensualidad</h2>
+    <p class="sub">Manzanas 60 y 61 · Cuota de $500. Registra la fecha real en que se recibió el pago. Los meses ya marcados en el Excel no se capturan dos veces.</p>
+    <form id="registrarPagoM60" class="grid g2" style="margin-top:18px">
+      <div><label for="pagoM60Unidad">Unidad y titular</label><select id="pagoM60Unidad" required><option value="">Selecciona una unidad</option>
+      ${unidades.map(u=>`<option value="${Number(u.unidad_id)}">${esc(u.edificio)}-${esc(u.unidad)} · ${esc(u.nombre)}</option>`).join('')}</select></div>
+      <div><label for="pagoM60Mes">Mes que se paga</label><input id="pagoM60Mes" type="month" min="2026-10" value="${hoy.slice(0,7)}" required></div>
+      <div><label for="pagoM60Fecha">Fecha real del pago</label><input id="pagoM60Fecha" type="date" min="2026-10-01" max="${hoy}" value="${hoy}" required></div>
+      <div><label for="pagoM60Destino">Se pagó a</label><select id="pagoM60Destino"><option>Nueva administración</option><option>CADU</option></select></div>
+      <div><label for="pagoM60Forma">Forma de pago</label><select id="pagoM60Forma"><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Tarjeta</option><option>Otro</option></select></div>
+      <div><label for="pagoM60Referencia">Referencia (opcional)</label><input id="pagoM60Referencia" maxlength="120" placeholder="Folio o referencia bancaria"></div>
+      <div class="acts"><button class="btn" id="guardarPagoM60">Guardar pago de $500</button></div>
+    </form><p class="sub" id="estadoPagoM60" role="status"></p></div>`;
+  $('registrarPagoM60').onsubmit=async e=>{
+    e.preventDefault();const boton=$('guardarPagoM60');boton.disabled=true;$('estadoPagoM60').textContent='';
+    try{
+      const r=await rpc('pg_operaciones_registrar_pago_m60',{
+        ...C,p_condominio:condominio.id,p_unidad:Number($('pagoM60Unidad').value),
+        p_periodo:$('pagoM60Mes').value+'-01',p_fecha_pago:$('pagoM60Fecha').value,
+        p_destino:$('pagoM60Destino').value,p_forma:$('pagoM60Forma').value,
+        p_referencia:$('pagoM60Referencia').value.trim()||null
+      });
+      if(!r.ok)throw new Error(r.error||'No se pudo registrar el pago.');
+      filtroHistorialM60.anio=Number($('pagoM60Mes').value.slice(0,4));
+      filtroHistorialM60.edificio='';filtroHistorialM60.busqueda='';filtroHistorialM60.offset=0;
+      toast('Pago registrado con su fecha real','good');ir('historial-m60');
+    }catch(error){$('estadoPagoM60').textContent=error.message;boton.disabled=false;}
+  };
 }
 
 async function vHistorialM60() {
@@ -39,7 +76,7 @@ async function vHistorialM60() {
   if(condominio!==condominioActivo||V!=='historial-m60') return;
   const rows=d.filas||[];
   $('vista').innerHTML=`<div class="card">
-    <div class="chead"><h2>Mensualidades y fondo CADU</h2><span class="pill p-blue">${Number(d.total)} registros</span></div>
+    <div class="chead"><h2>Mensualidades y fondo CADU</h2><button class="btn sm" id="nuevoPagoDesdeHistorial">Registrar pago</button><span class="pill p-blue">${Number(d.total)} registros</span></div>
     <p class="sub">Historial del archivo A11 CONTROL PAGOS Ac.xlsx. Cada $500 corresponde a una mensualidad pagada; el fondo de $1,500 corresponde a CADU. El archivo indica el periodo, pero no la fecha exacta de pago. Desde octubre de 2026 se clasificaron las mensualidades como pagadas a la nueva administración. Puedes corregir el destinatario de cada una.</p>
     <form id="filtrarHistorialM60" class="grid g3" style="margin-top:14px">
       <div><label for="histAnio">Periodo</label><select id="histAnio">
@@ -50,10 +87,11 @@ async function vHistorialM60() {
       <div class="acts"><button class="btn sm">Buscar</button></div>
     </form>
   </div><div class="card"><div class="cond-tabla"><table><thead><tr>
-    <th>Manzana y unidad</th><th>Titular</th><th>Periodo</th><th>Importe</th><th>Se pagó a</th><th></th>
+    <th>Manzana y unidad</th><th>Titular</th><th>Periodo</th><th>Fecha del pago</th><th>Importe</th><th>Se pagó a</th><th></th>
     </tr></thead><tbody>${rows.map(r=>`<tr>
       <td>${esc(r.edificio)}-${esc(r.unidad)}</td><td>${esc(r.nombre||'—')}</td>
       <td>${r.tipo==='fondo_cadu'?'Fondo CADU':esc(MES[Number(r.periodo.slice(5,7))]+' '+r.periodo.slice(0,4))}</td>
+      <td>${r.fecha_pago?fecha(r.fecha_pago):'Sin fecha en Excel'}</td>
       <td>${money(r.monto)}</td><td>${esc(r.destino)}</td>
       <td>${r.tipo==='mensualidad'?`<button type="button" class="btn gh sm editarDestinoM60" data-id="${Number(r.id)}">Editar</button>`:'—'}</td>
     </tr>`).join('')}</tbody></table></div>
@@ -62,6 +100,7 @@ async function vHistorialM60() {
       <span class="sub">${Number(d.total)?f.offset+1:0}–${Math.min(f.offset+rows.length,Number(d.total))} de ${Number(d.total)}</span>
       <button class="btn gh sm" id="histNext" ${f.offset+rows.length>=Number(d.total)?'disabled':''}>Siguiente</button></div>
   </div>`;
+  $('nuevoPagoDesdeHistorial').onclick=()=>ir('pago-m60');
   $('filtrarHistorialM60').onsubmit=e=>{
     e.preventDefault();f.anio=Number($('histAnio').value);f.edificio=$('histEdificio').value;
     f.busqueda=$('histBuscar').value.trim();f.offset=0;vHistorialM60().catch(error=>toast(error.message));
@@ -195,7 +234,7 @@ async function vPropietarios() {
   $('vista').innerHTML = `
     <div class="card">
       <div class="chead"><h2>Padrón de propietarios</h2>
-        ${condominio.codigo==='M60' ? '<a class="btn gh sm" href="/registro-propietarios" target="_blank" rel="noopener">Abrir registro de Manzana 60</a>' : ''}
+        ${condominio.codigo==='M60' ? '<a class="btn gh sm" href="/registro-propietarios" target="_blank" rel="noopener">Abrir registro de Manzanas 60 y 61</a>' : ''}
         <button class="btn sm" id="propImportar">Importar padrón</button>
       </div>
       <p class="sub">${esc(condominio.nombre)} · ${fichas.length} propietarios · ${d.unidades} unidades activas</p>
@@ -248,7 +287,7 @@ function verFicha(ficha,condominio) {
 
 function revisarRegistro(solicitud,condominio,padron) {
   const deUnidad = padron.filter(p=>p.edificio.trim().toUpperCase()===solicitud.edificio && p.unidad.trim().toUpperCase()===solicitud.unidad);
-  sheet(`<h3>Revisar solicitud de Manzana 60</h3>
+  sheet(`<h3>Revisar solicitud de Manzanas 60 y 61</h3>
     <div class="dl">
       <div><b>Nombre</b> <span>${esc(solicitud.nombre)}</span></div>
       <div><b>Unidad</b> <span>${esc(solicitud.edificio)}-${esc(solicitud.unidad)}</span></div>

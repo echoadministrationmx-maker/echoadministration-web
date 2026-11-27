@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0C1320">
 <meta name="robots" content="noindex">
-<title>Registro de propietarios · Manzana 60 · Echo</title>
+<title>Registro de propietarios · Manzanas 60 y 61 · Echo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -42,18 +42,18 @@ a{color:var(--blue)}
 <main>
   <a class="volver" href="/portal">← Cambiar de manzana</a>
   <section class="card" aria-labelledby="titulo">
-    <p class="manzana">Manzana 60</p>
+    <p class="manzana">Manzanas 60 y 61</p>
     <h1 id="titulo">Registro de propietarios</h1>
     <p id="registroIntro">Si eres propietario, envía tu nombre y unidad para que Echo Administración revise tu registro.</p>
     <form id="registro" method="post">
       <div><label for="nombre">Nombre completo</label><input name="nombre" id="nombre" autocomplete="name" minlength="2" maxlength="150" required></div>
       <div class="campos">
-        <div><label for="edificio">Edificio o torre</label><input name="edificio" id="edificio" maxlength="30" required></div>
+        <div><label for="edificio">Manzana y edificio</label><input name="edificio" id="edificio" maxlength="30" placeholder="Ej. 60-A o 61-A1" required></div>
         <div><label for="unidad">Número de unidad</label><input name="unidad" id="unidad" maxlength="30" required></div>
       </div>
       <div><label for="correo">Correo electrónico <span>(opcional)</span></label><input name="email" id="correo" type="email" autocomplete="email" maxlength="254"></div>
       <div><label for="telefono">Teléfono <span>(opcional)</span></label><input name="telefono" id="telefono" type="tel" autocomplete="tel" maxlength="30"></div>
-      <small>Echo usará estos datos para actualizar el padrón de Manzana 60. Consulta el <a href="/privacidad" target="_blank" rel="noopener">aviso de privacidad</a>.</small>
+      <small>Echo usará estos datos para actualizar el padrón de Manzanas 60 y 61. Consulta el <a href="/privacidad" target="_blank" rel="noopener">aviso de privacidad</a>.</small>
       <p id="estado" role="alert"></p>
       <button>Enviar registro</button>
     </form>
