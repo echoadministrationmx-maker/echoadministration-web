@@ -31,16 +31,16 @@ function menuCondominio() {
 
 async function vRegistrarPagoM60() {
   const condominio=condominioActivo;
-  const padron=await datosPadron(condominio.id);
+  const padron=await rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:2026});
+  if(!padron.ok)throw new Error(padron.error||'No se pudieron cargar las unidades.');
   if(condominio!==condominioActivo||V!=='pago-m60')return;
-  const unidades=[...new Map(padron.padron.map(u=>[Number(u.unidad_id),u])).values()]
-    .sort((a,b)=>`${a.edificio}-${a.unidad}`.localeCompare(`${b.edificio}-${b.unidad}`,'es',{numeric:true}));
+  const unidades=padron.unidades.sort((a,b)=>`${a.edificio}-${a.numero}`.localeCompare(`${b.edificio}-${b.numero}`,'es',{numeric:true}));
   const hoy=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'});
   $('vista').innerHTML=`<div class="card"><h2>Registrar mensualidad</h2>
     <p class="sub">Manzanas 60 y 61 · Cuota de $500. Registra la fecha real en que se recibió el pago. Los meses ya marcados en el Excel no se capturan dos veces.</p>
     <form id="registrarPagoM60" class="grid g2" style="margin-top:18px">
       <div><label for="pagoM60Unidad">Unidad y titular</label><select id="pagoM60Unidad" required><option value="">Selecciona una unidad</option>
-      ${unidades.map(u=>`<option value="${Number(u.unidad_id)}">${esc(u.edificio)}-${esc(u.unidad)} · ${esc(u.nombre)}</option>`).join('')}</select></div>
+      ${unidades.map(u=>`<option value="${Number(u.id)}">${esc(u.edificio)}-${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}</option>`).join('')}</select></div>
       <div><label for="pagoM60Mes">Mes que se paga</label><input id="pagoM60Mes" type="month" min="2026-10" value="${hoy.slice(0,7)}" required></div>
       <div><label for="pagoM60Fecha">Fecha real del pago</label><input id="pagoM60Fecha" type="date" min="2026-10-01" max="${hoy}" value="${hoy}" required></div>
       <div><label for="pagoM60Destino">Se pagó a</label><select id="pagoM60Destino"><option>Nueva administración</option><option>CADU</option></select></div>
@@ -226,9 +226,14 @@ function tablaCond(encabezados, filas) {
 
 async function vPropietarios() {
   const condominio = condominioActivo;
-  const d = await datosPadron(condominio.id);
+  const [d,contactos] = await Promise.all([datosPadron(condominio.id),
+    condominio.codigo==='M60'?rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:2026}):Promise.resolve(null)]);
   if (condominio!==condominioActivo || V!=='propietarios') return;
   const fichas = agruparPropietarios(d.padron);
+  if(contactos?.ok){
+    const claves=new Map(contactos.unidades.map(u=>[`${u.edificio}-${u.numero}`,u.clave_cadu]));
+    fichas.forEach(f=>f.clave_cadu=claves.get(f.unidades[0])||null);
+  }
   const solicitudes = d.solicitudes;
 
   $('vista').innerHTML = `
@@ -278,6 +283,7 @@ function verFicha(ficha,condominio) {
     <p class="sub">${esc(condominio.nombre)} · ${esc(ficha.clave)}</p>
     <div class="dl">
       <div><b>Unidades</b> <span>${esc(ficha.unidades.join(', '))}</span></div>
+      ${ficha.clave_cadu?`<div><b>Clave CADU</b> <span>${esc(ficha.clave_cadu)}</span></div>`:''}
       <div><b>Correo</b> <span>${esc(ficha.email||'—')}</span></div>
       <div><b>Teléfono</b> <span>${esc(ficha.telefono||'—')}</span></div>
       <div><b>WhatsApp</b> <span>${esc(ficha.whatsapp||'—')}</span></div>
@@ -379,7 +385,7 @@ async function descargarPlantilla(condominio) {
   guia.getColumn(1).width = 88;
   guia.addRows([
     ['Padrón de propietarios · Echo'],
-    [`Escribe ${condominio.codigo} en la columna Manzana de cada fila.`],
+    [condominio.codigo==='M60'?'Escribe M60 o M61 en cada fila, según la manzana de la unidad.':'Escribe '+condominio.codigo+' en la columna Manzana de cada fila.'],
     ['Completa la clave del propietario, el nombre, el edificio y la unidad.'],
     ['Usa una clave estable, como PROP-001. Conserva esa clave si el propietario tiene varias unidades.'],
     ['Si ya existe una ficha, copia su clave y la unidad del Excel de Operaciones.'],
@@ -417,11 +423,24 @@ function datosHojaPadron(hoja,condominio) {
     }
     if (!Object.entries(resultado).some(([campo,valor])=>campo!=='manzana' && valor)) return;
     resultado.manzana = resultado.manzana.toUpperCase();
-    if (resultado.manzana!==condominio.codigo) throw new Error(`Fila ${numero}. La columna Manzana debe decir ${condominio.codigo}.`);
+    const manzanaArchivo=resultado.manzana;
+    if (condominio.codigo==='M60' ? !['M60','M61'].includes(manzanaArchivo) : manzanaArchivo!==condominio.codigo)
+      throw new Error(`Fila ${numero}. Revisa la manzana seleccionada.`);
     if (['clave','nombre','edificio','unidad'].some(k=>!resultado[k])) {
       throw new Error(`Fila ${numero}. Completa la clave, el nombre, el edificio y la unidad.`);
     }
     for (const campo of ['clave','edificio','unidad']) resultado[campo]=resultado[campo].toUpperCase();
+    if(condominio.codigo==='M60') {
+      const prefijo=manzanaArchivo.slice(1)+'-';
+      if(/^\d{2}-/.test(resultado.edificio) && !resultado.edificio.startsWith(prefijo))
+        throw new Error(`Fila ${numero}. El edificio no coincide con ${manzanaArchivo}.`);
+      if(!resultado.edificio.startsWith(prefijo)) resultado.edificio=prefijo+resultado.edificio;
+      if(/^\d{5,12}$/.test(resultado.clave)) {
+        resultado.nombre=resultado.nombre.replace(/\b[12]\b/g,'').replace(/\s+/g,' ').trim();
+        resultado.clave='M'+resultado.edificio+'-'+resultado.unidad;
+      }
+      resultado.manzana=condominio.codigo;
+    }
     resultado.fila = numero;
     datos.push(resultado);
   });
