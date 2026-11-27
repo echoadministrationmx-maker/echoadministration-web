@@ -82,6 +82,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .kpi .l{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 .kpi .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:1.5rem;margin-top:2px;line-height:1.1}
 .kpi .s{font-size:.74rem;color:var(--faint);margin-top:1px}
+.m60-kpis{grid-template-columns:repeat(auto-fit,minmax(175px,1fr))}
+.m60-kpis .kpi{min-width:0;min-height:86px;display:flex;flex-direction:column;justify-content:center}
+.m60-kpis .v{overflow-wrap:anywhere;font-size:1.28rem}
+.m60-scope{margin:0 0 12px}
+.m60-filter-actions{align-items:end;margin:0}
+.m60-trend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 24px;margin-top:16px}
+.m60-trend-row{display:grid;grid-template-columns:32px minmax(0,1fr) 42px 48px;gap:8px;align-items:center;font-size:.8rem}
+.m60-trend-row b,.m60-trend-row small{text-align:right;font-variant-numeric:tabular-nums}
+.m60-track{height:10px;background:var(--silver);border-radius:20px;overflow:hidden}
+.m60-track span{display:block;height:100%;background:var(--blue);border-radius:20px}
+.m60-detail{border:1px solid var(--mid);border-radius:12px;background:var(--silver);padding:14px;margin-top:14px}
+.m60-plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin-top:13px}
+.m60-plan{border:1px solid var(--mid);border-radius:12px;padding:15px;background:#fff}
+.m60-plan h4{margin:0 0 7px}
 .item{background:#fff;border:1px solid var(--mid);border-radius:14px;padding:15px;margin-bottom:10px}
 .item .ihead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .item .iname{font-weight:700;font-size:.96rem;flex:1;min-width:130px}
@@ -145,6 +159,7 @@ details.acc[open] summary::before{content:'− '}
   .dl{grid-template-columns:1fr;gap:3px}
 }
 @media(max-width:380px){ .kpis{grid-template-columns:1fr} }
+@media(max-width:650px){.m60-trend{grid-template-columns:1fr}.m60-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -333,6 +348,7 @@ async function render(){
     else if(V==='fondo-cadu-m60') await vFondoCaduM60();
     else if(V==='datos-pago-m60') await vDatosPagoM60();
     else if(V==='descuentos-m60') await vDescuentosM60();
+    else if(V==='convenios-m60') await vConveniosM60();
     else if(V==='incidencias-locales') await vRegistrosLocales('incidencia');
     else if(V==='gastos-locales') await vRegistrosLocales('gasto');
     else if(V==='equipo-cond') await vEquipoCond();
@@ -2006,8 +2022,8 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js?v=20261127-datos-pago-m60"></script>
-<script src="/operaciones/panel-administracion.js?v=20261127-datos-pago-m60"></script>
+<script src="/operaciones/condominios.js?v=20261127-cobranza-convenios-m60"></script>
+<script src="/operaciones/panel-administracion.js?v=20261127-cobranza-convenios-m60"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
 <script src="/operaciones/publicaciones-inmuebles.js"></script>

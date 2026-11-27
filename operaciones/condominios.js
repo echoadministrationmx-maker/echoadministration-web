@@ -31,23 +31,48 @@ function menuCondominio() {
 
 async function vRegistrarPagoM60() {
   const condominio=condominioActivo;
-  const padron=await rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:2026});
+  const hoy=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'});
+  const anio=Number(hoy.slice(0,4));
+  const padron=await rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:anio});
   if(!padron.ok)throw new Error(padron.error||'No se pudieron cargar las unidades.');
   if(condominio!==condominioActivo||V!=='pago-m60')return;
   const unidades=padron.unidades.sort((a,b)=>`${a.edificio}-${a.numero}`.localeCompare(`${b.edificio}-${b.numero}`,'es',{numeric:true}));
-  const hoy=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'});
+  const edificios=edificiosM60(unidades);
   $('vista').innerHTML=`<div class="card"><h2>Registrar mensualidad</h2>
     <p class="sub">Manzanas 60 y 61 · Cuota de $500. Registra la fecha real en que se recibió el pago. Los meses ya marcados en el Excel no se capturan dos veces.</p>
     <form id="registrarPagoM60" class="grid g2" style="margin-top:18px">
-      <div><label for="pagoM60Unidad">Unidad y titular</label><select id="pagoM60Unidad" required><option value="">Selecciona una unidad</option>
-      ${unidades.map(u=>`<option value="${Number(u.id)}">${esc(u.edificio)}-${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}</option>`).join('')}</select></div>
+      <div><label for="pagoM60Edificio">Letra / edificio</label><select id="pagoM60Edificio" required><option value="">Selecciona edificio</option>${edificios.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('')}</select></div>
+      <div><label for="pagoM60Unidad">Unidad</label><select id="pagoM60Unidad" required disabled><option value="">Primero selecciona edificio</option></select></div>
       <div><label for="pagoM60Mes">Mes que se paga</label><input id="pagoM60Mes" type="month" min="2026-10" value="${hoy.slice(0,7)}" required></div>
       <div><label for="pagoM60Fecha">Fecha real del pago</label><input id="pagoM60Fecha" type="date" min="2026-10-01" max="${hoy}" value="${hoy}" required></div>
       <div><label for="pagoM60Destino">Se pagó a</label><select id="pagoM60Destino"><option>Nueva administración</option><option>CADU</option></select></div>
       <div><label for="pagoM60Forma">Forma de pago</label><select id="pagoM60Forma"><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Tarjeta</option><option>Otro</option></select></div>
       <div><label for="pagoM60Referencia">Referencia (opcional)</label><input id="pagoM60Referencia" maxlength="120" placeholder="Folio o referencia bancaria"></div>
       <div class="acts"><button class="btn" id="guardarPagoM60">Guardar pago de $500</button></div>
-    </form><p class="sub" id="estadoPagoM60" role="status"></p></div>`;
+    </form><p class="sub" id="estadoPagoM60" role="status"></p></div>
+    <div class="card"><h3>Resumen de mensualidades · ${anio}</h3><p class="sub" id="resumenPagoM60">Selecciona un edificio para consultar sus pagos.</p><div id="tendenciaPagoM60"></div><div class="m60-detail" id="detallePagoM60" hidden></div></div>`;
+  function actualizarUnidad(){
+    const edificio=$('pagoM60Edificio').value;
+    const grupo=unidades.filter(u=>u.edificio===edificio);
+    $('pagoM60Unidad').disabled=!edificio;
+    $('pagoM60Unidad').innerHTML=`<option value="">${edificio?'Selecciona unidad':'Primero selecciona edificio'}</option>${grupo.map(u=>`<option value="${Number(u.id)}">${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}</option>`).join('')}`;
+    $('resumenPagoM60').textContent=edificio?`${edificio} · ${grupo.length} unidades · ${grupo.filter(u=>u.pagos?.[String(Number(hoy.slice(5,7)))]).length} pagadas este mes (${porcentajeM60(grupo.filter(u=>u.pagos?.[String(Number(hoy.slice(5,7)))]).length,grupo.length)}%).`:'Selecciona un edificio para consultar sus pagos.';
+    $('tendenciaPagoM60').innerHTML=edificio?tendenciaM60(grupo,anio):'';
+    $('detallePagoM60').hidden=true;
+  }
+  $('pagoM60Edificio').onchange=actualizarUnidad;
+  $('pagoM60Unidad').onchange=()=>{
+    const u=unidades.find(x=>x.id===Number($('pagoM60Unidad').value));
+    const detalle=$('detallePagoM60');detalle.hidden=!u;
+    if(!u)return;
+    const n=Object.keys(u.pagos||{}).length;
+    detalle.innerHTML=`<b>${esc(u.edificio)}-${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}</b><p class="sub">${n} de 12 meses marcados (${porcentajeM60(n,12)}%). Sin registro no confirma adeudo.</p><p class="sub">${MES.slice(1).map((m,i)=>`${esc(m.slice(0,3))}: ${u.pagos?.[String(i+1)]?'✓':'—'}`).join(' · ')}</p>`;
+  };
+  $('pagoM60Mes').onchange=()=>{
+    const val=$('pagoM60Mes').value;
+    if(val&&Number(val.slice(0,4))!==anio){$('estadoPagoM60').textContent='El resumen muestra '+anio+'. Consulta el año elegido en Cobranza y seguimiento.';}
+    else $('estadoPagoM60').textContent='';
+  };
   $('registrarPagoM60').onsubmit=async e=>{
     e.preventDefault();const boton=$('guardarPagoM60');boton.disabled=true;$('estadoPagoM60').textContent='';
     try{
