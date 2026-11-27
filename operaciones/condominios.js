@@ -288,7 +288,26 @@ function verFicha(ficha,condominio) {
       <div><b>Teléfono</b> <span>${esc(ficha.telefono||'—')}</span></div>
       <div><b>WhatsApp</b> <span>${esc(ficha.whatsapp||'—')}</span></div>
     </div>
+    ${condominio.codigo==='M60'?`<form id="editarContactoPropM60" style="margin-top:16px">
+      <h4>Editar contacto del propietario</h4>
+      <div class="grid g2">
+        <div><label for="emailPropM60">Correo</label><input id="emailPropM60" type="email" maxlength="254" value="${esc(ficha.email||'')}"></div>
+        <div><label for="telefonoPropM60">Teléfono</label><input id="telefonoPropM60" type="tel" maxlength="30" value="${esc(ficha.telefono||'')}"></div>
+        <div><label for="whatsappPropM60">WhatsApp</label><input id="whatsappPropM60" type="tel" maxlength="30" value="${esc(ficha.whatsapp||'')}"></div>
+      </div><div class="acts"><button class="btn sm">Guardar contacto</button></div>
+      <p class="sub" id="estadoPropM60" role="status"></p></form>`:''}
     <div class="acts"><button class="btn gh" onclick="cerrarSheet()">Cerrar</button></div>`);
+  if(condominio.codigo==='M60')$('editarContactoPropM60').onsubmit=async e=>{
+    e.preventDefault();const boton=e.currentTarget.querySelector('button');boton.disabled=true;
+    $('estadoPropM60').textContent='';
+    try{
+      const r=await rpc('pg_operaciones_contacto_propietario_m60',{...C,p_condominio:condominio.id,
+        p_clave:ficha.clave,p_email:$('emailPropM60').value.trim(),
+        p_telefono:$('telefonoPropM60').value.trim(),p_whatsapp:$('whatsappPropM60').value.trim()});
+      if(!r.ok)throw new Error(r.error);
+      cerrarSheet();toast('Contacto del propietario actualizado','good');await vPropietarios();
+    }catch(error){$('estadoPropM60').textContent=error.message;boton.disabled=false;}
+  };
 }
 
 function revisarRegistro(solicitud,condominio,padron) {

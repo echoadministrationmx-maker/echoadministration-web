@@ -5,6 +5,29 @@ const estado = document.getElementById('estado');
 const boton = form.querySelector('button');
 const clavePublica = 'sb_publishable_Gscgjva4RQkFZfwANPpueg_rKfWJ_nU';
 
+async function cargarDatosPagoM60(){
+  try{
+    const respuesta=await fetch('https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1/rpc/pg_informacion_pago_m60',{
+      method:'POST',headers:{apikey:clavePublica,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)
+    });
+    if(!respuesta.ok)throw new Error('No se pudo consultar información de pago.');
+    const d=await respuesta.json();
+    if(!/^\d{18}$/.test(d.clabe||'')||!d.cuenta_deposito||!d.correo_comprobantes)throw new Error('Datos incompletos.');
+    document.getElementById('cuotaPagoM60').textContent=Number(d.cuota_mensual).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+    document.getElementById('bancoPagoM60').textContent=d.banco;
+    document.getElementById('clabePagoM60').textContent=d.clabe;
+    document.getElementById('cuentaPagoM60').textContent=d.cuenta_deposito;
+    const comprobante=document.getElementById('comprobantePagoM60');
+    comprobante.textContent=d.correo_comprobantes;comprobante.href='mailto:'+d.correo_comprobantes;
+    const correo=document.getElementById('contactoCorreoM60');
+    correo.textContent=d.correo_contacto;correo.href='mailto:'+d.correo_contacto;
+    const telefono=document.getElementById('contactoTelefonoM60');
+    telefono.textContent=d.telefono_contacto;telefono.href='tel:'+d.telefono_contacto.replace(/[^+0-9]/g,'');
+    document.getElementById('datosPagoM60').hidden=false;
+  }catch(error){document.getElementById('pagoM60Error').hidden=false;}
+}
+cargarDatosPagoM60();
+
 form.addEventListener('submit',async evento=>{
   evento.preventDefault();
   if (boton.disabled) return;

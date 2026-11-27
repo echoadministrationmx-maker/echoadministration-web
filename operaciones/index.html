@@ -331,6 +331,7 @@ async function render(){
     else if(V==='resumen-local') await vResumenLocal();
     else if(V==='cobranza-m60') await vCobranzaM60();
     else if(V==='fondo-cadu-m60') await vFondoCaduM60();
+    else if(V==='datos-pago-m60') await vDatosPagoM60();
     else if(V==='descuentos-m60') await vDescuentosM60();
     else if(V==='incidencias-locales') await vRegistrosLocales('incidencia');
     else if(V==='gastos-locales') await vRegistrosLocales('gasto');
@@ -2005,8 +2006,8 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js?v=20261127-panel-m60-m61"></script>
-<script src="/operaciones/panel-administracion.js?v=20261127-panel-m60-m61"></script>
+<script src="/operaciones/condominios.js?v=20261127-datos-pago-m60"></script>
+<script src="/operaciones/panel-administracion.js?v=20261127-datos-pago-m60"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
 <script src="/operaciones/publicaciones-inmuebles.js"></script>

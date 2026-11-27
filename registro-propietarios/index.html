@@ -32,9 +32,14 @@ button:disabled{opacity:.65;cursor:wait}
 small{color:var(--muted)}
 a{color:var(--blue)}
 .volver{display:inline-block;margin-bottom:12px;font-size:.9rem;font-weight:700}
+.pago-card{margin-top:20px}.pago-card h2{margin:0 0 10px;font:800 24px 'Bricolage Grotesque',system-ui,sans-serif}
+.pago-card h3{font-size:1rem;margin:22px 0 6px}.pago-card strong{color:var(--navy)}
+.pago-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.pago-dato{background:#f3f7fd;padding:13px;border-radius:10px;overflow-wrap:anywhere}
+.pago-dato small{display:block}.pago-dato strong{display:block;font-size:1.08rem}
 #estado{color:#A71C37;font-size:.9rem}
 #estado:empty{display:none}
-@media(max-width:550px){main{margin-top:25px;padding-inline:14px}.card{padding:23px}}
+@media(max-width:550px){main{margin-top:25px;padding-inline:14px}.card{padding:23px}.pago-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -59,7 +64,23 @@ a{color:var(--blue)}
     </form>
     <p id="enviado" role="status" tabindex="-1" hidden></p>
   </section>
+  <section class="card pago-card" id="datosPagoM60" aria-labelledby="tituloPagoM60" hidden>
+    <h2 id="tituloPagoM60">Cómo pagar el mantenimiento</h2>
+    <p>Manzanas 60 y 61 · cuota mensual de <strong id="cuotaPagoM60"></strong></p>
+    <div class="pago-grid">
+      <div class="pago-dato"><small>Banco</small><strong id="bancoPagoM60"></strong></div>
+      <div class="pago-dato"><small>CLABE para transferencia</small><strong id="clabePagoM60"></strong></div>
+      <div class="pago-dato"><small>Cuenta para depósito en efectivo</small><strong id="cuentaPagoM60"></strong></div>
+      <div class="pago-dato"><small>Comprobante de pago</small><a id="comprobantePagoM60"></a></div>
+    </div>
+    <p style="margin-top:12px">Puedes pagar por transferencia bancaria o depósito en ventanilla o cajero de Banamex. El pago con tarjeta mediante terminal Clip está anunciado como próximo.</p>
+    <h3>Concepto o referencia del pago</h3>
+    <p>Escribe tu número de cliente + manzana + edificio + departamento + mes(es) + año + nombre. Tu número de cliente es el mismo que usabas con la administración anterior.</p>
+    <h3>¿Necesitas ayuda con tu número de cliente?</h3>
+    <p>Contacta a la administración: <a id="contactoCorreoM60"></a> · <a id="contactoTelefonoM60"></a></p>
+  </section>
+  <p id="pagoM60Error" role="status" hidden>La información de pago no está disponible en este momento. Consulta directamente a la administración antes de pagar.</p>
 </main>
-<script src="/registro-propietarios/registro.js" defer></script>
+<script src="/registro-propietarios/registro.js?v=20261127-datos-pago" defer></script>
 </body>
 </html>

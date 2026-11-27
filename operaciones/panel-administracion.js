@@ -11,6 +11,7 @@ const VISTAS_M60 = [
   {k:'resumen-local',t:'Resumen',i:'📊'},
   {k:'cobranza-m60',t:'Cobranza y seguimiento',i:'📈'},
   {k:'fondo-cadu-m60',t:'Fondo pagado a CADU',i:'🛟'},
+  {k:'datos-pago-m60',t:'Datos para pagar',i:'🏦'},
   {k:'descuentos-m60',t:'Descuentos opcionales',i:'🏷️'},
   {k:'incidencias-locales',t:'Incidencias',i:'🔧'},
   {k:'gastos-locales',t:'Gastos',i:'🧾'}
@@ -105,12 +106,50 @@ async function vResumenLocal() {
       <button class="btn gh" data-local-nav="propietarios">Revisar solicitudes</button>
       <button class="btn gh" data-local-nav="cobranza-m60">Cobranza y seguimiento</button>
       <button class="btn gh" data-local-nav="fondo-cadu-m60">Fondo pagado a CADU</button>
+      <button class="btn gh" data-local-nav="datos-pago-m60">Datos para pagar y contacto</button>
       <button class="btn gh" data-local-nav="pago-m60">Registrar mensualidad</button>
       <button class="btn gh" data-local-nav="descuentos-m60">Configurar descuentos</button>
       <button class="btn gh" data-local-nav="incidencias-locales">Ver incidencias</button>
       <button class="btn gh" data-local-nav="gastos-locales">Ver gastos</button>
     </div></div>`;
   $('vista').querySelectorAll('[data-local-nav]').forEach(b=>b.onclick=()=>ir(b.dataset.localNav));
+}
+
+async function vDatosPagoM60() {
+  const condominio=condominioActivo;
+  const r=await rpc('pg_operaciones_pago_info_m60',{...C,p_condominio:condominio.id});
+  if(!r.ok)throw new Error(r.error);
+  if(condominio!==condominioActivo||V!=='datos-pago-m60')return;
+  const d=r.datos;
+  $('vista').innerHTML=`<div class="card"><h2>Información de pago · Manzanas 60 y 61</h2>
+    <p class="sub">Esta información aparece también en el registro público de propietarios. La terminal Clip está anunciada como próxima, no como método activo.</p>
+    <div class="kpis" style="margin-top:16px">
+      ${kpiPanel('Cuota de mantenimiento',money(d.cuota_mensual))}
+      ${kpiPanel('Banco',d.banco)}
+      ${kpiPanel('CLABE para transferencias',d.clabe)}
+      ${kpiPanel('Cuenta para depósito',d.cuenta_deposito)}
+    </div>
+    <p class="sub">Concepto sugerido: número de cliente + manzana + edificio + departamento + mes(es) + año + nombre. El número de cliente es el mismo de la administración anterior.</p>
+  </div><div class="card"><h3>Contacto de administración</h3>
+    <p class="sub">Puedes actualizar el número y los correos publicados. La CLABE y la cuenta no se cambian desde este formulario.</p>
+    <form id="editarContactoM60" class="grid g2" style="margin-top:14px">
+      <div><label for="adminTelefonoM60">Teléfono / WhatsApp</label><input id="adminTelefonoM60" type="tel" maxlength="25" value="${esc(d.telefono_contacto)}" required></div>
+      <div><label for="adminCorreoM60">Correo de consultas</label><input id="adminCorreoM60" type="email" maxlength="254" value="${esc(d.correo_contacto)}" required></div>
+      <div><label for="adminComprobantesM60">Correo para comprobantes</label><input id="adminComprobantesM60" type="email" maxlength="254" value="${esc(d.correo_comprobantes)}" required></div>
+      <div class="acts"><button class="btn">Guardar contacto</button></div>
+    </form><p class="sub" id="estadoContactoM60" role="status"></p></div>`;
+  $('editarContactoM60').onsubmit=async e=>{
+    e.preventDefault();const boton=e.currentTarget.querySelector('button');boton.disabled=true;
+    $('estadoContactoM60').textContent='';
+    try{
+      const result=await rpc('pg_operaciones_pago_info_m60',{...C,p_condominio:condominio.id,p_cambio:{
+        telefono_contacto:$('adminTelefonoM60').value.trim(),correo_contacto:$('adminCorreoM60').value.trim(),
+        correo_comprobantes:$('adminComprobantesM60').value.trim()
+      }});
+      if(!result.ok)throw new Error(result.error);
+      toast('Contacto actualizado','good');await vDatosPagoM60();
+    }catch(error){$('estadoContactoM60').textContent=error.message;boton.disabled=false;}
+  };
 }
 
 async function vCobranzaM60() {
