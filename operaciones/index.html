@@ -96,6 +96,19 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .m60-plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin-top:13px}
 .m60-plan{border:1px solid var(--mid);border-radius:12px;padding:15px;background:#fff}
 .m60-plan h4{margin:0 0 7px}
+.m60-hero{background:linear-gradient(135deg,#1847CC,#416BE3);color:#fff;border:0}
+.m60-hero>span{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;opacity:.9}
+.m60-hero>strong{display:block;font:800 2.6rem 'Bricolage Grotesque',sans-serif;margin:4px 0}
+.m60-hero p{font-size:.9rem;margin:0 0 14px}
+.m60-hero .m60-track{background:#ffffff45;height:12px}
+.m60-hero .m60-track span{background:#fff}
+.m60-month-row{display:grid;grid-template-columns:minmax(110px,1fr) auto;gap:7px 14px;padding:11px 0;border-bottom:1px solid var(--mid);align-items:center;font-size:.85rem}
+.m60-month-row>span{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.m60-month-row .m60-track{grid-column:1/-1}
+.m60-year-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;margin:13px 0}
+.m60-year-cell{text-align:center;border-radius:8px;padding:7px 2px;min-width:0}
+.m60-year-cell small,.m60-year-cell b{display:block}.m60-year-cell small{font-size:.62rem}.m60-year-cell b{font-size:1.15rem}
+.m60-year-cell.paid{background:var(--okbg);color:var(--ok)}.m60-year-cell.review{background:var(--amberbg);color:var(--amber)}.m60-year-cell.future{background:var(--silver);color:var(--faint)}
 .item{background:#fff;border:1px solid var(--mid);border-radius:14px;padding:15px;margin-bottom:10px}
 .item .ihead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .item .iname{font-weight:700;font-size:.96rem;flex:1;min-width:130px}
@@ -160,6 +173,7 @@ details.acc[open] summary::before{content:'− '}
 }
 @media(max-width:380px){ .kpis{grid-template-columns:1fr} }
 @media(max-width:650px){.m60-trend{grid-template-columns:1fr}.m60-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.m60-year-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.m60-month-row{grid-template-columns:1fr}.m60-month-row>span{text-align:left}}
 </style>
 </head>
 <body>
@@ -345,6 +359,10 @@ async function render(){
     if(V==='portafolio') await vPortafolio();
     else if(V==='resumen-local') await vResumenLocal();
     else if(V==='cobranza-m60') await vCobranzaM60();
+    else if(V==='seguimiento-m60') await vSeguimientoM60();
+    else if(V==='recibos-m60') await vRecibosM60();
+    else if(V==='constancias-m60') await vConstanciasM60();
+    else if(V==='avisos-m60') await vAvisosM60();
     else if(V==='fondo-cadu-m60') await vFondoCaduM60();
     else if(V==='datos-pago-m60') await vDatosPagoM60();
     else if(V==='descuentos-m60') await vDescuentosM60();
@@ -2022,8 +2040,8 @@ $('btnRef').onclick=async()=>{
   b.disabled=false; b.textContent='↻';
 };
 </script>
-<script src="/operaciones/condominios.js?v=20261127-cobranza-convenios-m60"></script>
-<script src="/operaciones/panel-administracion.js?v=20261127-cobranza-convenios-m60"></script>
+<script src="/operaciones/condominios.js?v=20261128-documentos-m60"></script>
+<script src="/operaciones/panel-administracion.js?v=20261128-seguimiento-documentos-m60"></script>
 <script src="/operaciones/rentas-convenios.js"></script>
 <script src="/formularios/inmuebles-datos.js"></script>
 <script src="/operaciones/publicaciones-inmuebles.js"></script>

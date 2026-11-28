@@ -9,7 +9,11 @@ const rutaGeneral = rutaPanel==='/operaciones/general';
 const VISTAS_M60 = [
   {g:'Administración'},
   {k:'resumen-local',t:'Resumen',i:'📊'},
-  {k:'cobranza-m60',t:'Cobranza y seguimiento',i:'📈'},
+  {k:'cobranza-m60',t:'Cobranza mensual',i:'📈'},
+  {k:'seguimiento-m60',t:'Seguimiento anual',i:'🔄'},
+  {k:'recibos-m60',t:'Comprobantes emitidos',i:'🧾'},
+  {k:'constancias-m60',t:'Estados sin adeudo',i:'📄'},
+  {k:'avisos-m60',t:'Avisos del portal',i:'📢'},
   {k:'fondo-cadu-m60',t:'Fondo pagado a CADU',i:'🛟'},
   {k:'datos-pago-m60',t:'Datos para pagar',i:'🏦'},
   {k:'descuentos-m60',t:'Descuentos opcionales',i:'🏷️'},
@@ -115,6 +119,10 @@ async function vResumenLocal() {
       <button class="btn" data-local-nav="archivos">Subir padrón de propietarios</button>
       <button class="btn gh" data-local-nav="propietarios">Revisar solicitudes</button>
       <button class="btn gh" data-local-nav="cobranza-m60">Cobranza y seguimiento</button>
+      <button class="btn gh" data-local-nav="seguimiento-m60">Seguimiento anual</button>
+      <button class="btn gh" data-local-nav="recibos-m60">Comprobantes emitidos</button>
+      <button class="btn gh" data-local-nav="constancias-m60">Estados sin adeudo</button>
+      <button class="btn gh" data-local-nav="avisos-m60">Avisos del portal</button>
       <button class="btn gh" data-local-nav="fondo-cadu-m60">Fondo pagado a CADU</button>
       <button class="btn gh" data-local-nav="datos-pago-m60">Datos para pagar y contacto</button>
       <button class="btn gh" data-local-nav="pago-m60">Registrar mensualidad</button>
@@ -163,55 +171,107 @@ async function vDatosPagoM60() {
   };
 }
 
+const seguimientoM60={anio:2026,mes:filtroM60.mes,edificio:'',busqueda:'',nivel:''};
+let solicitudSeguimientoM60=0;
 async function vCobranzaM60() {
-  const condominio=condominioActivo;
-  const d=await rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:filtroM60.anio});
+  const condominio=condominioActivo,anio=filtroM60.anio,mes=filtroM60.mes;
+  const d=await rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:anio});
   if(!d.ok)throw new Error(d.error);
-  if(condominio!==condominioActivo||V!=='cobranza-m60')return;
-  const units=d.unidades||[];
-  const buildingNames=edificiosM60(units);
-  const mes=String(filtroM60.mes);
-  const filtrados=units.filter(u=>(!filtroM60.edificio||u.edificio===filtroM60.edificio)
-    &&(!filtroM60.busqueda||coincideM60(u,filtroM60.busqueda)));
-  const pagados=filtrados.filter(u=>u.pagos?.[mes]);
-  const destino=(name)=>pagados.filter(u=>u.pagos[mes].destino===name).length;
-  const previo=filtroM60.mes>1?filtrados.filter(u=>u.pagos?.[String(filtroM60.mes-1)]).length:0;
-  const visibles=filtrados.filter(u=>filtroM60.estado==='todos'||(filtroM60.estado==='pagado'?Boolean(u.pagos?.[mes]):!u.pagos?.[mes]));
-  $('vista').innerHTML=`<div class="card"><h2>Cobranza y seguimiento · Manzanas 60 y 61</h2>
-    <p class="sub">Cuotas de $500 marcadas como pagadas. Una celda sin registro requiere verificación; no se presume adeudo. El fondo CADU se muestra aparte.</p>
-    <form id="filtroCobM60" class="grid g3" style="margin-top:14px">
-      <div><label for="cobM60Anio">Año</label><select id="cobM60Anio">${[2026,2025,2024,2023,2022,2027].map(y=>`<option ${filtroM60.anio===y?'selected':''}>${y}</option>`).join('')}</select></div>
-      <div><label for="cobM60Mes">Mes</label><select id="cobM60Mes">${MES.slice(1).map((m,i)=>`<option value="${i+1}" ${filtroM60.mes===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
-      <div><label for="cobM60Edificio">Edificio</label><select id="cobM60Edificio"><option value="">Todos</option>${buildingNames.map(b=>`<option value="${esc(b)}" ${filtroM60.edificio===b?'selected':''}>${esc(b)}</option>`).join('')}</select></div>
-      <div><label for="cobM60Buscar">Buscar unidad, titular o clave CADU</label><input id="cobM60Buscar" value="${esc(filtroM60.busqueda)}"></div>
-      <div><label for="cobM60Estado">Estado del mes</label><select id="cobM60Estado"><option value="todos">Todos</option><option value="pagado" ${filtroM60.estado==='pagado'?'selected':''}>Pago registrado</option><option value="sin_registro" ${filtroM60.estado==='sin_registro'?'selected':''}>Sin registro · revisar</option></select></div>
-      <div class="acts m60-filter-actions"><button class="btn sm">Aplicar filtros</button><button type="button" class="btn gh sm" id="limpiarCobM60">Limpiar</button></div>
+  if(condominio!==condominioActivo||V!=='cobranza-m60'||anio!==filtroM60.anio||mes!==filtroM60.mes)return;
+  const units=d.unidades||[],edificios=edificiosM60(units);
+  const filtrados=units.filter(u=>(!filtroM60.edificio||u.edificio===filtroM60.edificio)&&(!filtroM60.busqueda||coincideM60(u,filtroM60.busqueda)));
+  const pagados=filtrados.filter(u=>u.pagos?.[String(mes)]);
+  const visibles=filtrados.filter(u=>filtroM60.estado==='todos'||(filtroM60.estado==='pagado'?Boolean(u.pagos?.[String(mes)]):!u.pagos?.[String(mes)]));
+  const monto=pagados.length*500,ideal=filtrados.length*500,pct=porcentajeM60(pagados.length,filtrados.length);
+  const prev=mes>1?filtrados.filter(u=>u.pagos?.[String(mes-1)]).length:null;
+  const porEdificio=edificiosM60(filtrados).map(e=>{const grupo=filtrados.filter(u=>u.edificio===e),n=grupo.filter(u=>u.pagos?.[String(mes)]).length;
+    return {e,grupo,n,p:porcentajeM60(n,grupo.length)};});
+  $('vista').innerHTML=`<div class="card"><div class="chead"><div style="flex:1"><h2>Cobranza mensual · Manzanas 60 y 61</h2><p class="sub">La cobertura se calcula con pagos marcados para el periodo, no con fechas bancarias desconocidas. Una marca ausente requiere revisión.</p></div><button class="btn gh sm" id="cobM60Anual">Seguimiento anual</button></div>
+    <form id="filtroCobM60" class="grid g3">
+      <div><label for="cobM60Anio">Año</label><select id="cobM60Anio">${[2022,2023,2024,2025,2026,2027,2028].map(y=>`<option ${anio===y?'selected':''}>${y}</option>`).join('')}</select></div>
+      <div><label for="cobM60Mes">Mes</label><select id="cobM60Mes">${MES.slice(1).map((m,i)=>`<option value="${i+1}" ${mes===i+1?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
+      <div><label for="cobM60Edificio">Edificio</label><select id="cobM60Edificio"><option value="">Todos</option>${edificios.map(b=>`<option value="${esc(b)}" ${filtroM60.edificio===b?'selected':''}>${esc(b)}</option>`).join('')}</select></div>
+      <div><label for="cobM60Buscar">Unidad, titular o clave CADU</label><input id="cobM60Buscar" value="${esc(filtroM60.busqueda)}"></div>
+      <div><label for="cobM60Estado">Estado del mes</label><select id="cobM60Estado"><option value="todos">Todos</option><option value="pagado" ${filtroM60.estado==='pagado'?'selected':''}>Pago registrado</option><option value="sin_registro" ${filtroM60.estado==='sin_registro'?'selected':''}>Por verificar</option></select></div>
+      <div class="acts m60-filter-actions"><button class="btn sm">Aplicar</button><button type="button" class="btn gh sm" id="limpiarCobM60">Limpiar</button></div>
     </form></div>
-    <div class="m60-scope"><p class="sub">Indicadores para ${filtrados.length} unidades ${filtroM60.edificio?'· '+esc(filtroM60.edificio):'· todos los edificios'}${filtroM60.busqueda?' · búsqueda: '+esc(filtroM60.busqueda):''}. El estado del mes filtra la lista de seguimiento.</p></div>
-    <div class="kpis m60-kpis">${kpiPanel('Pagos marcados · '+MES[filtroM60.mes],pagados.length+' / '+filtrados.length+' · '+porcentajeM60(pagados.length,filtrados.length)+'%')}
-      ${kpiPanel('Recaudación del periodo',money(pagados.length*500))}
-      ${kpiPanel('Sin registro · verificar',filtrados.length-pagados.length)}
-      ${kpiPanel('Registrados con CADU',destino('CADU'))}
-      ${kpiPanel('Nueva administración',destino('Nueva administración'))}
-      ${kpiPanel('Pagos marcados mes previo',filtroM60.mes===1?'Consulta diciembre del año anterior':previo)}
-      ${kpiPanel('Fondo CADU',filtrados.filter(u=>u.fondo_cadu).length+' / '+filtrados.length)}</div>
-    <div class="card"><h3>Evolución mensual · ${filtroM60.anio}</h3><p class="sub">Porcentaje de unidades filtradas con un pago registrado en cada mes. Meses futuros o sin datos aparecen sin registro.</p>${tendenciaM60(filtrados,filtroM60.anio)}</div>
-    <div class="card"><h3>Recaudación por edificio · ${esc(MES[filtroM60.mes])} ${filtroM60.anio}</h3>
-      ${tablaCond(['Edificio','Pagaron','Unidades','Porcentaje','Fondo CADU'],edificiosM60(filtrados).map(b=>{
-        const g=filtrados.filter(u=>u.edificio===b),n=g.filter(u=>u.pagos?.[mes]).length;
-        return [b,n,g.length,Math.round(n/g.length*100)+'%',g.filter(u=>u.fondo_cadu).length+' / '+g.length];
-      }))}</div>
-    <div class="card"><h3>Seguimiento anual por unidad · ${visibles.length} resultados</h3><p class="sub">✓ pago marcado · — sin registro. La falta de registro no confirma deuda.</p>
-      <div class="cond-tabla"><table><thead><tr><th>Unidad</th><th>Titular / clave CADU</th>
-      ${MES.slice(1).map(m=>`<th>${esc(m.slice(0,3))}</th>`).join('')}</tr></thead><tbody>
-      ${visibles.map(u=>`<tr><td>${esc(u.edificio)}-${esc(u.numero)}</td><td>${esc(u.nombre||'—')}<br><small>${esc(u.clave_cadu||'')}</small></td>
-        ${Array.from({length:12},(_,i)=>`<td title="${u.pagos?.[i+1]?esc(u.pagos[i+1].destino):'Sin registro'}">${u.pagos?.[i+1]?'✓':'—'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="card m60-hero"><span>Cobertura del periodo · ${esc(MES[mes])} ${anio}</span><strong>${pct}%</strong><p>${pagados.length} de ${filtrados.length} unidades con pago registrado</p><div class="m60-track"><span style="width:${pct}%"></span></div></div>
+    <div class="kpis m60-kpis">
+      ${kpiPanel('Meta de referencia',money(ideal))}
+      ${kpiPanel('Mensualidades marcadas',money(monto))}
+      ${kpiPanel('Sin pago registrado',filtrados.length-pagados.length)}
+      ${kpiPanel('Pagaron el mes anterior',prev===null?'Consulta diciembre por separado':prev)}
+    </div>
+    <div class="card"><h3>Mes por mes · ${anio}</h3><p class="sub">Meta de referencia = unidades activas × $500. No es un saldo exigible ni una factura emitida.</p>
+      ${MES.slice(1).map((nombre,i)=>{const n=filtrados.filter(u=>u.pagos?.[String(i+1)]).length,p=porcentajeM60(n,filtrados.length);
+        return `<div class="m60-month-row"><div><b>${esc(nombre)}</b><small> · ${n}/${filtrados.length} unidades</small></div><span>${p}% · ${money(n*500)} de ${money(ideal)}</span><div class="m60-track"><span style="width:${p}%"></span></div></div>`;}).join('')}</div>
+    <div class="card"><h3>Recaudación por edificio · ${esc(MES[mes])}</h3>
+      ${porEdificio.map(x=>`<div class="m60-month-row"><div><b>${esc(x.e)}</b><small> · ${x.n}/${x.grupo.length} unidades</small></div><span>${x.p}% · ${money(x.n*500)}</span><div class="m60-track"><span style="width:${x.p}%"></span></div></div>`).join('')||'<p class="sub">Sin edificios para estos filtros.</p>'}</div>
+    <div class="card"><h3>Unidades · ${visibles.length} resultados</h3><div class="cond-tabla"><table><thead><tr><th>Unidad</th><th>Titular</th><th>Periodo</th><th>Estado</th><th>Se pagó a</th></tr></thead><tbody>
+      ${visibles.map(u=>{const p=u.pagos?.[String(mes)];return `<tr><td>${esc(u.edificio)}-${esc(u.numero)}</td><td>${esc(u.nombre||'—')}</td><td>${esc(MES[mes])} ${anio}</td><td>${p?'✓ Marcado':'Por verificar'}</td><td>${p?esc(p.destino):'—'}</td></tr>`;}).join('')}</tbody></table></div>
       ${visibles.length?'':'<p class="sub">Sin unidades para estos filtros.</p>'}</div>`;
-  $('filtroCobM60').onsubmit=e=>{e.preventDefault();filtroM60.anio=Number($('cobM60Anio').value);
-    filtroM60.mes=Number($('cobM60Mes').value);filtroM60.edificio=$('cobM60Edificio').value;
-    filtroM60.busqueda=$('cobM60Buscar').value.trim();filtroM60.estado=$('cobM60Estado').value;
-    vCobranzaM60().catch(error=>toast(error.message));};
-  $('limpiarCobM60').onclick=()=>{filtroM60.edificio='';filtroM60.busqueda='';filtroM60.estado='todos';vCobranzaM60().catch(error=>toast(error.message));};
+  $('filtroCobM60').onsubmit=e=>{e.preventDefault();filtroM60.anio=Number($('cobM60Anio').value);filtroM60.mes=Number($('cobM60Mes').value);
+    filtroM60.edificio=$('cobM60Edificio').value;filtroM60.busqueda=$('cobM60Buscar').value.trim();filtroM60.estado=$('cobM60Estado').value;
+    vCobranzaM60().catch(error=>toast(error.message,'err'));};
+  $('limpiarCobM60').onclick=()=>{filtroM60.edificio='';filtroM60.busqueda='';filtroM60.estado='todos';vCobranzaM60().catch(error=>toast(error.message,'err'));};
+  $('cobM60Anual').onclick=()=>{seguimientoM60.anio=anio;seguimientoM60.mes=mes;ir('seguimiento-m60');};
+}
+
+async function vSeguimientoM60() {
+  const request=++solicitudSeguimientoM60,condominio=condominioActivo,anio=seguimientoM60.anio,mes=seguimientoM60.mes;
+  const [panel,conv]=await Promise.all([
+    rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:anio}),
+    rpc('pg_operaciones_convenios_m60',{...C,p_condominio:condominio.id})]);
+  if(!panel.ok||!conv.ok)throw new Error(panel.error||conv.error);
+  if(condominio!==condominioActivo||V!=='seguimiento-m60'||request!==solicitudSeguimientoM60)return;
+  const units=panel.unidades||[],activos=new Map(conv.convenios.filter(c=>c.estado==='activo').map(c=>[c.unidad_id,c]));
+  const edificios=edificiosM60(units);
+  const ahora=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'}).slice(0,7);
+  const corte=`${anio}-${String(mes).padStart(2,'0')}`;
+  $('vista').innerHTML=`<div class="card"><div class="chead"><div style="flex:1"><h2>Seguimiento anual · ${anio}</h2><p class="sub">Vista de cada unidad desde enero hasta ${esc(MES[mes])}. El corte es de consulta y no cambia el periodo de operación.</p></div><button class="btn gh sm" id="segM60Mensual">Cobranza mensual</button></div>
+    <div class="grid g3"><div><label for="segM60Periodo">Comparar hasta</label><input type="month" id="segM60Periodo" min="2022-01" max="${ahora}" value="${corte}"></div>
+    <div><label for="segM60Edificio">Edificio</label><select id="segM60Edificio"><option value="">Todos</option>${edificios.map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div>
+    <div><label for="segM60Buscar">Unidad o propietario</label><input id="segM60Buscar" value="${esc(seguimientoM60.busqueda)}"></div></div>
+    <div style="margin-top:12px"><label for="segM60Nivel">A quién dar seguimiento</label><select id="segM60Nivel"><option value="">Todos</option><option value="interrumpio">Pagaron el mes anterior y este no</option><option value="verificar">Sin pago registrado este mes</option><option value="pagado">Pago registrado este mes</option><option value="convenio">Con convenio activo</option></select></div>
+    <p class="sub" style="margin-top:12px">✓ Pagado · ? Sin pago registrado · — Fuera del corte. No se asigna deuda ni prioridad de cobro sin verificar los cargos y comprobantes.</p></div>
+    <div id="segM60Resultados"></div>`;
+  const paint=()=>{
+    const list=units.filter(u=>(!seguimientoM60.edificio||u.edificio===seguimientoM60.edificio)
+      &&(!seguimientoM60.busqueda||coincideM60(u,seguimientoM60.busqueda))
+      &&(!seguimientoM60.nivel||(
+        seguimientoM60.nivel==='interrumpio'?mes>1&&Boolean(u.pagos?.[String(mes-1)])&&!u.pagos?.[String(mes)]:
+        seguimientoM60.nivel==='verificar'?!u.pagos?.[String(mes)]:
+        seguimientoM60.nivel==='pagado'?Boolean(u.pagos?.[String(mes)]):activos.has(u.id))));
+    const interrumpio=list.filter(u=>mes>1&&u.pagos?.[String(mes-1)]&&!u.pagos?.[String(mes)]).length;
+    $('segM60Resultados').innerHTML=`<div class="kpis m60-kpis">
+      ${kpiPanel('Unidades filtradas',list.length)}
+      ${kpiPanel('Pago registrado · '+MES[mes],list.filter(u=>u.pagos?.[String(mes)]).length)}
+      ${kpiPanel('Pagaron el mes previo; éste sin marca',interrumpio)}
+      ${kpiPanel('Por verificar',list.filter(u=>!u.pagos?.[String(mes)]).length)}</div>
+      ${list.map(u=>{const c=activos.get(u.id),pagados=Array.from({length:mes},(_,i)=>i+1).filter(n=>u.pagos?.[String(n)]).length;
+        return `<div class="item"><div class="ihead"><b class="iname">${esc(u.edificio)}-${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}</b><span class="pill ${u.pagos?.[String(mes)]?'p-ok':'p-amb'}">${u.pagos?.[String(mes)]?'Pago registrado':'Verificar'}</span>${c?'<span class="pill p-blue">Convenio activo</span>':''}</div>
+          <p class="sub">${pagados} de ${mes} meses marcados hasta el corte · ${porcentajeM60(pagados,mes)}% · clave CADU ${esc(u.clave_cadu||'—')}</p>
+          <div class="m60-year-grid" aria-label="Meses de ${anio}">${MES.slice(1).map((nombre,i)=>{const pago=u.pagos?.[String(i+1)],futuro=i+1>mes&&!pago;
+            return `<div class="m60-year-cell ${pago?'paid':futuro?'future':'review'}" title="${esc(nombre)}: ${pago?'Pagado a '+pago.destino:futuro?'Fuera del corte':'Sin pago registrado'}"><small>${esc(nombre.slice(0,3))}</small><b>${pago?'✓':futuro?'—':'?'}</b></div>`;}).join('')}</div>
+          <p class="sub">${c?'Convenio: '+esc(c.tipo)+' · saldo confirmado '+money(c.saldo_confirmado):'Sin convenio activo registrado'}</p>
+          <div class="acts">${u.whatsapp?`<button class="btn gh sm" data-seg-contacto="${Number(u.id)}">Escribir por WhatsApp</button>`:''}<button class="btn gh sm" data-seg-hist="${Number(u.id)}">Ver pagos</button></div></div>`;}).join('')||'<div class="empty">Sin unidades para estos filtros.</div>'}`;
+    $('segM60Resultados').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+      if(b.dataset.segHist){const u=units.find(x=>x.id===Number(b.dataset.segHist));filtroHistorialM60.anio=anio;filtroHistorialM60.edificio=u.edificio;filtroHistorialM60.busqueda=u.numero;filtroHistorialM60.offset=0;ir('historial-m60');}
+      if(b.dataset.segContacto){const u=units.find(x=>x.id===Number(b.dataset.segContacto));const phone=String(u.whatsapp||'').replace(/\D/g,'');
+        if(phone.length<10){toast('Revisa el WhatsApp del propietario.','err');return;}
+        const msg=`Hola, somos Echo Administración de las manzanas 60 y 61. Queremos revisar el estado de cuenta de la unidad ${u.edificio}-${u.numero}. ¿Podemos ayudarte a confirmar tus pagos?`;
+        window.open(`https://wa.me/${phone.length===10?'52'+phone:phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener');}
+    };
+  };
+  $('segM60Edificio').value=seguimientoM60.edificio;
+  $('segM60Nivel').value=seguimientoM60.nivel;
+  $('segM60Periodo').onchange=e=>{if(!e.target.validity.valid||!e.target.value)return;const [y,m]=e.target.value.split('-').map(Number);
+    seguimientoM60.anio=y;seguimientoM60.mes=m;vSeguimientoM60().catch(error=>toast(error.message,'err'));};
+  $('segM60Edificio').onchange=e=>{seguimientoM60.edificio=e.target.value;paint();};
+  $('segM60Buscar').oninput=e=>{seguimientoM60.busqueda=e.target.value.trim();paint();};
+  $('segM60Nivel').onchange=e=>{seguimientoM60.nivel=e.target.value;paint();};
+  $('segM60Mensual').onclick=()=>{filtroM60.anio=anio;filtroM60.mes=mes;ir('cobranza-m60');};
+  paint();
 }
 
 async function vFondoCaduM60() {
@@ -485,3 +545,118 @@ function mostrarAccesoEquipo(d) {
 }
 
 prepararAccesoPanel();
+async function vAvisosM60() {
+  const condominio=condominioActivo;
+  const d=await rpc('pg_operaciones_avisos_m60',{...C,p_condominio:condominio.id});
+  if(!d.ok)throw new Error(d.error);
+  if(condominio!==condominioActivo||V!=='avisos-m60')return;
+  $('vista').innerHTML=`<div class="card"><h2>Avisos del portal · Manzanas 60 y 61</h2>
+    <p class="sub">Los avisos activos aparecen en la página pública de la comunidad. No incluyas nombres, saldos ni datos privados: cualquier persona con el enlace puede verlos.</p>
+    <form id="avisoM60Form" class="grid g2" style="margin-top:16px">
+      <div><label for="avisoM60Titulo">Título</label><input id="avisoM60Titulo" maxlength="120" required></div>
+      <div><label for="avisoM60Tipo">Tono</label><select id="avisoM60Tipo"><option value="info">Informativo</option><option value="alerta">Alerta</option><option value="urgente">Urgente</option></select></div>
+      <div style="grid-column:1/-1"><label for="avisoM60Mensaje">Mensaje para todos los propietarios</label><textarea id="avisoM60Mensaje" rows="5" maxlength="3000" required></textarea></div>
+      <div class="acts"><button class="btn">Publicar aviso</button><a class="btn gh" href="/registro-propietarios" target="_blank" rel="noopener">Ver página pública</a></div></form><p class="sub" id="avisoM60Estado" role="status"></p></div>
+    <div class="card"><h3>Avisos publicados · ${d.avisos.length}</h3>${d.avisos.map(a=>`<div class="item"><div class="ihead"><b class="iname">${esc(a.titulo)}</b><span class="pill ${a.activo?'p-ok':'p-gray'}">${a.activo?'Visible':'Oculto'}</span></div>
+      <p class="sub">${fecha(a.creado_at)} · ${esc(a.tipo)} · ${esc(a.creado_por)}</p><p style="white-space:pre-wrap;margin-top:10px">${esc(a.mensaje)}</p>
+      <button class="btn gh sm" data-aviso-id="${Number(a.id)}" data-aviso-activo="${!a.activo}">${a.activo?'Ocultar':'Volver a publicar'}</button></div>`).join('')||'<p class="sub">Todavía no hay avisos.</p>'}</div>`;
+  async function guardar(cambio){const r=await rpc('pg_operaciones_avisos_m60',{...C,p_condominio:condominio.id,p_cambio:cambio});if(!r.ok)throw new Error(r.error);await vAvisosM60();}
+  $('avisoM60Form').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;
+    try{await guardar({accion:'crear',titulo:$('avisoM60Titulo').value.trim(),mensaje:$('avisoM60Mensaje').value.trim(),tipo:$('avisoM60Tipo').value});toast('Aviso publicado','good');}
+    catch(error){$('avisoM60Estado').textContent=error.message;b.disabled=false;}};
+  $('vista').querySelectorAll('[data-aviso-id]').forEach(b=>b.onclick=async()=>{b.disabled=true;
+    try{await guardar({accion:'estado',id:b.dataset.avisoId,activo:b.dataset.avisoActivo==='true'});toast('Visibilidad actualizada','good');}
+    catch(error){toast(error.message,'err');b.disabled=false;}});
+}
+
+function imprimirDocumentoM60(tipo,d) {
+  const recibo=tipo==='recibo',folio=(recibo?'M60-R-':'M60-S-')+String(d.id).padStart(5,'0');
+  const cuerpo=recibo
+    ? `<p>Se registró una mensualidad de mantenimiento recibida por la nueva administración.</p>
+      <dl><dt>Periodo</dt><dd>${esc(String(d.periodo).slice(0,7))}</dd><dt>Fecha real del pago</dt><dd>${esc(d.fecha_pago||'—')}</dd>
+      <dt>Importe</dt><dd>${money(d.monto)} MXN</dd><dt>Forma de pago</dt><dd>${esc(d.forma_pago||'—')}</dd><dt>Referencia</dt><dd>${esc(d.referencia||'—')}</dd></dl>
+      <p>Comprobante de registro administrativo. Conserva también el comprobante bancario original cuando corresponda.</p>`
+    : `<p>Según los pagos de mantenimiento registrados a favor de la nueva administración, la unidad indicada tiene marcadas sus mensualidades desde octubre de 2026 hasta <b>${esc(String(d.periodo_hasta).slice(0,7))}</b>, inclusive.</p>
+      <p>Este estado no certifica obligaciones ante CADU, fondo de ahorro, servicios u otros conceptos. Es informativo y refleja únicamente los registros de Echo disponibles al emitirlo.</p>
+      <dl><dt>Periodo cubierto</dt><dd>Octubre 2026 – ${esc(String(d.periodo_hasta).slice(0,7))}</dd><dt>Vigencia informativa</dt><dd>${esc(d.vigente_hasta)}</dd><dt>Motivo</dt><dd>${esc(d.motivo||'Solicitud del propietario')}</dd></dl>`;
+  const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${recibo?'Comprobante':'Estado sin adeudo'} ${esc(folio)}</title>
+    <style>body{font:16px/1.6 system-ui,sans-serif;color:#15243e;background:#f2f5fa;padding:28px}.doc{max-width:720px;margin:auto;background:white;padding:40px;border-radius:16px}.brand{color:#1847cc;font-weight:800;letter-spacing:.1em}h1{line-height:1.15;margin:12px 0 4px}small{color:#617085}dl{display:grid;grid-template-columns:180px 1fr;gap:10px;border-top:1px solid #dbe3ee;border-bottom:1px solid #dbe3ee;padding:20px 0}dt{color:#617085}dd{margin:0;font-weight:700}button{background:#1847cc;color:white;border:0;padding:12px 18px;border-radius:9px;cursor:pointer;margin-bottom:16px}@media print{body{padding:0;background:white}button{display:none}.doc{padding:0}}</style></head><body><div class="doc"><button onclick="window.print()">Imprimir / Guardar PDF</button><div class="brand">ECHO ADMINISTRACIÓN · MANZANAS 60 Y 61</div><h1>${recibo?'Comprobante de mensualidad':'Estado de cuenta sin adeudo registrado'}</h1><small>Folio ${esc(folio)} · Emitido ${esc(String(d.emitido_at).slice(0,10))}</small><p><b>Unidad:</b> ${esc(d.edificio)}-${esc(d.numero)}<br><b>Propietario:</b> ${esc(d.nombre||'Sin titular')}</p>${cuerpo}<small>Documento generado por el panel administrativo de Echo. Consulta con la administración cualquier discrepancia antes de usarlo para un trámite.</small></div></body></html>`;
+  const w=window.open('','_blank');if(!w){toast('Permite ventanas emergentes para abrir el documento.','err');return;}
+  w.document.write(html);w.document.close();
+}
+
+async function vRecibosM60() {
+  const condominio=condominioActivo;
+  const d=await rpc('pg_operaciones_documentos_m60',{...C,p_condominio:condominio.id});
+  if(!d.ok)throw new Error(d.error);
+  if(condominio!==condominioActivo||V!=='recibos-m60')return;
+  const recibos=d.recibos||[],edificios=edificiosM60(recibos);
+  $('vista').innerHTML=`<div class="card"><h2>Comprobantes emitidos · Manzanas 60 y 61</h2>
+    <p class="sub">Se genera un folio al registrar un pago nuevo de $500 recibido por la nueva administración. El archivo histórico de CADU no emite comprobantes de Echo. El PDF se puede imprimir o guardar; aún no hay envío automático por correo.</p>
+    <div class="grid g3" style="margin-top:16px"><div><label for="recM60Edificio">Edificio</label><select id="recM60Edificio"><option value="">Todos</option>${edificios.map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div>
+    <div><label for="recM60Unidad">Unidad</label><input id="recM60Unidad" placeholder="Ej. 201"></div>
+    <div><label for="recM60Folio">Folio</label><input id="recM60Folio" inputmode="numeric" placeholder="Ej. 12"></div></div><p class="sub" id="recM60Conteo" aria-live="polite"></p></div><div id="recM60Filas"></div>`;
+  function pintar(){const edificio=$('recM60Edificio').value,unidad=$('recM60Unidad').value.trim().toLowerCase(),folio=$('recM60Folio').value.trim().replace(/^M60-R-?/i,'').replace(/^0+/,'');
+    const lista=recibos.filter(r=>(!edificio||r.edificio===edificio)&&(!unidad||String(r.numero).toLowerCase().includes(unidad))&&(!folio||String(r.id)===folio));
+    $('recM60Conteo').textContent=`${lista.length} de ${recibos.length} comprobantes`;
+    $('recM60Filas').innerHTML=lista.map(r=>`<div class="item"><div class="ihead"><span class="tag">M60-R-${String(r.id).padStart(5,'0')}</span><b class="iname">${esc(r.edificio)}-${esc(r.numero)} · ${esc(r.nombre||'Sin titular')}</b><span class="pill ${r.estado==='activo'?'p-ok':'p-warn'}">${esc(r.estado)}</span></div>
+      <p class="sub">${esc(String(r.periodo).slice(0,7))} · pago ${esc(r.fecha_pago||'—')} · ${money(r.monto)} · ${esc(r.forma_pago||'—')}</p>
+      <p class="sub">${r.email?'Correo del titular: '+esc(r.email):'Sin correo registrado'} · Sin envío automático</p>
+      ${r.estado==='activo'?`<div class="acts"><button class="btn sm" data-rec-ver="${r.id}">Ver / Guardar PDF</button><button class="btn gh sm" data-rec-cancelar="${r.id}">Cancelar comprobante</button></div>`:`<p class="sub">Cancelado: ${esc(r.motivo_cancelacion||'—')}</p>`}</div>`).join('')||'<div class="empty">Sin comprobantes para estos filtros.</div>';
+    $('recM60Filas').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
+      const r=recibos.find(x=>x.id===Number(b.dataset.recVer||b.dataset.recCancelar));if(!r)return;
+      if(b.dataset.recVer)imprimirDocumentoM60('recibo',r);
+      else {const motivo=prompt('Motivo de cancelación del comprobante:');if(!motivo)return;b.disabled=true;
+        try{const x=await rpc('pg_operaciones_documentos_m60',{...C,p_condominio:condominio.id,p_cambio:{accion:'cancelar_recibo',id:r.id,motivo}});if(!x.ok)throw new Error(x.error);toast('Comprobante cancelado','good');await vRecibosM60();}
+        catch(error){toast(error.message,'err');b.disabled=false;}}};
+  }
+  $('recM60Edificio').onchange=pintar;$('recM60Unidad').oninput=pintar;$('recM60Folio').oninput=pintar;pintar();
+}
+
+async function vConstanciasM60() {
+  const condominio=condominioActivo,hoy=new Date().toLocaleDateString('sv-SE',{timeZone:'America/Mexico_City'}),anio=Number(hoy.slice(0,4)),mes=Number(hoy.slice(5,7));
+  const anios=Array.from({length:anio-2025},(_,i)=>2026+i);
+  const [d,...paneles]=await Promise.all([
+    rpc('pg_operaciones_documentos_m60',{...C,p_condominio:condominio.id}),
+    ...anios.map(y=>rpc('pg_operaciones_panel_m60',{...C,p_condominio:condominio.id,p_anio:y}))]);
+  if(!d.ok||paneles.some(p=>!p.ok))throw new Error(d.error||paneles.find(p=>!p.ok)?.error);
+  if(condominio!==condominioActivo||V!=='constancias-m60')return;
+  const periodo=hoy.slice(0,7),base=paneles[0],porAnio=new Map(anios.map((y,i)=>[y,new Map((paneles[i].unidades||[]).map(u=>[u.id,u]))]));
+  const elegibles=(base.unidades||[]).filter(u=>{
+    for(let year=2026;year<=anio;year++){
+      const row=porAnio.get(year)?.get(u.id);if(!row)return false;
+      for(let m=year===2026?10:1;m<=(year===anio?mes:12);m++){
+        if(!row.pagos?.[String(m)]||row.pagos[String(m)].destino!=='Nueva administración')return false;
+      }
+    }
+    return true;
+  });
+  const constancias=d.constancias||[],edificios=edificiosM60(base.unidades||[]);
+  $('vista').innerHTML=`<div class="card"><h2>Estados sin adeudo registrado</h2><p class="sub">Documento informativo para cuotas de mantenimiento recibidas por la nueva administración desde octubre de 2026 hasta ${esc(periodo)}. No certifica obligaciones históricas con CADU, fondo de ahorro ni servicios. El servidor verifica pagos y convenios antes de cada emisión.</p>
+    <div class="kpis m60-kpis" style="margin-top:16px">${kpiPanel('Unidades con meses marcados',elegibles.length)}${kpiPanel('Documentos emitidos',constancias.length)}</div>
+    <form id="constM60Form" class="grid g2"><div><label for="constM60Edificio">Edificio</label><select id="constM60Edificio" required><option value="">Selecciona edificio</option>${edificios.map(e=>`<option value="${esc(e)}">${esc(e)}</option>`).join('')}</select></div>
+      <div><label for="constM60Unidad">Unidad</label><select id="constM60Unidad" required disabled><option value="">Selecciona edificio primero</option></select></div>
+      <div><label for="constM60Periodo">Hasta el periodo</label><input id="constM60Periodo" type="month" min="2026-10" max="${periodo}" value="${periodo}" required></div>
+      <div><label for="constM60Motivo">Motivo (opcional)</label><input id="constM60Motivo" maxlength="300" placeholder="Ej. trámite solicitado por propietario"></div>
+      <div class="acts"><button class="btn">Emitir documento</button></div></form><p class="sub" id="constM60Estado" role="status"></p></div>
+    <div class="card"><h3>Documentos emitidos</h3><div class="grid g3"><div><label for="constM60Filtro">Buscar unidad o titular</label><input id="constM60Filtro"></div></div><div id="constM60Lista"></div></div>`;
+  $('constM60Edificio').onchange=()=>{const e=$('constM60Edificio').value,g=(base.unidades||[]).filter(u=>u.edificio===e),aptos=new Set(elegibles.map(u=>u.id));
+    $('constM60Unidad').disabled=!e;$('constM60Unidad').innerHTML=`<option value="">Selecciona unidad</option>${g.map(u=>`<option value="${Number(u.id)}">${esc(u.numero)} · ${esc(u.nombre||'Sin titular')}${aptos.has(u.id)?' · meses actuales verificados':' · revisar pagos'}</option>`).join('')}`;
+    $('constM60Estado').textContent=e?'Elige el periodo que deseas cubrir. El sistema validará todos los pagos desde octubre de 2026 antes de emitir.':'';};
+  $('constM60Form').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;
+    try{const r=await rpc('pg_operaciones_documentos_m60',{...C,p_condominio:condominio.id,p_cambio:{accion:'constancia',unidad:$('constM60Unidad').value,periodo:$('constM60Periodo').value,motivo:$('constM60Motivo').value.trim()}});
+      if(!r.ok)throw new Error(r.error);toast('Estado emitido · ábrelo en la lista para guardar el PDF','good');await vConstanciasM60();}
+    catch(error){$('constM60Estado').textContent=error.message;b.disabled=false;}};
+  function pintar(){const q=$('constM60Filtro').value.trim().toLowerCase();const list=constancias.filter(x=>`${x.edificio}-${x.numero} ${x.nombre||''}`.toLowerCase().includes(q));
+    $('constM60Lista').innerHTML=list.map(c=>`<div class="item"><div class="ihead"><span class="tag">M60-S-${String(c.id).padStart(5,'0')}</span><b class="iname">${esc(c.edificio)}-${esc(c.numero)} · ${esc(c.nombre||'Sin titular')}</b><span class="pill ${c.estado==='vigente'?'p-ok':'p-warn'}">${esc(c.estado)}</span></div>
+      <p class="sub">Hasta ${esc(String(c.periodo_hasta).slice(0,7))} · emitido ${fecha(c.emitido_at)} · vigencia ${esc(c.vigente_hasta)}</p>
+      ${c.estado==='vigente'?`<div class="acts"><button class="btn gh sm" data-doc-ver="${c.id}">Ver / Guardar PDF</button><button class="btn gh sm" data-doc-cancelar="${c.id}">Cancelar</button></div>`:`<p class="sub">Cancelado: ${esc(c.motivo_cancelacion||'—')}</p>`}</div>`).join('')||'<p class="sub">Todavía no hay documentos para esta búsqueda.</p>';
+    $('constM60Lista').onclick=async e=>{const b=e.target.closest('button');if(!b)return;
+      const c=constancias.find(x=>x.id===Number(b.dataset.docVer||b.dataset.docCancelar));if(!c)return;
+      if(b.dataset.docVer)imprimirDocumentoM60('constancia',c);
+      else {const motivo=prompt('Motivo de cancelación del documento:');if(!motivo)return;b.disabled=true;
+        try{const x=await rpc('pg_operaciones_documentos_m60',{...C,p_condominio:condominio.id,p_cambio:{accion:'cancelar_constancia',id:c.id,motivo}});if(!x.ok)throw new Error(x.error);toast('Estado cancelado','good');await vConstanciasM60();}
+        catch(error){toast(error.message,'err');b.disabled=false;}}};
+  }
+  $('constM60Filtro').oninput=pintar;pintar();
+}

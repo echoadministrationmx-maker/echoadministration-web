@@ -28,6 +28,27 @@ async function cargarDatosPagoM60(){
 }
 cargarDatosPagoM60();
 
+async function cargarAvisosComunidadM60(){
+  try{
+    const respuesta=await fetch('https://nwqigjkmlkwyyblgqppm.supabase.co/rest/v1/rpc/pg_avisos_comunidad_m60',{
+      method:'POST',headers:{apikey:clavePublica,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)
+    });
+    if(!respuesta.ok)throw new Error('No se pudieron consultar los avisos.');
+    const avisos=await respuesta.json();
+    if(!Array.isArray(avisos)||!avisos.length)return;
+    const lista=document.getElementById('listaAvisosComunidadM60');
+    for(const aviso of avisos){
+      const item=document.createElement('article');item.className='aviso-comunidad '+(['alerta','urgente'].includes(aviso.tipo)?aviso.tipo:'info');
+      const titulo=document.createElement('h3');titulo.textContent=aviso.titulo;
+      const mensaje=document.createElement('p');mensaje.textContent=aviso.mensaje;
+      const fecha=document.createElement('small');fecha.textContent=new Date(aviso.fecha).toLocaleDateString('es-MX',{timeZone:'America/Mexico_City',day:'numeric',month:'long',year:'numeric'});
+      item.append(titulo,mensaje,fecha);lista.append(item);
+    }
+    document.getElementById('avisosComunidadM60').hidden=false;
+  }catch(error){/* El registro de propietarios permanece disponible. */}
+}
+cargarAvisosComunidadM60();
+
 form.addEventListener('submit',async evento=>{
   evento.preventDefault();
   if (boton.disabled) return;

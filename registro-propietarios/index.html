@@ -37,6 +37,10 @@ a{color:var(--blue)}
 .pago-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 .pago-dato{background:#f3f7fd;padding:13px;border-radius:10px;overflow-wrap:anywhere}
 .pago-dato small{display:block}.pago-dato strong{display:block;font-size:1.08rem}
+.avisos-card{margin-bottom:20px}.avisos-card h2{margin:0 0 6px;font:800 24px 'Bricolage Grotesque',system-ui,sans-serif}
+.aviso-comunidad{border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:9px;padding:13px;margin-top:12px;white-space:pre-wrap}
+.aviso-comunidad.alerta{border-left-color:#B87503;background:#fff9ed}.aviso-comunidad.urgente{border-left-color:#B00020;background:#fff2f3}
+.aviso-comunidad h3{margin:0 0 5px;font-size:1rem}.aviso-comunidad small{display:block;margin-top:8px}
 #estado{color:#A71C37;font-size:.9rem}
 #estado:empty{display:none}
 @media(max-width:550px){main{margin-top:25px;padding-inline:14px}.card{padding:23px}.pago-grid{grid-template-columns:1fr}}
@@ -46,6 +50,11 @@ a{color:var(--blue)}
 <header><div class="brand"><span class="logo" aria-hidden="true">E</span> Echo Administración</div></header>
 <main>
   <a class="volver" href="/portal">← Cambiar de manzana</a>
+  <section class="card avisos-card" id="avisosComunidadM60" aria-labelledby="tituloAvisosComunidadM60" hidden>
+    <h2 id="tituloAvisosComunidadM60">Avisos de la comunidad</h2>
+    <p>Información publicada por la administración para las manzanas 60 y 61.</p>
+    <div id="listaAvisosComunidadM60"></div>
+  </section>
   <section class="card" aria-labelledby="titulo">
     <p class="manzana">Manzanas 60 y 61</p>
     <h1 id="titulo">Registro de propietarios</h1>
@@ -81,6 +90,6 @@ a{color:var(--blue)}
   </section>
   <p id="pagoM60Error" role="status" hidden>La información de pago no está disponible en este momento. Consulta directamente a la administración antes de pagar.</p>
 </main>
-<script src="/registro-propietarios/registro.js?v=20261127-datos-pago" defer></script>
+<script src="/registro-propietarios/registro.js?v=20261128-avisos-m60" defer></script>
 </body>
 </html>

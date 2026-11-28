@@ -85,7 +85,8 @@ async function vRegistrarPagoM60() {
       if(!r.ok)throw new Error(r.error||'No se pudo registrar el pago.');
       filtroHistorialM60.anio=Number($('pagoM60Mes').value.slice(0,4));
       filtroHistorialM60.edificio='';filtroHistorialM60.busqueda='';filtroHistorialM60.offset=0;
-      toast('Pago registrado con su fecha real','good');ir('historial-m60');
+      toast(r.folio?'Pago registrado · comprobante M60-R-'+String(r.folio).padStart(5,'0'):'Pago registrado con su fecha real','good');
+      ir(r.folio?'recibos-m60':'historial-m60');
     }catch(error){$('estadoPagoM60').textContent=error.message;boton.disabled=false;}
   };
 }
